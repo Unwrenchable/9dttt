@@ -13,7 +13,8 @@
                        window.location.hostname.includes('192.168.');
     
     const isVercel = window.location.hostname.includes('vercel.app');
-    const isProduction = window.location.hostname === 'd9ttt.com' || 
+    const isProduction = window.location.hostname === '9dttt.vercel.app' || 
+                        window.location.hostname === 'd9ttt.com' || 
                         window.location.hostname === 'www.d9ttt.com';
     
     // Backend URLs

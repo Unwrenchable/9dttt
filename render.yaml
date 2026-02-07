@@ -22,7 +22,7 @@ services:
       
       # Frontend URL for CORS
       - key: FRONTEND_URL
-        value: https://d9ttt.com
+        value: https://9dttt.vercel.app
       
       - key: VERCEL_URL
         value: https://your-vercel-app.vercel.app

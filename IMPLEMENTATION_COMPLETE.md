@@ -255,7 +255,7 @@ API calls automatically proxied via `vercel.json` rewrites!
 6. Monitor deployments
 
 ### URLs After Deployment:
-- **Frontend**: https://d9ttt.com (or your-app.vercel.app)
+- **Frontend**: https://9dttt.vercel.app
 - **Backend**: https://ninedttt.onrender.com
 - **Health Check**: https://ninedttt.onrender.com/api/health
 
