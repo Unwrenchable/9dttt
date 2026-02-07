@@ -2,24 +2,70 @@
  * Universal Authentication System
  * Uses browser-based OAuth (Google, Microsoft, Apple) + Web3 wallets
  * No Firebase needed - uses IndexedDB for local storage and your backend API
+ * Cross-browser compatible with fallbacks for older browsers
  */
 
 class UniversalAuth {
     constructor() {
         this.user = null;
         this.db = null;
+        this.useLocalStorageFallback = false;
         this.apiEndpoint = 'https://atomicfizzcaps.xyz/api'; // Your tokenization backend
-        this.initDB();
-        this.checkSession();
+        this.init();
+    }
+    
+    async init() {
+        // Check browser capabilities
+        this.checkBrowserSupport();
+        
+        // Try IndexedDB first, fallback to localStorage
+        try {
+            await this.initDB();
+        } catch (error) {
+            console.warn('IndexedDB not available, using localStorage fallback');
+            this.useLocalStorageFallback = true;
+        }
+        
+        await this.checkSession();
+    }
+    
+    checkBrowserSupport() {
+        // Log supported features
+        const features = {
+            indexedDB: 'indexedDB' in window,
+            localStorage: 'localStorage' in window,
+            credentials: 'credentials' in navigator,
+            crypto: 'crypto' in window && 'subtle' in window.crypto,
+            fetch: 'fetch' in window
+        };
+        
+        console.log('Browser capabilities:', features);
+        
+        // Provide polyfill warnings
+        if (!features.fetch) {
+            console.warn('Fetch API not supported - some features may not work');
+        }
+        
+        return features;
     }
     
     async initDB() {
+        // Check if IndexedDB is available
+        if (!window.indexedDB) {
+            throw new Error('IndexedDB not supported');
+        }
+        
         return new Promise((resolve, reject) => {
             const request = indexedDB.open('9DTTT_GameDB', 1);
             
-            request.onerror = () => reject(request.error);
+            request.onerror = () => {
+                console.error('IndexedDB error:', request.error);
+                reject(request.error);
+            };
+            
             request.onsuccess = () => {
                 this.db = request.result;
+                console.log('IndexedDB initialized successfully');
                 resolve(this.db);
             };
             
@@ -52,20 +98,22 @@ class UniversalAuth {
         });
     }
     
-    // Browser-based OAuth Login
+    // Browser-based OAuth Login with fallbacks
     async loginWithGoogle() {
         try {
-            // Use Google Identity Services (One Tap)
-            if (window.google && window.google.accounts) {
+            // Check if Google Identity Services is available
+            if (window.google && window.google.accounts && window.google.accounts.id) {
                 window.google.accounts.id.initialize({
                     client_id: 'YOUR_GOOGLE_CLIENT_ID', // Replace with your actual client ID
-                    callback: (response) => this.handleGoogleCallback(response)
+                    callback: (response) => this.handleGoogleCallback(response),
+                    auto_select: false,
+                    cancel_on_tap_outside: true
                 });
                 
                 window.google.accounts.id.prompt();
-            } else {
-                // Fallback: Use Credential Management API
-                if (window.PasswordCredential) {
+            } else if (navigator.credentials && navigator.credentials.get) {
+                // Fallback: Use Credential Management API (Chrome, Edge, Opera)
+                try {
                     const credential = await navigator.credentials.get({
                         password: true,
                         federated: {
@@ -75,47 +123,80 @@ class UniversalAuth {
                     
                     if (credential) {
                         await this.processCredential(credential);
+                    } else {
+                        this.showError('Google Sign-In not available. Please use Guest mode or try another browser.');
                     }
+                } catch (credError) {
+                    console.warn('Credential API not supported:', credError);
+                    this.showError('Google Sign-In requires a modern browser (Chrome, Edge, Opera, or Firefox 60+)');
                 }
+            } else {
+                // Final fallback: Inform user
+                this.showError('Google Sign-In is not available in this browser. Please use Guest mode or try Chrome/Edge.');
             }
         } catch (error) {
             console.error('Google login error:', error);
-            this.showError('Failed to login with Google');
+            this.showError('Failed to login with Google. Using Guest mode as fallback.');
+            // Auto-fallback to guest mode
+            await this.loginAsGuest();
         }
     }
     
     async loginWithApple() {
         try {
-            if (window.AppleID) {
+            // Check if Apple Sign In JS is loaded
+            if (window.AppleID && window.AppleID.auth) {
                 const data = await window.AppleID.auth.signIn();
                 await this.handleAppleCallback(data);
             } else {
-                alert('Apple Sign In not available. Please use Google or guest mode.');
+                console.warn('Apple Sign In not available');
+                alert('Apple Sign In not available in this browser. Please use Google Sign-In or Guest mode.');
+                // Auto-fallback to guest
+                await this.loginAsGuest();
             }
         } catch (error) {
             console.error('Apple login error:', error);
+            this.showError('Failed to login with Apple. Using Guest mode.');
+            await this.loginAsGuest();
         }
     }
     
     async loginWithWallet() {
         try {
             // Web3 wallet login (Phantom, MetaMask, etc.)
+            // Check Solana Phantom wallet first
             if (window.solana && window.solana.isPhantom) {
                 const resp = await window.solana.connect();
                 const publicKey = resp.publicKey.toString();
                 
                 await this.createUserFromWallet(publicKey, 'Solana');
-            } else if (window.ethereum) {
+            } 
+            // Check Ethereum MetaMask or other Web3 providers
+            else if (window.ethereum) {
                 const accounts = await window.ethereum.request({ 
                     method: 'eth_requestAccounts' 
                 });
                 
                 await this.createUserFromWallet(accounts[0], 'Ethereum');
-            } else {
-                alert('No Web3 wallet detected. Please install Phantom or MetaMask.');
+            }
+            // No wallet detected
+            else {
+                const installWallet = confirm(
+                    'No Web3 wallet detected.\n\n' +
+                    'Install Phantom (Solana) or MetaMask (Ethereum)?\n\n' +
+                    'Click OK to learn more, or Cancel to use Guest mode.'
+                );
+                
+                if (installWallet) {
+                    window.open('https://phantom.app/', '_blank');
+                } else {
+                    await this.loginAsGuest();
+                }
             }
         } catch (error) {
             console.error('Wallet login error:', error);
+            this.showError('Failed to connect wallet. Using Guest mode.');
+            await this.loginAsGuest();
         }
     }
     
@@ -201,42 +282,89 @@ class UniversalAuth {
     }
     
     async saveUser(user) {
-        return new Promise((resolve, reject) => {
-            const transaction = this.db.transaction(['users'], 'readwrite');
-            const store = transaction.objectStore('users');
-            const request = store.put(user);
-            
-            request.onsuccess = () => {
+        // Use localStorage fallback if IndexedDB unavailable
+        if (this.useLocalStorageFallback || !this.db) {
+            try {
+                localStorage.setItem('9dttt_user_' + user.id, JSON.stringify(user));
                 localStorage.setItem('9dttt_userId', user.id);
-                resolve();
-            };
-            request.onerror = () => reject(request.error);
+                return Promise.resolve();
+            } catch (error) {
+                console.error('LocalStorage error:', error);
+                return Promise.reject(error);
+            }
+        }
+        
+        // Use IndexedDB
+        return new Promise((resolve, reject) => {
+            try {
+                const transaction = this.db.transaction(['users'], 'readwrite');
+                const store = transaction.objectStore('users');
+                const request = store.put(user);
+                
+                request.onsuccess = () => {
+                    localStorage.setItem('9dttt_userId', user.id);
+                    resolve();
+                };
+                request.onerror = () => reject(request.error);
+            } catch (error) {
+                console.error('IndexedDB save error:', error);
+                reject(error);
+            }
         });
     }
     
     async getUser(userId) {
+        // Use localStorage fallback if IndexedDB unavailable
+        if (this.useLocalStorageFallback || !this.db) {
+            try {
+                const userData = localStorage.getItem('9dttt_user_' + userId);
+                return userData ? JSON.parse(userData) : null;
+            } catch (error) {
+                console.error('LocalStorage read error:', error);
+                return null;
+            }
+        }
+        
+        // Use IndexedDB
         return new Promise((resolve, reject) => {
-            const transaction = this.db.transaction(['users'], 'readonly');
-            const store = transaction.objectStore('users');
-            const request = store.get(userId);
-            
-            request.onsuccess = () => resolve(request.result);
-            request.onerror = () => reject(request.error);
+            try {
+                const transaction = this.db.transaction(['users'], 'readonly');
+                const store = transaction.objectStore('users');
+                const request = store.get(userId);
+                
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            } catch (error) {
+                console.error('IndexedDB read error:', error);
+                reject(error);
+            }
         });
     }
     
     async checkSession() {
-        const userId = localStorage.getItem('9dttt_userId');
-        if (userId && this.db) {
-            this.user = await this.getUser(userId);
-            if (this.user) {
-                this.onAuthStateChanged(this.user);
+        try {
+            const userId = localStorage.getItem('9dttt_userId');
+            if (userId) {
+                this.user = await this.getUser(userId);
+                if (this.user) {
+                    this.onAuthStateChanged(this.user);
+                }
             }
+        } catch (error) {
+            console.error('Session check error:', error);
+            // Clear corrupted session
+            localStorage.removeItem('9dttt_userId');
         }
     }
     
     async syncWithBackend(user) {
         try {
+            // Check if fetch is available
+            if (!window.fetch) {
+                console.warn('Fetch API not available - skipping backend sync');
+                return;
+            }
+            
             // Sync user data with your atomicfizzcaps.xyz backend
             const response = await fetch(`${this.apiEndpoint}/users/sync`, {
                 method: 'POST',
@@ -299,3 +427,8 @@ class UniversalAuth {
 
 // Initialize global auth instance
 window.universalAuth = new UniversalAuth();
+
+// Log compatibility info
+console.log('🔐 Universal Auth initialized with cross-browser support');
+console.log('✅ Supports: Chrome, Firefox, Safari, Edge, Opera');
+console.log('✅ Fallbacks enabled for older browsers');
