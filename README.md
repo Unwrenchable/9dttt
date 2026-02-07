@@ -320,6 +320,8 @@ npx cap add ios android
 npx cap sync
 ```
 
+**Note:** When running `npx cap init`, you'll be prompted for a package name (e.g., `com.example.app`). For Android apps, this package name becomes the `applicationId` in your app-level `build.gradle` file.
+
 ---
 
 ## 🛡️ Moderation
