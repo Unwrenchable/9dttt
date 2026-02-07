@@ -7,7 +7,7 @@
 (async function() {
     'use strict';
     
-    console.log('🎮 Initializing game...');
+    // Silent initialization
     
     // 1. Initialize Firebase if available
     async function initFirebase() {
@@ -22,11 +22,10 @@
             
             if (data.available && data.config && !firebase.apps.length) {
                 firebase.initializeApp(data.config);
-                console.log('✅ Firebase initialized');
                 return true;
             }
         } catch (error) {
-            console.log('Firebase not configured');
+            // Silent fail - Firebase is optional
         }
         return false;
     }
@@ -34,17 +33,16 @@
     // 2. Initialize Unified Auth
     async function initAuth() {
         if (!window.unifiedAuth) {
-            console.error('Unified auth not loaded!');
+            console.error('\u26a0\ufe0f Unified auth not loaded!');
             return;
         }
         
         await window.unifiedAuth.init();
-        console.log('✅ Authentication ready');
         
         // Show welcome message for logged-in users
         const user = window.unifiedAuth.getUser();
         if (user && !user.isGuest) {
-            console.log(`👋 Welcome back, ${user.displayName || user.username}!`);
+            // Silent - no console spam
         }
     }
     
@@ -53,7 +51,6 @@
         if (window.GameUI && !window.gameUI) {
             window.gameUI = new GameUI();
             window.gameUI.init();
-            console.log('✅ Game UI initialized');
         }
     }
     
@@ -61,22 +58,18 @@
     function initMultiplayer() {
         if (window.MultiplayerClient && !window.multiplayerClient) {
             window.multiplayerClient = new MultiplayerClient();
-            console.log('✅ Multiplayer client ready');
         }
     }
     
     // 5. Initialize Gamepad Support
     function initGamepad() {
-        if (window.gamepadManager) {
-            console.log('✅ Gamepad support enabled');
-        }
+        // Silent initialization
     }
     
     // 6. Initialize Accessibility
     function initAccessibility() {
-        if (window.AccessibilityManager) {
+        if (window.AccessibilityManager && !window.accessibilityManager) {
             window.accessibilityManager = new AccessibilityManager();
-            console.log('✅ Accessibility features enabled');
         }
     }
     
@@ -111,9 +104,6 @@
                 }
             }
         });
-        
-        console.log('✅ Keyboard shortcuts enabled');
-        console.log('   Shift+A: Auth | Shift+L: Leaderboard | Shift+M: Menu | Esc: Close');
     }
     
     // 8. Add loading indicator
@@ -188,10 +178,11 @@
         initAccessibility();
         setupKeyboardShortcuts();
         
-        console.log('🎉 Game initialization complete!');
-        
         // Dispatch ready event for game-specific code
         window.dispatchEvent(new Event('gameReady'));
+        
+        // Log success
+        console.log('🎮 Game Ready');
     }
     
     // Wait for DOM to be ready

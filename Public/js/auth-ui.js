@@ -351,7 +351,7 @@ class AuthUI {
             await firebase.auth().signInWithPopup(provider);
             this.hide();
         } catch (error) {
-            console.error('Google login error:', error);
+            console.error('⚠️ Google login failed:', error.message);
             alert('Google login failed: ' + (error.message || 'Please try again.'));
         }
     }
@@ -366,13 +366,14 @@ class AuthUI {
             await firebase.auth().signInWithPopup(provider);
             this.hide();
         } catch (error) {
-            console.error('Apple login error:', error);
+            console.error('⚠️ Apple login failed:', error.message);
             alert('Apple login failed: ' + (error.message || 'Please try again.'));
         }
     }
     
     async loginWithWallet() {
-     
+        alert('Web3 wallet integration coming soon! Use email/password or social login for now.');
+    }
     
     showEmailLogin() {
         const content = this.modal.querySelector('#authContent');
@@ -453,15 +454,13 @@ class AuthUI {
             errorEl.style.display = 'block';
         }
     }
-       alert('Web3 wallet integration coming soon! Use email/password or social login for now.');
-    }
     
     async loginAsGuest() {
         try {
             await window.unifiedAuth.continueAsGuest();
             this.hide();
         } catch (error) {
-            console.error('Guest login error:', error);
+            console.error('⚠️ Guest login failed:', error.message);
             alert('Guest login failed. Please try again.');
         }
     }

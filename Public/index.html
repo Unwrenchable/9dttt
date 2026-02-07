@@ -1089,15 +1089,15 @@
             try {
                 // Try to initialize Firebase if configured
                 if (typeof firebase !== 'undefined') {
-                    const response = await fetch(' /api/auth/firebase/status');
+                    const response = await fetch('/api/auth/firebase/status');
                     const data = await response.json();
-                    if (data.available && data.config) {
+                    if (data.available && data.config && !firebase.apps.length) {
                         firebase.initializeApp(data.config);
                         console.log('✅ Firebase initialized');
                     }
                 }
             } catch (error) {
-                console.log('Firebase not configured, using email/password only');
+                // Silent fail - Firebase is optional
             }
             
             // Initialize unified auth

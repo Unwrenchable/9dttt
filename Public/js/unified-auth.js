@@ -63,7 +63,7 @@ class UnifiedAuth {
                 this.isInitialized = true;
                 return false;
             } catch (error) {
-                console.error('Auth initialization error:', error);
+                console.error('⚠️ Auth initialization failed:', error.message);
                 this.isInitialized = true;
                 return false;
             }
@@ -103,14 +103,14 @@ class UnifiedAuth {
                                 this.notifyListeners();
                             }
                         } catch (error) {
-                            console.error('Firebase login error:', error);
+                            console.error('⚠️ Firebase login failed:', error.message);
                         }
                     }
                     resolve();
                 });
             });
         } catch (error) {
-            console.error('Firebase init error:', error);
+            console.error('⚠️ Firebase initialization failed:', error.message);
         }
     }
 
@@ -131,7 +131,7 @@ class UnifiedAuth {
                 return result.success;
             }
         } catch (error) {
-            console.log('Auto sign-in not available');
+            // Silent fail - auto sign-in is optional
         }
         return false;
     }
@@ -258,7 +258,7 @@ class UnifiedAuth {
             
             await navigator.credentials.store(credential);
         } catch (error) {
-            console.log('Could not store credentials:', error);
+            // Silent fail - credential storage is optional
         }
     }
 
@@ -293,7 +293,7 @@ class UnifiedAuth {
             try {
                 await firebase.auth().signOut();
             } catch (error) {
-                console.log('Firebase signout error:', error);
+                // Silent fail - Firebase signout is optional
             }
         }
         
@@ -353,7 +353,7 @@ class UnifiedAuth {
             try {
                 callback(this.user);
             } catch (error) {
-                console.error('Auth listener error:', error);
+                console.error('⚠️ Auth listener error:', error.message);
             }
         });
     }
@@ -411,6 +411,7 @@ if (typeof window !== 'undefined') {
         logout: () => window.unifiedAuth.logout(),
         isLoggedIn: () => window.unifiedAuth.isLoggedIn(),
         onAuthStateChanged: (...args) => window.unifiedAuth.onAuthStateChanged(...args),
+        addListener: (...args) => window.unifiedAuth.onAuthStateChanged(...args),
         verifyToken: () => window.unifiedAuth.verifyToken(),
         updateProfile: (...args) => window.unifiedAuth.updateProfile(...args),
         getAuthHeader: () => window.unifiedAuth.getAuthHeader()

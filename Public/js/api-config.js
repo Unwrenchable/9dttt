@@ -53,11 +53,7 @@
         isProxied: isProduction || isVercel
     };
     
-    console.log('🔧 API Configuration:', {
-        environment: window.API_CONFIG.environment,
-        backend: window.API_CONFIG.baseUrl || 'same-domain (proxied)',
-        isProxied: window.API_CONFIG.isProxied
-    });
+    // Silent configuration
     
     // Helper function for API calls
     window.apiCall = async function(endpoint, options = {}) {
