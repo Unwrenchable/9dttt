@@ -391,7 +391,6 @@ class AuthUI {
             
             // Show loading state
             const content = this.modal.querySelector('#authContent');
-            const originalContent = content.innerHTML;
             content.innerHTML = `
                 <div style="text-align: center; padding: 40px 20px;">
                     <div style="font-size: 48px; margin-bottom: 20px;">🔍</div>
@@ -411,6 +410,11 @@ class AuthUI {
                 body: JSON.stringify({ idToken })
             });
             
+            // Check for network errors
+            if (!verifyResponse.ok) {
+                throw new Error(`Server error: ${verifyResponse.status}`);
+            }
+            
             const verifyResult = await verifyResponse.json();
             
             if (verifyResult.success) {
@@ -424,6 +428,8 @@ class AuthUI {
                 }
                 this.hide();
             } else {
+                // Sign out from Firebase if backend verification failed
+                await firebase.auth().signOut();
                 throw new Error(verifyResult.error || 'Authentication failed');
             }
         } catch (error) {
@@ -455,7 +461,6 @@ class AuthUI {
             
             // Show loading state
             const content = this.modal.querySelector('#authContent');
-            const originalContent = content.innerHTML;
             content.innerHTML = `
                 <div style="text-align: center; padding: 40px 20px;">
                     <div style="font-size: 48px; margin-bottom: 20px;">🍎</div>
@@ -475,6 +480,11 @@ class AuthUI {
                 body: JSON.stringify({ idToken })
             });
             
+            // Check for network errors
+            if (!verifyResponse.ok) {
+                throw new Error(`Server error: ${verifyResponse.status}`);
+            }
+            
             const verifyResult = await verifyResponse.json();
             
             if (verifyResult.success) {
@@ -488,6 +498,8 @@ class AuthUI {
                 }
                 this.hide();
             } else {
+                // Sign out from Firebase if backend verification failed
+                await firebase.auth().signOut();
                 throw new Error(verifyResult.error || 'Authentication failed');
             }
         } catch (error) {
