@@ -344,7 +344,7 @@ class AuthUI {
     async loginWithGoogle() {
         try {
             if (!window.firebase || !firebase.auth) {
-                alert('Firebase not available. Try email/password login.');
+                alert('Firebase not available. Try email/password or wallet login instead.');
                 return;
             }
             const provider = new firebase.auth.GoogleAuthProvider();
@@ -352,14 +352,25 @@ class AuthUI {
             this.hide();
         } catch (error) {
             console.error('⚠️ Google login failed:', error.message);
-            alert('Google login failed: ' + (error.message || 'Please try again.'));
+            
+            // Handle specific Firebase errors
+            if (error.code === 'auth/configuration-not-found') {
+                alert('⚠️ Google Sign-In is not enabled yet.\n\nPlease use:\n• 🦊 Wallet Login (MetaMask/Phantom/XUMM)\n• 📧 Email/Password\n• 👤 Guest Login');
+            } else if (error.code === 'auth/popup-blocked') {
+                alert('Popup blocked by browser. Please allow popups for this site.');
+            } else if (error.code === 'auth/popup-closed-by-user') {
+                // User closed popup - no alert needed
+                console.log('Google login cancelled by user');
+            } else {
+                alert('Google login failed: ' + (error.message || 'Please try another login method.'));
+            }
         }
     }
     
     async loginWithApple() {
         try {
             if (!window.firebase || !firebase.auth) {
-                alert('Firebase not available. Try email/password login.');
+                alert('Firebase not available. Try email/password or wallet login instead.');
                 return;
             }
             const provider = new firebase.auth.OAuthProvider('apple.com');
@@ -367,7 +378,18 @@ class AuthUI {
             this.hide();
         } catch (error) {
             console.error('⚠️ Apple login failed:', error.message);
-            alert('Apple login failed: ' + (error.message || 'Please try again.'));
+            
+            // Handle specific Firebase errors
+            if (error.code === 'auth/configuration-not-found') {
+                alert('⚠️ Apple Sign-In is not enabled yet.\n\nPlease use:\n• 🦊 Wallet Login (MetaMask/Phantom/XUMM)\n• 📧 Email/Password\n• 👤 Guest Login');
+            } else if (error.code === 'auth/popup-blocked') {
+                alert('Popup blocked by browser. Please allow popups for this site.');
+            } else if (error.code === 'auth/popup-closed-by-user') {
+                // User closed popup - no alert needed
+                console.log('Apple login cancelled by user');
+            } else {
+                alert('Apple login failed: ' + (error.message || 'Please try another login method.'));
+            }
         }
     }
     
