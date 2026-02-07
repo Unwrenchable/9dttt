@@ -146,10 +146,10 @@ class UniversalGameIntegration {
     
     checkAutoLogin() {
         // Check if user is already logged in
-        if (!window.universalAuth.isAuthenticated()) {
+        if (!window.unifiedAuth || !window.unifiedAuth.isLoggedIn || !window.unifiedAuth.isLoggedIn()) {
             // Show login prompt after 30 seconds
             setTimeout(() => {
-                if (!window.universalAuth.isAuthenticated()) {
+                if (!window.unifiedAuth || !window.unifiedAuth.isLoggedIn || !window.unifiedAuth.isLoggedIn()) {
                     this.showLoginPrompt();
                 }
             }, 30000);
@@ -204,7 +204,7 @@ class UniversalGameIntegration {
     async submitScore(score, metadata = {}) {
         this.score = score;
         
-        if (window.globalLeaderboard && window.universalAuth?.isAuthenticated()) {
+        if (window.globalLeaderboard && window.unifiedAuth?.isLoggedIn && window.unifiedAuth.isLoggedIn()) {
             const scoreEntry = await window.globalLeaderboard.submitScore(
                 this.gameId,
                 score,
@@ -375,8 +375,8 @@ class UniversalGameIntegration {
 }
 
 // CSS Animations
-const style = document.createElement('style');
-style.textContent = `
+const gameIntegrationStyle = document.createElement('style');
+gameIntegrationStyle.textContent = `
     @keyframes slideUp {
         from {
             transform: translateY(100px);
@@ -402,7 +402,7 @@ style.textContent = `
         }
     }
 `;
-document.head.appendChild(style);
+document.head.appendChild(gameIntegrationStyle);
 
 /* 
  * USAGE EXAMPLE:

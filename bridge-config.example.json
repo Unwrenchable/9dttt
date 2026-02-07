@@ -1,0 +1,133 @@
+{
+  "version": "1.0.0",
+  "environment": "testnet",
+  "description": "AtomicFizz Cross-Chain Bridge Configuration - TESTNET ONLY",
+  "chains": {
+    "xrp": {
+      "network": "testnet",
+      "server": "wss://s.altnet.rippletest.net:51233",
+      "tokenCurrency": "FIZZ",
+      "tokenIssuer": "REPLACE_WITH_YOUR_ISSUER_ADDRESS",
+      "distributorAddress": "REPLACE_WITH_YOUR_DISTRIBUTOR_ADDRESS",
+      "distributorSeed": "KEEP_THIS_SECRET",
+      "explorer": "https://testnet.xrpl.org",
+      "faucet": "https://xrpl.org/xrp-testnet-faucet.html"
+    },
+    "solana": {
+      "network": "devnet",
+      "endpoint": "https://api.devnet.solana.com",
+      "tokenMint": "TO_BE_CREATED",
+      "programId": "TO_BE_DEPLOYED",
+      "bridgeAuthority": "TO_BE_GENERATED",
+      "explorer": "https://explorer.solana.com/?cluster=devnet",
+      "faucet": "https://solfaucet.com/"
+    },
+    "ethereum": {
+      "network": "sepolia",
+      "chainId": 11155111,
+      "rpcUrl": "https://sepolia.infura.io/v3/YOUR_INFURA_KEY",
+      "tokenContract": "TO_BE_DEPLOYED",
+      "bridgeContract": "TO_BE_DEPLOYED",
+      "deployer": "TO_BE_SET",
+      "explorer": "https://sepolia.etherscan.io",
+      "faucet": "https://sepoliafaucet.com/"
+    }
+  },
+  "bridge": {
+    "enabled": true,
+    "testMode": true,
+    "mechanism": "lock-unlock",
+    "model": "treasury",
+    "totalSupply": "77000000",
+    "description": "Treasury-Based Distribution: Fixed supply, treasuries on each chain lock/unlock tokens",
+    "minTransfer": "1",
+    "maxTransfer": "10000",
+    "feePercent": "1.0",
+    "feesRecipient": {
+      "xrp": "BRIDGE_FEE_ADDRESS",
+      "solana": "BRIDGE_FEE_ADDRESS",
+      "ethereum": "BRIDGE_FEE_ADDRESS"
+    },
+    "treasuries": {
+      "xrp": {
+        "address": "TO_BE_SET",
+        "initialBalance": "30800000",
+        "description": "XRP treasury holds tokens for distribution"
+      },
+      "solana": {
+        "address": "TO_BE_SET",
+        "initialBalance": "30800000",
+        "description": "Solana treasury holds tokens for distribution"
+      },
+      "ethereum": {
+        "address": "TO_BE_SET",
+        "initialBalance": "15400000",
+        "description": "Ethereum treasury holds tokens for distribution"
+      }
+    },
+    "confirmations": {
+      "xrp": 1,
+      "solana": 32,
+      "ethereum": 12
+    },
+    "timeouts": {
+      "xrp": 300,
+      "solana": 180,
+      "ethereum": 600
+    }
+  },
+  "relayer": {
+    "apiEndpoint": "https://atomicfizzcaps.xyz/api/bridge",
+    "websocket": "wss://atomicfizzcaps.xyz/bridge",
+    "checkInterval": 5000,
+    "maxRetries": 3,
+    "enabled": true
+  },
+  "gaming": {
+    "rewardsEnabled": true,
+    "defaultRewardChain": "xrp",
+    "rewardMultiplier": 0.01,
+    "games": {
+      "crypto-quest": {
+        "enabled": true,
+        "scoreToTokenRatio": 100,
+        "maxRewardPerGame": 100
+      },
+      "pong": {
+        "enabled": true,
+        "scoreToTokenRatio": 50,
+        "maxRewardPerGame": 50
+      },
+      "backgammon": {
+        "enabled": true,
+        "scoreToTokenRatio": 75,
+        "maxRewardPerGame": 75
+      }
+    }
+  },
+  "security": {
+    "rateLimiting": {
+      "enabled": true,
+      "maxTransfersPerHour": 10,
+      "maxTransfersPerDay": 50
+    },
+    "blacklist": [],
+    "whitelist": [],
+    "requireKYC": false,
+    "testMode": true
+  },
+  "monitoring": {
+    "enabled": true,
+    "alertsEmail": "alerts@atomicfizzcaps.xyz",
+    "logLevel": "debug",
+    "metrics": {
+      "enabled": true,
+      "endpoint": "https://atomicfizzcaps.xyz/api/metrics"
+    }
+  },
+  "notes": {
+    "setup": "Run 'node scripts/xrp-testnet-token.js' to create XRP testnet token",
+    "docs": "See TESTNET_BRIDGE_SETUP.md for complete setup instructions",
+    "security": "NEVER commit actual seeds or private keys to version control!"
+  }
+}

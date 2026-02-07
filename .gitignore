@@ -45,3 +45,13 @@ coverage/
 # Misc
 *.pem
 .cache/
+
+# Bridge and wallet secrets
+bridge-config.json
+*.keypair
+*.seed
+.env.bridge
+testnet-credentials.json
+wallet-secrets.json
+node_modules/
+.env
