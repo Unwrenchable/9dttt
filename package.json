@@ -11,7 +11,10 @@
     "test": "echo 'Running tests...'",
     "setup:xrp-testnet": "node scripts/xrp-testnet-token.js",
     "bridge:check": "node scripts/check-bridge-status.js",
-    "bridge:info": "cat TESTNET_BRIDGE_SETUP.md"
+    "bridge:info": "cat TESTNET_BRIDGE_SETUP.md",
+    "deploy:token": "node scripts/xrp-testnet-token.js",
+    "tokenomics": "cat TOKENOMICS.md",
+    "deploy:info": "cat DEPLOY_NOW.md"
   },
   "engines": {
     "node": ">=18.0.0",
