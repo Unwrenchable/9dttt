@@ -27,10 +27,25 @@ const { AD_REWARDS, COSMETICS } = require('./server/monetization');
 
 const app = express();
 const server = http.createServer(app);
+// CORS configuration for split deployment
+const allowedOrigins = [
+    'https://d9ttt.com',
+    'https://www.d9ttt.com',
+    'https://9dttt.vercel.app',
+    process.env.VERCEL_URL,
+    process.env.FRONTEND_URL
+].filter(Boolean);
+
+// Add localhost for development
+if (config.NODE_ENV === 'development') {
+    allowedOrigins.push('http://localhost:3000', 'http://localhost:5500', 'http://127.0.0.1:5500');
+}
+
 const io = new Server(server, {
     cors: {
-        origin: config.NODE_ENV === 'development' ? '*' : false,
-        methods: ['GET', 'POST']
+        origin: config.NODE_ENV === 'development' ? '*' : allowedOrigins,
+        methods: ['GET', 'POST'],
+        credentials: true
     },
     // Connection rate limiting
     connectionStateRecovery: {
@@ -40,6 +55,36 @@ const io = new Server(server, {
 
 // Trust proxy (for Render and other hosting)
 app.set('trust proxy', 1);
+
+// CORS middleware for split deployment
+const allowedOrigins = [
+    'https://d9ttt.com',
+    'https://www.d9ttt.com',
+    process.env.VERCEL_URL,
+    process.env.FRONTEND_URL
+].filter(Boolean);
+
+// Add localhost for development
+if (config.NODE_ENV === 'development') {
+    allowedOrigins.push('http://localhost:3000', 'http://localhost:5500', 'http://127.0.0.1:5500');
+}
+
+app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    if (allowedOrigins.includes(origin) || config.NODE_ENV === 'development') {
+        res.header('Access-Control-Allow-Origin', origin || '*');
+        res.header('Access-Control-Allow-Credentials', 'true');
+        res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    }
+    
+    // Handle preflight
+    if (req.method === 'OPTIONS') {
+        return res.sendStatus(200);
+    }
+    
+    next();
+});
 
 // HTTPS redirect in production
 app.use(security.httpsRedirectMiddleware());

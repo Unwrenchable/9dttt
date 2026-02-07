@@ -1,46 +1,73 @@
-# Render Blueprint - 9DTTT Game Platform
-# This file tells Render how to deploy your service automatically
+# Render Blueprint - 9DTTT Backend API & WebSocket Server
+# Backend-only deployment - Frontend served by Vercel
 
 services:
   - type: web
-    name: 9dttt
+    name: 9dttt-backend
     runtime: node
-    region: virginia
+    region: oregon
     plan: free
     branch: main
     buildCommand: npm install
-    startCommand: npm start
+    startCommand: node server.js
+    
+    healthCheckPath: /api/health
+    
     envVars:
       - key: NODE_ENV
         value: production
-      - key: NO_ANIMATION
-        value: "true"
-      # JWT Secret - auto-generated
+      
+      - key: PORT
+        value: 10000
+      
+      # Frontend URL for CORS
+      - key: FRONTEND_URL
+        value: https://d9ttt.com
+      
+      - key: VERCEL_URL
+        value: https://your-vercel-app.vercel.app
+      
+      # JWT Secret - auto-generated secure random string
       - key: JWT_SECRET
         generateValue: true
-      # Keep-alive URL (set to your Render URL after first deploy)
+      
+      # Backend self-URL (set after first deploy)
+      - key: BACKEND_URL
+        value: https://9dttt.onrender.com
+      
+      # Keep-alive configuration
       - key: RENDER_EXTERNAL_URL
         sync: false
-      # Redis (optional - add Render Redis for persistence)
+      
+      # Redis (optional - for session persistence)
       - key: REDIS_URL
         sync: false
-      # OAuth - Discord (https://discord.com/developers/applications)
-      - key: DISCORD_CLIENT_ID
+      
+      # Firebase (optional - for Google/Apple sign-in)
+      - key: FIREBASE_API_KEY
         sync: false
-      - key: DISCORD_CLIENT_SECRET
+      - key: FIREBASE_AUTH_DOMAIN
         sync: false
-      # OAuth - Google (https://console.cloud.google.com/apis/credentials)
-      - key: GOOGLE_CLIENT_ID
+      - key: FIREBASE_PROJECT_ID
         sync: false
-      - key: GOOGLE_CLIENT_SECRET
+      - key: FIREBASE_STORAGE_BUCKET
         sync: false
-      # OAuth - Twitch (https://dev.twitch.tv/console/apps)
-      - key: TWITCH_CLIENT_ID
+      - key: FIREBASE_MESSAGING_SENDER_ID
         sync: false
-      - key: TWITCH_CLIENT_SECRET
+      - key: FIREBASE_APP_ID
         sync: false
-      # OAuth - Twitter (https://developer.twitter.com/en/portal/dashboard)
-      - key: TWITTER_CLIENT_ID
+      
+      # Database (optional - PostgreSQL for persistence)
+      - key: DATABASE_URL
         sync: false
-      - key: TWITTER_CLIENT_SECRET
-        sync: false
+      
+      # Rate limiting
+      - key: RATE_LIMIT_ENABLED
+        value: "true"
+      
+      # Security
+      - key: ENABLE_HTTPS_REDIRECT
+        value: "false"
+      
+    # Health checks
+    autoDeploy: true

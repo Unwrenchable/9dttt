@@ -132,31 +132,20 @@
         </footer>
     </div>
 
-    <!-- Firebase SDK (for social login - Google, Apple) -->
+    <!-- UNIFIED SCRIPT LOADING -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    <script src="../js/firebase-init.js"></script>
     
-    <!-- Browser Native Authentication (Credential Management API) -->
-    <script src="../js/browser-auth-init.js"></script>
+    <script src="../js/unified-auth.js"></script>
+    <script src="../js/auth-ui.js"></script>
     
-    <!-- JavaScript -->
     <script src="/socket.io/socket.io.js"></script>
     <script src="../js/gamepad-manager.js"></script>
     <script src="../js/accessibility-manager.js"></script>
     <script src="../js/game-engine.js"></script>
-    <script src="../js/auth-client.js"></script>
     <script src="../js/multiplayer-client.js"></script>
     <script src="../js/game-ui.js"></script>
+    <script src="../js/game-init.js"></script>
     <script src="../js/ultimate-tictactoe.js"></script>
-    <script>
-        // Initialize unified auth UI for login across all pages
-        document.addEventListener('DOMContentLoaded', () => {
-            if (window.GameUI) {
-                window.gameUI = new GameUI();
-                window.gameUI.init();
-            }
-        });
-    </script>
 </body>
 </html>

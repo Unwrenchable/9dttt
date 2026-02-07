@@ -20,14 +20,16 @@ class GameUI {
         this.createMultiplayerModal();
         this.createHeaderUI();
         
-        // Initialize auth client and update UI
-        await window.authClient.init();
-        this.updateAuthUI();
+        // Initialize auth client (unified auth provides compatibility layer)
+        if (window.authClient) {
+            await window.authClient.init();
+            this.updateAuthUI();
+            
+            // Listen for auth state changes
+            window.authClient.onAuthStateChanged(() => this.updateAuthUI());
+        }
         
-        // Listen for auth state changes
-        window.authClient.addListener(() => this.updateAuthUI());
-        
-        // Check URL params for auth callbacks
+        // Check URL params for auth callbacks (legacy)
         this.handleAuthCallback();
     }
 
@@ -92,7 +94,13 @@ class GameUI {
         }
 
         // Event listeners
-        document.getElementById('signin-btn')?.addEventListener('click', () => this.showAuthModal('login'));
+        document.getElementById('signin-btn')?.addEventListener('click', () => {
+            if (window.authUI) {
+                window.authUI.show();
+            } else {
+                this.showAuthModal('login');
+            }
+        });
         document.getElementById('profile-btn')?.addEventListener('click', () => this.showProfileModal());
         document.getElementById('logout-btn')?.addEventListener('click', () => this.handleLogout());
     }
