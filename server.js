@@ -57,18 +57,6 @@ const io = new Server(server, {
 app.set('trust proxy', 1);
 
 // CORS middleware for split deployment
-const allowedOrigins = [
-    'https://d9ttt.com',
-    'https://www.d9ttt.com',
-    process.env.VERCEL_URL,
-    process.env.FRONTEND_URL
-].filter(Boolean);
-
-// Add localhost for development
-if (config.NODE_ENV === 'development') {
-    allowedOrigins.push('http://localhost:3000', 'http://localhost:5500', 'http://127.0.0.1:5500');
-}
-
 app.use((req, res, next) => {
     const origin = req.headers.origin;
     if (allowedOrigins.includes(origin) || config.NODE_ENV === 'development') {
