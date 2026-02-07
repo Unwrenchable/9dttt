@@ -93,14 +93,10 @@ class FirebaseAuth {
                         }
 
                         // Verify the token is for our project
-                        if (tokenInfo.aud !== config.FIREBASE_API_KEY && 
-                            tokenInfo.azp !== config.FIREBASE_API_KEY) {
-                            // For Firebase tokens, check if it matches our project
-                            // The audience should contain our project ID
-                            if (!tokenInfo.aud?.includes(this.projectId)) {
-                                reject(new Error('Token not issued for this application'));
-                                return;
-                            }
+                        // Firebase ID tokens have 'aud' set to the project ID
+                        if (this.projectId && tokenInfo.aud !== this.projectId) {
+                            reject(new Error('Token not issued for this application'));
+                            return;
                         }
 
                         resolve({
