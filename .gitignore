@@ -45,3 +45,5 @@ coverage/
 # Misc
 *.pem
 .cache/
+node_modules/
+.env
