@@ -5,22 +5,10 @@
   "github": {
     "silent": true
   },
-  "builds": [
-    {
-      "src": "Public/**",
-      "use": "@vercel/static"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/",
-      "dest": "/Public/index.html"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/Public/$1"
-    }
-  ],
+  "buildCommand": "echo 'No build needed - static files only'",
+  "outputDirectory": "Public",
+  "cleanUrls": true,
+  "trailingSlash": false,
   "headers": [
     {
       "source": "/(.*)",
