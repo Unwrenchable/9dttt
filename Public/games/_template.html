@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- Primary Meta Tags -->
+    <title>Game Title - 9DTTT</title>
+    <meta name="description" content="Game description">
+    <meta name="keywords" content="game keywords">
+    
+    <!-- Mobile App -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0a0e27">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/jpeg" href="../icon.jpg">
+    
+    <!-- Unified Stylesheets - Load in Order -->
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/game-ui.css">
+    <!-- Add game-specific CSS here -->
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header role="banner">
+            <h1>Game Title</h1>
+            <p class="subtitle">Game tagline</p>
+        </header>
+
+        <!-- Game Content -->
+        <main id="main-content" role="main">
+            <!-- Your game UI here -->
+        </main>
+
+        <!-- Controls -->
+        <div class="controls">
+            <button id="new-game-btn">New Game</button>
+            <a href="../index.html" class="secondary">← Back to Games</a>
+        </div>
+    </div>
+
+    <!-- UNIFIED SCRIPT LOADING - DO NOT MODIFY ORDER -->
+    
+    <!-- 1. Core Dependencies (Optional External) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    
+    <!-- 2. Core Systems - Load First -->
+    <script src="../js/unified-auth.js"></script>
+    <script src="../js/auth-ui.js"></script>
+    
+    <!-- 3. Game Features - Load Second -->
+    <script src="../js/multiplayer-client.js"></script>
+    <script src="../js/game-ui.js"></script>
+    <script src="../js/achievements.js"></script>
+    <script src="../js/leaderboard-ui.js"></script>
+    
+    <!-- 4. Optional Features -->
+    <script src="../js/gamepad-manager.js"></script>
+    <script src="../js/accessibility-manager.js"></script>
+    <script src="../js/fullscreen-manager.js"></script>
+    
+    <!-- 5. Game Initialization - Load Last -->
+    <script src="../js/game-init.js"></script>
+    
+    <!-- 6. Game-Specific Code - Load After game-init.js -->
+    <!-- <script src="../js/your-game.js"></script> -->
+    
+    <!-- 7. Game Logic - Wait for gameReady event -->
+    <script>
+        // Wait for all systems to initialize
+        window.addEventListener('gameReady', () => {
+            console.log('✅ All systems ready - Starting game');
+            
+            // Your game initialization code here
+            initGame();
+        });
+        
+        function initGame() {
+            // Game-specific initialization
+            console.log('🎮 Game starting...');
+        }
+    </script>
+</body>
+</html>

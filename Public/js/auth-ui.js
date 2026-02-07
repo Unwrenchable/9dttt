@@ -247,13 +247,16 @@ class AuthUI {
     }
     
     setupEventListeners() {
-        window.addEventListener('authStateChanged', (e) => {
-            this.updateUI(e.detail.user);
-        });
+        // Listen to unified auth state changes
+        if (window.unifiedAuth) {
+            window.unifiedAuth.onAuthStateChanged((user) => {
+                this.updateUI(user);
+            });
+        }
     }
     
     show() {
-        const user = window.universalAuth?.getUser();
+        const user = window.unifiedAuth?.getUser();
         this.updateUI(user);
         this.modal.style.display = 'block';
     }
@@ -276,18 +279,11 @@ class AuthUI {
         return `
             <div class="auth-header">
                 <h2>🎮 Welcome!</h2>
-                <p>Sign in to save your progress and earn tokens</p>
+                <p>Sign in to save your progress and compete on leaderboards</p>
             </div>
             
             <div class="auth-methods">
-                <button class="auth-button auth-button-wallet" onclick="window.authUI.loginWithWallet()">
-                    <span class="auth-icon">👛</span>
-                    <span>Connect Web3 Wallet</span>
-                    <span class="wallet-badge">CRYPTO</span>
-                </button>
-                
-                <div class="auth-divider">or use traditional login</div>
-                
+                ${window.firebase ? `
                 <button class="auth-button auth-button-google" onclick="window.authUI.loginWithGoogle()">
                     <span class="auth-icon">G</span>
                     <span>Continue with Google</span>
@@ -296,6 +292,14 @@ class AuthUI {
                 <button class="auth-button auth-button-apple" onclick="window.authUI.loginWithApple()">
                     <span class="auth-icon">🍎</span>
                     <span>Continue with Apple</span>
+                </button>
+                
+                <div class="auth-divider">or</div>
+                ` : ''}
+                
+                <button class="auth-button auth-button-wallet" onclick="window.authUI.showEmailLogin()">
+                    <span class="auth-icon">✉️</span>
+                    <span>Email/Password Login</span>
                 </button>
                 
                 <div class="auth-divider">or</div>
@@ -339,43 +343,132 @@ class AuthUI {
     
     async loginWithGoogle() {
         try {
-            await window.universalAuth.loginWithGoogle();
+            if (!window.firebase || !firebase.auth) {
+                alert('Firebase not available. Try email/password login.');
+                return;
+            }
+            const provider = new firebase.auth.GoogleAuthProvider();
+            await firebase.auth().signInWithPopup(provider);
             this.hide();
         } catch (error) {
-            alert('Google login failed. Please try again.');
+            console.error('Google login error:', error);
+            alert('Google login failed: ' + (error.message || 'Please try again.'));
         }
     }
     
     async loginWithApple() {
         try {
-            await window.universalAuth.loginWithApple();
+            if (!window.firebase || !firebase.auth) {
+                alert('Firebase not available. Try email/password login.');
+                return;
+            }
+            const provider = new firebase.auth.OAuthProvider('apple.com');
+            await firebase.auth().signInWithPopup(provider);
             this.hide();
         } catch (error) {
-            alert('Apple login failed. Please try again.');
+            console.error('Apple login error:', error);
+            alert('Apple login failed: ' + (error.message || 'Please try again.'));
         }
     }
     
     async loginWithWallet() {
-        try {
-            await window.universalAuth.loginWithWallet();
-            this.hide();
-        } catch (error) {
-            alert('Wallet connection failed. Please install Phantom or MetaMask.');
+     
+    
+    showEmailLogin() {
+        const content = this.modal.querySelector('#authContent');
+        content.innerHTML = `
+            <div class="auth-header">
+                <h2>✉️ Email Login</h2>
+                <p>Sign in or create a new account</p>
+            </div>
+            
+            <form id="emailLoginForm" class="auth-methods" style="gap: 10px;">
+                <input type="text" id="auth-username" placeholder="Username" 
+                    style="padding: 15px; border-radius: 10px; border: 2px solid rgba(255,255,255,0.3); 
+                    background: rgba(255,255,255,0.1); color: #fff; font-size: 16px;">
+                <input type="email" id="auth-email" placeholder="Email (for registration)" 
+                    style="padding: 15px; border-radius: 10px; border: 2px solid rgba(255,255,255,0.3); 
+                    background: rgba(255,255,255,0.1); color: #fff; font-size: 16px;">
+                <input type="password" id="auth-password" placeholder="Password" 
+                    style="padding: 15px; border-radius: 10px; border: 2px solid rgba(255,255,255,0.3); 
+                    background: rgba(255,255,255,0.1); color: #fff; font-size: 16px;">
+                
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button type="button" class="auth-button auth-button-google" style="flex: 1;" 
+                        onclick="window.authUI.handleEmailLogin()">
+                        🔑 Login
+                    </button>
+                    <button type="button" class="auth-button auth-button-wallet" style="flex: 1;" 
+                        onclick="window.authUI.handleEmailRegister()">
+                        ✨ Register
+                    </button>
+                </div>
+                
+                <button type="button" class="auth-button auth-button-guest" onclick="window.authUI.show()">
+                    ← Back
+                </button>
+            </form>
+            
+            <div id="auth-error" style="color: #ff6b6b; text-align: center; margin-top: 10px; display: none;"></div>
+        `;
+    }
+    
+    async handleEmailLogin() {
+        const username = document.getElementById('auth-username').value;
+        const password = document.getElementById('auth-password').value;
+        const errorEl = document.getElementById('auth-error');
+        
+        if (!username || !password) {
+            errorEl.textContent = 'Please enter username and password';
+            errorEl.style.display = 'block';
+            return;
         }
+        
+        const result = await window.unifiedAuth.login(username, password);
+        if (result.success) {
+            this.hide();
+        } else {
+            errorEl.textContent = result.error || 'Login failed';
+            errorEl.style.display = 'block';
+        }
+    }
+    
+    async handleEmailRegister() {
+        const username = document.getElementById('auth-username').value;
+        const email = document.getElementById('auth-email').value;
+        const password = document.getElementById('auth-password').value;
+        const errorEl = document.getElementById('auth-error');
+        
+        if (!username || !email || !password) {
+            errorEl.textContent = 'Please fill all fields for registration';
+            errorEl.style.display = 'block';
+            return;
+        }
+        
+        const result = await window.unifiedAuth.register(username, email, password);
+        if (result.success) {
+            this.hide();
+        } else {
+            errorEl.textContent = result.error || 'Registration failed';
+            errorEl.style.display = 'block';
+        }
+    }
+       alert('Web3 wallet integration coming soon! Use email/password or social login for now.');
     }
     
     async loginAsGuest() {
         try {
-            await window.universalAuth.loginAsGuest();
+            await window.unifiedAuth.continueAsGuest();
             this.hide();
         } catch (error) {
+            console.error('Guest login error:', error);
             alert('Guest login failed. Please try again.');
         }
     }
     
     async logout() {
         if (confirm('Are you sure you want to sign out?')) {
-            await window.universalAuth.logout();
+            await window.unifiedAuth.logout();
             this.hide();
         }
     }
@@ -405,12 +498,14 @@ function createUserBadge() {
     document.body.appendChild(badge);
     
     // Update badge on auth change
-    window.addEventListener('authStateChanged', (e) => {
-        updateUserBadge(e.detail.user);
-    });
+    if (window.unifiedAuth) {
+        window.unifiedAuth.onAuthStateChanged((user) => {
+            updateUserBadge(user);
+        });
+    }
     
     // Initial update
-    updateUserBadge(window.universalAuth?.getUser());
+    updateUserBadge(window.unifiedAuth?.getUser());
 }
 
 function updateUserBadge(user) {
