@@ -261,7 +261,111 @@ class UnifiedAuth {
             // Silent fail - credential storage is optional
         }
     }
+    /**
+     * Login with Web3 Wallet (Multi-Chain: Ethereum, Solana, XRP)
+     */
+    async loginWithWallet(chain = 'auto') {
+        try {
+            // Ensure multi-chain wallet is loaded
+            if (!window.multiChainWallet) {
+                throw new Error('Wallet module not loaded. Please refresh the page.');
+            }
 
+            let walletResult;
+
+            // Connect to specified chain or auto-detect
+            switch (chain) {
+                case 'auto':
+                    walletResult = await window.multiChainWallet.autoConnect();
+                    break;
+                case 'ethereum':
+                    walletResult = await window.multiChainWallet.connectEthereum();
+                    break;
+                case 'solana':
+                    walletResult = await window.multiChainWallet.connectSolana();
+                    break;
+                case 'xrp':
+                case 'xumm':
+                    walletResult = await window.multiChainWallet.connectXUMM();
+                    break;
+                case 'crossmark':
+                    walletResult = await window.multiChainWallet.connectCrossmark();
+                    break;
+                default:
+                    throw new Error(`Unsupported chain: ${chain}`);
+            }
+
+            if (!walletResult.success) {
+                throw new Error('Wallet connection failed');
+            }
+
+            // Sign message for authentication
+            const nonce = Math.random().toString(36).substr(2);
+            const message = `Sign in to 9DTTT\nNonce: ${nonce}\nAddress: ${walletResult.address}`;
+            
+            const signResult = await window.multiChainWallet.signMessage(message);
+
+            // Create local user (backend integration coming soon)
+            this.user = {
+                id: `wallet_${walletResult.chain}_${walletResult.address.slice(0, 8)}`,
+                username: `${walletResult.wallet}User`,
+                displayName: `${walletResult.wallet} (${walletResult.address.slice(0, 6)}...${walletResult.address.slice(-4)})`,
+                wallet: walletResult.address,
+                chain: walletResult.chain,
+                walletType: walletResult.wallet,
+                isGuest: false,
+                profile: {
+                    avatar: {
+                        type: 'icon',
+                        icon: walletResult.chain === 'ethereum' ? '🦊' : walletResult.chain === 'solana' ? '👻' : '💎'
+                    }
+                }
+            };
+            
+            localStorage.setItem('auth_method', 'wallet');
+            localStorage.setItem('wallet_chain', walletResult.chain);
+            localStorage.setItem('wallet_address', walletResult.address);
+            
+            this.notifyListeners();
+            
+            return { success: true, user: this.user, wallet: walletResult };
+        } catch (error) {
+            console.error('Wallet login error:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    /**
+     * Disconnect wallet
+     */
+    async disconnectWallet() {
+        if (window.multiChainWallet) {
+            await window.multiChainWallet.disconnect();
+        }
+        
+        localStorage.removeItem('wallet_chain');
+        localStorage.removeItem('wallet_address');
+        
+        if (this.user && this.user.wallet) {
+            await this.logout();
+        }
+    }
+
+    /**
+     * Get wallet balance
+     */
+    async getWalletBalance() {
+        if (!window.multiChainWallet || !window.multiChainWallet.address) {
+            return null;
+        }
+        
+        try {
+            return await window.multiChainWallet.getBalance();
+        } catch (error) {
+            console.error('Failed to get wallet balance:', error);
+            return null;
+        }
+    }
     /**
      * Verify existing token
      */
