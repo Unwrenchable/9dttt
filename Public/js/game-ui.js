@@ -1154,6 +1154,9 @@ class GameUI {
     }
 }
 
+// Export GameUI class globally
+window.GameUI = GameUI;
+
 // Create global UI instance
 window.gameUI = new GameUI();
 
