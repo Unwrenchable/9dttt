@@ -28,8 +28,14 @@ class UnifiedAuth {
                 // Check browser capabilities
                 this.hasBrowserAuth = !!window.PasswordCredential;
                 
+                // Wait for wallet to initialize
+                if (window.multiChainWallet && !window.multiChainWallet.isInitialized) {
+                    await window.multiChainWallet.init();
+                }
+                
                 // Load existing token
                 this.token = localStorage.getItem('auth_token');
+                const authMethod = localStorage.getItem('auth_method');
                 
                 if (this.token) {
                     // Verify existing session
@@ -38,6 +44,16 @@ class UnifiedAuth {
                         this.user = result.user;
                         this.notifyListeners();
                         this.isInitialized = true;
+                        
+                        // If wallet auth, ensure wallet is still connected
+                        if (authMethod === 'wallet' && window.multiChainWallet) {
+                            const walletStatus = window.multiChainWallet.getStatus();
+                            if (!walletStatus.connected) {
+                                console.warn('⚠️ Wallet disconnected, clearing auth');
+                                this.clearSession();
+                            }
+                        }
+                        
                         return true;
                     } else {
                         this.clearSession();
@@ -214,6 +230,9 @@ class UnifiedAuth {
                     break;
                 case 'ethereum':
                     walletResult = await window.multiChainWallet.connectEthereum();
+                    break;
+                case 'walletconnect':
+                    walletResult = await window.multiChainWallet.connectViaWalletConnect();
                     break;
                 case 'solana':
                     walletResult = await window.multiChainWallet.connectSolana();
@@ -442,6 +461,19 @@ class UnifiedAuth {
 // Create and export global instance
 if (typeof window !== 'undefined') {
     window.unifiedAuth = new UnifiedAuth();
+    
+    // Auto-initialize auth on page load
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            window.unifiedAuth.init().catch(err => {
+                console.error('Auth init failed:', err);
+            });
+        });
+    } else {
+        window.unifiedAuth.init().catch(err => {
+            console.error('Auth init failed:', err);
+        });
+    }
     
     // Legacy compatibility - map to old authClient API
     window.authClient = {

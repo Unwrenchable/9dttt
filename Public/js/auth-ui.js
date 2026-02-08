@@ -422,6 +422,11 @@ class AuthUI {
                             🦊 MetaMask (Ethereum)
                         </button>
                         
+                        <button class="auth-button" onclick="window.authUI.connectWallet('walletconnect')" 
+                                style="background: linear-gradient(135deg, #3B99FC 0%, #2980E8 100%);">
+                            📱 WalletConnect (Mobile)
+                        </button>
+                        
                         <button class="auth-button" onclick="window.authUI.connectWallet('auto')" 
                                 style="background: linear-gradient(135deg, #4CAF50 0%, #45A049 100%); margin-top: 16px;">
                             ✨ Auto-Detect Wallet
