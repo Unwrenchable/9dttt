@@ -102,7 +102,7 @@ See [README_DEPLOYMENT.md](README_DEPLOYMENT.md) for detailed deployment guide.
 - 🏆 **Leaderboards** - Compete for the top spot
 - 👤 **Player Profiles** - Custom avatars, stats tracking, and achievements
 - 🖼️ **Avatar Uploads** - Upload your own profile picture (JPEG, PNG, GIF, WebP)
-- 🔐 **Social Login** - Sign in with Google or Apple (FREE via Firebase)
+- 🔐 **Multi-Chain Wallet Auth** - Sign in with XRP, Solana, or Ethereum wallets ([Quick Start](WALLET_QUICK_START.md))
 - 🛡️ **Safe Community** - Comprehensive moderation and anti-abuse systems
 - ♿ **Fully Accessible** - Keyboard navigation, screen reader support, and more
 - 🎨 **Cosmetics** - Unlock avatar frames, board themes, and player icons
