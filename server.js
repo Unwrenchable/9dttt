@@ -20,6 +20,7 @@ const security = require('./server/security');
 const keepAlive = require('./server/keepAlive');
 const boot = require('./server/boot');
 const browserAuth = require('./server/browser-auth');
+const firebase = require('./server/firebase');
 const monetization = require('./server/monetization');
 const { REPORT_CATEGORIES, DISCIPLINE_LEVELS } = require('./server/moderation');
 const { AD_REWARDS, COSMETICS } = require('./server/monetization');
@@ -216,6 +217,59 @@ app.post('/api/auth/wallet', security.rateLimitMiddleware('api_auth'), async (re
         console.error('Wallet auth error:', error);
         res.status(500).json({ success: false, error: 'Wallet authentication failed' });
     }
+});
+
+// ============================================
+// Firebase Authentication (Google, Apple, etc.)
+// Social login integration
+// ============================================
+
+// Verify Firebase ID token
+app.post('/api/auth/firebase/verify', security.rateLimitMiddleware('api_auth'), async (req, res) => {
+    try {
+        const { idToken, provider } = req.body;
+        
+        if (!idToken) {
+            return res.status(400).json({ 
+                success: false, 
+                error: 'ID token is required' 
+            });
+        }
+        
+        // Check if Firebase is available
+        if (!firebase.isAvailable()) {
+            return res.status(503).json({ 
+                success: false, 
+                error: 'Firebase authentication not configured' 
+            });
+        }
+        
+        // Verify the Firebase token
+        const tokenData = await firebase.verifyIdToken(idToken);
+        
+        // Get or create user
+        const result = await firebase.getOrCreateUser(tokenData, provider);
+        
+        if (!result.success) {
+            return res.status(401).json(result);
+        }
+        
+        res.json(result);
+    } catch (error) {
+        console.error('Firebase auth error:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: 'Firebase authentication failed: ' + error.message 
+        });
+    }
+});
+
+// Get Firebase configuration status
+app.get('/api/auth/firebase/status', (req, res) => {
+    res.json({
+        available: firebase.isAvailable(),
+        providers: firebase.getAvailableProviders()
+    });
 });
 
 // ============================================
@@ -1014,6 +1068,9 @@ async function startServer() {
     
     // Initialize storage
     await storage.initialize();
+    
+    // Initialize Firebase (optional - gracefully handles if not configured)
+    firebase.init();
     
     server.listen(config.PORT, () => {
         // Start keep-alive service for Render (prevents free tier from sleeping)

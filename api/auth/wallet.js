@@ -6,7 +6,10 @@
 const { ethers } = require('ethers');
 const nacl = require('tweetnacl');
 const bs58 = require('bs58');
-const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
+const { v4: uuidv4 } = require('uuid');
+const config = require('../../server/config');
+const storage = require('../../server/storage');
 
 /**
  * Verify Ethereum signature
@@ -108,41 +111,88 @@ module.exports = async (req, res) => {
             });
         }
 
-        // Create/get user
-        const userId = `wallet_${chain}_${address.slice(0, 8).toLowerCase()}`;
+        // Create unique username for wallet
+        const username = `wallet_${chain}_${address.slice(0, 8).toLowerCase()}`;
         const displayName = wallet ? 
             `${wallet} (${address.slice(0, 6)}...${address.slice(-4)})` :
             `${chain} (${address.slice(0, 6)}...${address.slice(-4)})`;
+        
+        // Check if user already exists
+        let user = await storage.getUser(username);
+        
+        if (!user) {
+            // Create new wallet user
+            user = {
+                id: uuidv4(),
+                username: username,
+                displayName: displayName,
+                email: `${username}@wallet.9dttt.com`, // Virtual email for JWT compatibility
+                wallet: address,
+                chain: chain,
+                walletType: wallet || chain,
+                isGuest: false,
+                createdAt: new Date().toISOString(),
+                stats: {
+                    wins: 0,
+                    losses: 0,
+                    draws: 0,
+                    gamesPlayed: 0,
+                    winStreak: 0,
+                    bestWinStreak: 0
+                },
+                profile: {
+                    avatar: {
+                        type: 'icon',
+                        icon: chain === 'ethereum' ? '🦊' : chain === 'solana' ? '👻' : '💎'
+                    },
+                    bio: `Authenticated via ${wallet || chain} wallet`,
+                    joinedAt: new Date().toISOString()
+                },
+                settings: {
+                    notifications: true,
+                    publicProfile: true,
+                    showOnlineStatus: true
+                }
+            };
             
-        const user = {
-            id: userId,
-            username: userId,
-            displayName: displayName,
+            // Save new user
+            await storage.setUser(username, user);
+            await storage.updateLeaderboard(username, user.stats);
+            
+            console.log(`✅ New wallet user created: ${username}`);
+        } else {
+            // Update last login
+            user.lastLogin = new Date().toISOString();
+            await storage.setUser(username, user);
+            
+            console.log(`✅ Wallet user logged in: ${username}`);
+        }
+
+        // Generate JWT token
+        const token = jwt.sign(
+            { id: user.id, username: user.username, email: user.email },
+            config.JWT_SECRET,
+            { expiresIn: config.JWT_EXPIRES_IN }
+        );
+
+        // Sanitize user data for response
+        const sanitizedUser = {
+            id: user.id,
+            username: user.username,
+            displayName: user.displayName,
             wallet: address,
             chain: chain,
-            walletType: wallet || chain,
-            isGuest: false,
-            createdAt: Date.now(),
-            coins: 0,
-            profile: {
-                avatar: {
-                    type: 'icon',
-                    icon: chain === 'ethereum' ? '🦊' : chain === 'solana' ? '👻' : '💎'
-                }
-            }
+            walletType: user.walletType,
+            stats: user.stats,
+            profile: user.profile,
+            isGuest: false
         };
-
-        // Generate JWT token (simple version - can be enhanced)
-        const token = crypto.randomBytes(32).toString('hex');
-
-        // Log successful auth
-        console.log(`✅ Wallet authenticated: ${chain} - ${address.slice(0, 8)}...`);
 
         // Response
         res.json({
             success: true,
             message: 'Wallet authenticated successfully',
-            user,
+            user: sanitizedUser,
             token,
             chain,
             address: address.slice(0, 6) + '...' + address.slice(-4) // Masked for security

@@ -239,23 +239,30 @@ class UnifiedAuth {
             
             const signResult = await window.multiChainWallet.signMessage(message);
 
-            // Create local user (backend integration coming soon)
-            this.user = {
-                id: `wallet_${walletResult.chain}_${walletResult.address.slice(0, 8)}`,
-                username: `${walletResult.wallet}User`,
-                displayName: `${walletResult.wallet} (${walletResult.address.slice(0, 6)}...${walletResult.address.slice(-4)})`,
-                wallet: walletResult.address,
-                chain: walletResult.chain,
-                walletType: walletResult.wallet,
-                isGuest: false,
-                profile: {
-                    avatar: {
-                        type: 'icon',
-                        icon: walletResult.chain === 'ethereum' ? '🦊' : walletResult.chain === 'solana' ? '👻' : '💎'
-                    }
-                }
-            };
+            // Authenticate with backend
+            const response = await fetch('/api/auth/wallet', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chain: walletResult.chain,
+                    address: walletResult.address,
+                    signature: signResult.signature,
+                    message: message,
+                    wallet: walletResult.wallet
+                })
+            });
+
+            const authResult = await response.json();
+
+            if (!authResult.success) {
+                throw new Error(authResult.error || 'Wallet authentication failed');
+            }
+
+            // Store authenticated user and token
+            this.user = authResult.user;
+            this.token = authResult.token;
             
+            localStorage.setItem('auth_token', this.token);
             localStorage.setItem('auth_method', 'wallet');
             localStorage.setItem('wallet_chain', walletResult.chain);
             localStorage.setItem('wallet_address', walletResult.address);
@@ -444,5 +451,16 @@ if (typeof window !== 'undefined') {
         verifyToken: () => window.unifiedAuth.verifyToken(),
         updateProfile: (...args) => window.unifiedAuth.updateProfile(...args),
         getAuthHeader: () => window.unifiedAuth.getAuthHeader()
+    };
+    
+    // Legacy compatibility - map to old universalAuth API
+    window.universalAuth = {
+        get user() { return window.unifiedAuth.getUser(); },
+        getUser: () => window.unifiedAuth.getUser(),
+        init: () => window.unifiedAuth.init(),
+        saveUser: async (user) => {
+            // Legacy method - update profile
+            return window.unifiedAuth.updateProfile(user);
+        }
     };
 }
