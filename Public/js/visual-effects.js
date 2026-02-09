@@ -41,8 +41,9 @@ class VisualEffects {
 
     /**
      * Apply lighting overlay to scene
+     * @param {number} frameCount - Current animation frame number for flicker effects
      */
-    applyLighting(frame = 0) {
+    applyLighting(frameCount = 0) {
         if (this.lighting.sources.length === 0) return;
 
         const ctx = this.ctx;
@@ -57,7 +58,7 @@ class VisualEffects {
         // Add light sources
         ctx.globalCompositeOperation = 'lighter';
         this.lighting.sources.forEach(light => {
-            const flicker = light.flicker * Math.sin(frame * 0.1);
+            const flicker = light.flicker * Math.sin(frameCount * 0.1);
             const intensity = light.intensity + flicker;
             
             const gradient = ctx.createRadialGradient(
@@ -153,6 +154,10 @@ class VisualEffects {
 
     /**
      * Create impact wave effect
+     * @param {number} x - X position
+     * @param {number} y - Y position
+     * @param {number} maxRadius - Maximum radius in pixels (default: 100)
+     * @param {number} duration - Duration in milliseconds (default: 500)
      */
     createImpactWave(x, y, maxRadius = 100, duration = 500) {
         this.effects.push({
@@ -165,6 +170,10 @@ class VisualEffects {
 
     /**
      * Create energy pulse effect
+     * @param {number} x - X position
+     * @param {number} y - Y position
+     * @param {string} color - Hex color code (default: '#00FFFF')
+     * @param {number} count - Number of pulses (default: 3)
      */
     createEnergyPulse(x, y, color = '#00FFFF', count = 3) {
         for (let i = 0; i < count; i++) {
@@ -183,6 +192,8 @@ class VisualEffects {
 
     /**
      * Create screen shake effect
+     * @param {number} intensity - Shake intensity in pixels (default: 10)
+     * @param {number} duration - Duration in milliseconds (default: 300)
      */
     createScreenShake(intensity = 10, duration = 300) {
         this.effects.push({

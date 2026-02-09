@@ -10,6 +10,12 @@
     align-items: center;
     gap: 20px;
     margin-bottom: var(--spacing-lg);
+    position: relative; /* Establish positioning context for canvas wrapper */
+}
+
+/* Canvas wrapper for scanline overlay */
+.game-container > div {
+    position: relative;
 }
 
 #game-canvas {
@@ -25,6 +31,7 @@
     image-rendering: pixelated; /* Crisp pixel art */
     image-rendering: -moz-crisp-edges;
     image-rendering: crisp-edges;
+    display: block;
 }
 
 #game-canvas:hover {
@@ -32,25 +39,6 @@
         0 0 40px rgba(74, 144, 226, 0.5),
         0 0 80px rgba(74, 144, 226, 0.2),
         inset 0 0 20px rgba(0, 0, 0, 0.5);
-}
-
-/* Add subtle scanline effect for retro feel */
-#game-canvas::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: repeating-linear-gradient(
-        0deg,
-        rgba(0, 0, 0, 0.1) 0px,
-        transparent 1px,
-        transparent 2px,
-        rgba(0, 0, 0, 0.1) 3px
-    );
-    pointer-events: none;
-    opacity: 0.3;
 }
 
 /* Gamepad Status Widget */

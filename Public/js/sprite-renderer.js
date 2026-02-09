@@ -18,6 +18,10 @@ class SpriteRenderer {
         this.enableShading = true;
         this.enableGradients = true;
         this.enableShadows = true;
+        
+        // Configuration constants
+        this.CACHE_FRAME_INTERVAL = 5; // Cache sprites every N frames for performance
+        this.HAIR_HIGHLIGHT_COLOR = 'rgba(139, 69, 19, 0.5)';
     }
 
     /**
@@ -32,7 +36,7 @@ class SpriteRenderer {
             color = null
         } = options;
 
-        const cacheKey = `${type}_${size}_${facing}_${animation}_${Math.floor(frame/5)}_${color}`;
+        const cacheKey = `${type}_${size}_${facing}_${animation}_${Math.floor(frame/this.CACHE_FRAME_INTERVAL)}_${color}`;
 
         // Use cached sprite if available
         if (this.cache.has(cacheKey)) {
@@ -151,7 +155,7 @@ class SpriteRenderer {
         this.drawPixelRect(ctx, 5*unit, 2*unit + bob, 6*unit, 2*unit);
 
         // Hair highlights
-        ctx.fillStyle = 'rgba(139, 69, 19, 0.5)';
+        ctx.fillStyle = this.HAIR_HIGHLIGHT_COLOR;
         this.drawPixelRect(ctx, 6*unit, 2.2*unit + bob, 2*unit, 0.5*unit);
 
         // Eyes with shine
