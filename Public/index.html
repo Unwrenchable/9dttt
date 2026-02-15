@@ -620,12 +620,19 @@
                 <div class="retro-banner">
                     🕹️ CLASSIC 16-BIT • 32-BIT • 64-BIT STYLE GAMING 🕹️
                 </div>
-                
+
+                <!-- Show Game Downloads link only if user is signed in -->
+                <div id="downloads-link-container" style="display:none; margin-bottom:18px; text-align:center;">
+                    <a href="games.html" class="downloads-link" style="font-size:1.2rem; color:#FFD700; font-weight:bold; text-shadow:0 0 8px #FFD700,0 0 16px #FFD700;">
+                        ⬇️ Download More Games &rarr;
+                    </a>
+                </div>
+
                 <!-- Insert Coin Animation -->
                 <button class="insert-coin pulse" id="insert-coin" aria-label="Click to play coin sound">
                     🪙 INSERT COIN TO PLAY 🪙
                 </button>
-                
+
                 <p>Welcome to the 9DTTT Game Library! Filter by category or browse all games:</p>
                 <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: var(--spacing-sm);">
                     🎮 <strong>Controller Support:</strong> D-Pad/Left Stick to navigate • A to select • LB/RB to switch to filters
@@ -1024,6 +1031,16 @@
             // Initialize unified auth
             await window.unifiedAuth.init();
             console.log('✅ Unified auth initialized');
+            // Show downloads link if signed in
+            const downloadsLink = document.getElementById('downloads-link-container');
+            if (window.unifiedAuth.user) {
+                downloadsLink.style.display = 'block';
+            }
+            if (window.unifiedAuth && window.unifiedAuth.addListener) {
+                window.unifiedAuth.addListener(function(user) {
+                    downloadsLink.style.display = user ? 'block' : 'none';
+                });
+            }
         })();
         
         // Category filtering functionality
