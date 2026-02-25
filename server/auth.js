@@ -190,9 +190,9 @@ class Auth {
         }
 
         // Profile updates
-        if (updates.bio !== undefined) user.profile.bio = updates.bio.slice(0, 200);
-        if (updates.location !== undefined) user.profile.location = updates.location.slice(0, 50);
-        if (updates.displayName !== undefined) user.displayName = updates.displayName.slice(0, 30);
+        if (updates.bio !== undefined) user.profile.bio = updates.bio.slice(0, 200).replace(/[<>]/g, '');
+        if (updates.location !== undefined) user.profile.location = updates.location.slice(0, 50).replace(/[<>]/g, '');
+        if (updates.displayName !== undefined) user.displayName = updates.displayName.slice(0, 30).replace(/[<>]/g, '');
         if (updates.avatar !== undefined) user.profile.avatar = updates.avatar;
 
         // Social links

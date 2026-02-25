@@ -3,17 +3,25 @@
  * Environment-based configuration for the 9DTTT Game Platform
  */
 
+const NODE_ENV = process.env.NODE_ENV || 'development';
+const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production';
+
+// Fail fast in production if the default insecure JWT secret is still in use
+if (NODE_ENV === 'production' && JWT_SECRET === 'your-super-secret-jwt-key-change-in-production') {
+    throw new Error('FATAL: JWT_SECRET environment variable must be set to a strong secret in production. Refusing to start.');
+}
+
 module.exports = {
     // Server
     PORT: process.env.PORT || 3000,
-    NODE_ENV: process.env.NODE_ENV || 'development',
+    NODE_ENV,
     BASE_URL: process.env.BASE_URL || process.env.RENDER_EXTERNAL_URL || 'http://localhost:3000',
     
     // Maintenance Mode (default: false - set to 'true' in env to enable)
     MAINTENANCE_MODE: process.env.MAINTENANCE_MODE === 'true',
     
     // JWT Authentication
-    JWT_SECRET: process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production',
+    JWT_SECRET,
     JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '7d',
     
     // Redis Configuration
