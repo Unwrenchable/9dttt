@@ -36,7 +36,7 @@
   "dependencies": {
     "@solana/web3.js": "^1.95.8",
     "@walletconnect/sign-client": "^2.16.1",
-    "@walletconnect/web3-provider": "^1.8.0",
+
     "bcryptjs": "^2.4.3",
     "bs58": "^6.0.0",
     "compression": "^1.7.4",

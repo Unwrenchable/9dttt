@@ -204,7 +204,7 @@ class GameChat {
         });
         
         msgEl.innerHTML = `
-            <span class="msg-sender">${message.isOwn ? 'You' : message.sender}</span>
+            <span class="msg-sender">${message.isOwn ? 'You' : this.escapeHtml(message.sender)}</span>
             <span class="msg-text">${this.escapeHtml(message.text)}</span>
             <span class="msg-time">${time}</span>
         `;

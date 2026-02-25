@@ -427,18 +427,18 @@ class GameUI {
                 <div class="friend-item">
                     <div class="friend-avatar">
                         ${friend.avatar?.type === 'custom' 
-                            ? `<img src="${friend.avatar.data}" alt="">` 
-                            : `<div class="avatar-initial" style="background: ${friend.avatar?.color || '#4a90e2'}">${friend.avatar?.initial || friend.username[0].toUpperCase()}</div>`
+                            ? `<img src="${this.escapeHtml(friend.avatar.data)}" alt="">` 
+                            : `<div class="avatar-initial" style="background: ${this.safeCssColor(friend.avatar?.color)}">${this.escapeHtml(friend.avatar?.initial || (friend.username && friend.username[0].toUpperCase()))}</div>`
                         }
                     </div>
                     <div class="friend-info">
-                        <span class="friend-name">${friend.displayName || friend.username}</span>
+                        <span class="friend-name">${this.escapeHtml(friend.displayName || friend.username)}</span>
                         <span class="friend-status ${friend.isOnline ? 'online' : 'offline'}">
                             ${friend.isOnline ? '● Online' : '○ Offline'}
                         </span>
                     </div>
                     <button class="challenge-btn ${friend.isOnline ? '' : 'disabled'}" 
-                            data-username="${friend.username}"
+                            data-username="${this.escapeHtml(friend.username)}"
                             ${friend.isOnline ? '' : 'disabled'}>
                         Challenge
                     </button>
@@ -484,12 +484,12 @@ class GameUI {
                     <div class="friend-item">
                         <div class="friend-avatar">
                             ${user.avatar?.type === 'custom' 
-                                ? `<img src="${user.avatar.data}" alt="">` 
-                                : `<div class="avatar-initial" style="background: ${user.avatar?.color || '#4a90e2'}">${user.avatar?.initial || user.username[0].toUpperCase()}</div>`
+                                ? `<img src="${this.escapeHtml(user.avatar.data)}" alt="">` 
+                                : `<div class="avatar-initial" style="background: ${this.safeCssColor(user.avatar?.color)}">${this.escapeHtml(user.avatar?.initial || (user.username && user.username[0].toUpperCase()))}</div>`
                             }
                         </div>
                         <div class="friend-info">
-                            <span class="friend-name">${user.displayName || user.username}</span>
+                            <span class="friend-name">${this.escapeHtml(user.displayName || user.username)}</span>
                             <span class="friend-status ${user.isOnline ? 'online' : 'offline'}">
                                 ${user.isOnline ? '● Online' : '○ Offline'}
                             </span>
@@ -497,10 +497,10 @@ class GameUI {
                         <div class="friend-actions">
                             ${user.isFollowing 
                                 ? '<span class="following-badge">Following</span>' 
-                                : `<button class="follow-btn small" data-username="${user.username}">Follow</button>`
+                                : `<button class="follow-btn small" data-username="${this.escapeHtml(user.username)}">Follow</button>`
                             }
                             ${user.isOnline 
-                                ? `<button class="challenge-btn small" data-username="${user.username}">Challenge</button>` 
+                                ? `<button class="challenge-btn small" data-username="${this.escapeHtml(user.username)}">Challenge</button>` 
                                 : ''
                             }
                         </div>
@@ -751,9 +751,9 @@ class GameUI {
         // Update avatar
         const avatarEl = modal.querySelector('#profile-avatar');
         if (user.profile.avatar.type === 'custom') {
-            avatarEl.innerHTML = `<img src="${user.profile.avatar.data}" alt="Avatar">`;
+            avatarEl.innerHTML = `<img src="${this.escapeHtml(user.profile.avatar.data)}" alt="Avatar">`;
         } else {
-            avatarEl.innerHTML = `<div class="avatar-initial" style="background: ${user.profile.avatar.color}">${user.profile.avatar.initial}</div>`;
+            avatarEl.innerHTML = `<div class="avatar-initial" style="background: ${this.safeCssColor(user.profile.avatar.color)}">${this.escapeHtml(user.profile.avatar.initial)}</div>`;
         }
         
         // Update info
@@ -1025,7 +1025,7 @@ class GameUI {
         
         const tcName = challenge.timeControlName || '10 min';
         challengeModal.querySelector('#challenge-text').innerHTML = 
-            `<strong>${challenge.challenger}</strong> challenges you to a <strong>${tcName}</strong> game!`;
+            `<strong>${this.escapeHtml(challenge.challenger)}</strong> challenges you to a <strong>${this.escapeHtml(tcName)}</strong> game!`;
         
         challengeModal.classList.add('show');
         
@@ -1102,9 +1102,9 @@ class GameUI {
             // Update avatar
             const avatarEl = document.getElementById('user-avatar');
             if (user.profile.avatar.type === 'custom') {
-                avatarEl.innerHTML = `<img src="${user.profile.avatar.data}" alt="Avatar">`;
+                avatarEl.innerHTML = `<img src="${this.escapeHtml(user.profile.avatar.data)}" alt="Avatar">`;
             } else {
-                avatarEl.innerHTML = `<div class="avatar-initial" style="background: ${user.profile.avatar.color}">${user.profile.avatar.initial}</div>`;
+                avatarEl.innerHTML = `<div class="avatar-initial" style="background: ${this.safeCssColor(user.profile.avatar.color)}">${this.escapeHtml(user.profile.avatar.initial)}</div>`;
             }
             
             // Update name
@@ -1137,6 +1137,29 @@ class GameUI {
             notification.classList.remove('show');
             setTimeout(() => notification.remove(), 300);
         }, 3000);
+    }
+
+    /**
+     * Escape HTML special characters to prevent XSS
+     */
+    escapeHtml(str) {
+        if (str === null || str === undefined) return '';
+        return String(str).replace(/[&<>"']/g, (c) => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;',
+            '"': '&quot;', "'": '&#x27;'
+        }[c]));
+    }
+
+    /**
+     * Validate a CSS color value (only allow safe color formats)
+     */
+    safeCssColor(color) {
+        if (typeof color !== 'string') return '#4a90e2';
+        // Allow hex colors, rgb(), hsl(), and named colors (letters only)
+        if (/^(#[0-9a-fA-F]{3,8}|rgb\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*\)|hsl\([\d\s,%a-zA-Z.]+\)|[a-zA-Z]+)$/.test(color)) {
+            return color;
+        }
+        return '#4a90e2';
     }
 }
 
