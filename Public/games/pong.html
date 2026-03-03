@@ -124,8 +124,10 @@
                 this.mode = 'ai';
                 this.scores = [0, 0];
                 this.winScore = 11;
+                this.keys = {};
                 
                 this.reset();
+                this.setupInput();
                 this.gameLoop();
             }
             
@@ -169,18 +171,21 @@
                 }
             }
             
+            setupInput() {
+                if (this._inputSetup) return;
+                this._inputSetup = true;
+                window.addEventListener('keydown', (e) => { this.keys[e.code] = true; });
+                window.addEventListener('keyup', (e) => { this.keys[e.code] = false; });
+            }
+            
             handleInput() {
-                const keys = {};
-                document.onkeydown = (e) => keys[e.code] = true;
-                document.onkeyup = (e) => keys[e.code] = false;
-                
                 // Player 1 - Keyboard + Analog stick + D-pad
-                if (keys['KeyW'] || 
+                if (this.keys['KeyW'] || 
                     (window.gamepadManager?.getAxis(0, 'leftY') < -0.3) ||
                     window.gamepadManager?.isPressed(0, 'up')) {
                     this.paddles[0].y -= this.paddleSpeed;
                 }
-                if (keys['KeyS'] || 
+                if (this.keys['KeyS'] || 
                     (window.gamepadManager?.getAxis(0, 'leftY') > 0.3) ||
                     window.gamepadManager?.isPressed(0, 'down')) {
                     this.paddles[0].y += this.paddleSpeed;
@@ -188,12 +193,12 @@
                 
                 // Player 2 (if not AI) - Keyboard + Analog stick + D-pad
                 if (this.mode === 'local') {
-                    if (keys['ArrowUp'] || 
+                    if (this.keys['ArrowUp'] || 
                         (window.gamepadManager?.getAxis(1, 'leftY') < -0.3) ||
                         window.gamepadManager?.isPressed(1, 'up')) {
                         this.paddles[1].y -= this.paddleSpeed;
                     }
-                    if (keys['ArrowDown'] || 
+                    if (this.keys['ArrowDown'] || 
                         (window.gamepadManager?.getAxis(1, 'leftY') > 0.3) ||
                         window.gamepadManager?.isPressed(1, 'down')) {
                         this.paddles[1].y += this.paddleSpeed;

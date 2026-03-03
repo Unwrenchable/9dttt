@@ -359,6 +359,11 @@
         document.addEventListener('DOMContentLoaded', () => {
             window.gameIntegration = new UniversalGameIntegration('crypto-quest', 'Crypto Quest Academy');
         });
+
+        function closeInfo() {
+            const panel = document.getElementById('infoPanel');
+            if (panel) panel.style.display = 'none';
+        }
     </script>
 </body>
 </html>
