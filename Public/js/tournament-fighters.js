@@ -1,22 +1,31 @@
 /**
  * Tournament Fighters - Street Fighter style fighting game with tournament mode
  */
+
+// Animation/timing constants
+const HURT_ANIMATION_THRESHOLD = 200; // invincibility ms above which 'hurt' anim plays
+const INVINCIBILITY_FLICKER_RATE = 80; // ms per flicker cycle during invincibility
+
 class TournamentFighters {
     constructor() {
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
         this.canvas.width = 1000;
-        this.canvas.height = 600;
+        this.canvas.height = 560;
+
+        // Professional character renderer
+        this.charRenderer = window.CharacterRenderer ? new window.CharacterRenderer() : null;
+        this.frameCount = 0;
         
         this.fighters = [
-            { id: 'ryu', name: 'RYU', emoji: '🥋', speed: 5, power: 8, special: 'Hadouken' },
-            { id: 'chun', name: 'CHUN-LI', emoji: '👸', speed: 9, power: 6, special: 'Lightning Kick' },
-            { id: 'zangief', name: 'ZANGIEF', emoji: '🐻', speed: 3, power: 10, special: 'Spinning Piledriver' },
-            { id: 'guile', name: 'GUILE', emoji: '🪖', speed: 6, power: 7, special: 'Sonic Boom' },
-            { id: 'blanka', name: 'BLANKA', emoji: '🟢', speed: 8, power: 7, special: 'Electric Thunder' },
-            { id: 'dhalsim', name: 'DHALSIM', emoji: '🧘', speed: 4, power: 6, special: 'Yoga Fire' },
-            { id: 'ken', name: 'KEN', emoji: '🔥', speed: 7, power: 8, special: 'Shoryuken' },
-            { id: 'sagat', name: 'SAGAT', emoji: '🐯', speed: 5, power: 9, special: 'Tiger Uppercut' }
+            { id: 'ryu',     name: 'RYU',      speed: 5, power: 8,  special: 'Hadouken',           origin: 'Japan' },
+            { id: 'chun',    name: 'CHUN-LI',  speed: 9, power: 6,  special: 'Lightning Kick',     origin: 'China' },
+            { id: 'zangief', name: 'ZANGIEF',  speed: 3, power: 10, special: 'Spinning Piledriver', origin: 'Russia' },
+            { id: 'guile',   name: 'GUILE',    speed: 6, power: 7,  special: 'Sonic Boom',         origin: 'USA' },
+            { id: 'blanka',  name: 'BLANKA',   speed: 8, power: 7,  special: 'Electric Thunder',   origin: 'Brazil' },
+            { id: 'dhalsim', name: 'DHALSIM',  speed: 4, power: 6,  special: 'Yoga Fire',          origin: 'India' },
+            { id: 'ken',     name: 'KEN',      speed: 7, power: 8,  special: 'Shoryuken',          origin: 'USA' },
+            { id: 'sagat',   name: 'SAGAT',    speed: 5, power: 9,  special: 'Tiger Uppercut',     origin: 'Thailand' }
         ];
         
         this.state = 'menu';
@@ -50,23 +59,41 @@ class TournamentFighters {
     renderFighterSelect() {
         const container = document.getElementById('fighterSelect');
         container.innerHTML = this.fighters.map((f, i) => `
-            <div class="fighter-card" onclick="game.selectFighter(${i})">
-                <div style="font-size: 48px;">${f.emoji}</div>
-                <div style="margin-top: 10px;">${f.name}</div>
-                <div style="font-size: 10px; margin-top: 5px;">
-                    SPD:${f.speed} PWR:${f.power}
+            <div class="fighter-card" onclick="game.selectFighter(${i})" data-fighter-id="${f.id}">
+                <canvas class="fighter-portrait" width="90" height="90" style="display:block;margin:0 auto;"></canvas>
+                <div style="margin-top: 8px; font-size: 11px; letter-spacing: 1px;">${f.name}</div>
+                <div style="font-size: 8px; margin-top: 4px; color: #aaa;">${f.origin || ''}</div>
+                <div style="font-size: 8px; margin-top: 4px;">
+                    <span style="color:#4ef;">SPD ${f.speed}</span> &nbsp; <span style="color:#f84;">PWR ${f.power}</span>
                 </div>
+                <div style="font-size: 7px; margin-top: 3px; color: #ff0;">${f.special}</div>
             </div>
         `).join('');
+
+        // Draw portraits using CharacterRenderer
+        if (this.charRenderer) {
+            document.querySelectorAll('.fighter-portrait').forEach((canvas, i) => {
+                const f = this.fighters[i];
+                const ctx = canvas.getContext('2d');
+                // Dark gradient background
+                const bg = ctx.createRadialGradient(45, 45, 5, 45, 45, 55);
+                bg.addColorStop(0, '#1a2040');
+                bg.addColorStop(1, '#080c1a');
+                ctx.fillStyle = bg;
+                ctx.fillRect(0, 0, 90, 90);
+                // Draw portrait centred
+                this.charRenderer.drawPortrait(ctx, f.id, 45, 55, 90);
+            });
+        }
     }
     
     selectFighter(index) {
         if (this.selectedFighters[0] === null) {
             this.selectedFighters[0] = this.fighters[index];
-            document.querySelectorAll('.fighter-card')[index].classList.add('selected');
-        } else if (this.selectedFighters[1] === null) {
+            document.querySelectorAll('.fighter-card')[index].classList.add('selected-p1');
+        } else if (this.selectedFighters[1] === null && index !== this.fighters.indexOf(this.selectedFighters[0])) {
             this.selectedFighters[1] = this.fighters[index];
-            document.querySelectorAll('.fighter-card')[index].classList.add('selected');
+            document.querySelectorAll('.fighter-card')[index].classList.add('selected-p2');
         }
     }
     
@@ -106,12 +133,13 @@ class TournamentFighters {
         
         this.round = 1;
         this.timer = 99;
+        this.frameCount = 0;
         
         this.players = [
             {
                 ...this.selectedFighters[0],
                 x: 200,
-                y: 450,
+                y: 410,
                 vx: 0,
                 vy: 0,
                 width: 50,
@@ -126,6 +154,8 @@ class TournamentFighters {
                 specialCharge: 0,
                 invincible: 0,
                 combo: 0,
+                animState: 'idle',
+                animFrame: 0,
                 controls: {
                     left: 'KeyA',
                     right: 'KeyD',
@@ -140,7 +170,7 @@ class TournamentFighters {
             {
                 ...this.selectedFighters[1],
                 x: 750,
-                y: 450,
+                y: 410,
                 vx: 0,
                 vy: 0,
                 width: 50,
@@ -155,6 +185,8 @@ class TournamentFighters {
                 specialCharge: 0,
                 invincible: 0,
                 combo: 0,
+                animState: 'idle',
+                animFrame: 0,
                 controls: this.mode === 'tournament' ? null : {
                     left: 'ArrowLeft',
                     right: 'ArrowRight',
@@ -261,8 +293,8 @@ class TournamentFighters {
         player.y += player.vy;
         
         // Ground collision
-        if (player.y >= 450) {
-            player.y = 450;
+        if (player.y >= 410) {
+            player.y = 410;
             player.vy = 0;
             player.onGround = true;
         }
@@ -289,6 +321,20 @@ class TournamentFighters {
         }
         
         player.vx *= 0.8;
+
+        // Update animation state
+        if (player.invincible > HURT_ANIMATION_THRESHOLD) {
+            player.animState = 'hurt';
+        } else if (!player.onGround) {
+            player.animState = 'jump';
+        } else if (player.blocking) {
+            player.animState = 'block';
+        } else if (player.attacking) {
+            player.animState = 'attack';
+        } else {
+            player.animState = 'idle';
+        }
+        player.animFrame = (player.animFrame || 0) + 1;
     }
     
     playerControl(player) {
@@ -432,8 +478,8 @@ class TournamentFighters {
             this.players[1].health = this.players[1].maxHealth;
             this.players[0].x = 200;
             this.players[1].x = 750;
-            this.players[0].y = 450;
-            this.players[1].y = 450;
+            this.players[0].y = 410;
+            this.players[1].y = 410;
             this.announceRound();
         }
     }
@@ -466,79 +512,160 @@ class TournamentFighters {
     }
     
     draw() {
-        // Background
-        const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
-        gradient.addColorStop(0, '#ff6b6b');
-        gradient.addColorStop(1, '#4ecdc4');
-        this.ctx.fillStyle = gradient;
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        
-        // Floor
-        this.ctx.fillStyle = '#8b7355';
-        this.ctx.fillRect(0, 530, this.canvas.width, 70);
-        
-        // Draw projectiles
+        const ctx = this.ctx;
+        this.frameCount++;
+
+        // === BACKGROUND — dramatic arena ===
+        const skyGrad = ctx.createLinearGradient(0, 0, 0, this.canvas.height);
+        skyGrad.addColorStop(0, '#0a0820');
+        skyGrad.addColorStop(0.5, '#1a1040');
+        skyGrad.addColorStop(1, '#0d0820');
+        ctx.fillStyle = skyGrad;
+        ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+        // Background crowd silhouettes
+        ctx.fillStyle = 'rgba(80, 40, 120, 0.35)';
+        for (let i = 0; i < 30; i++) {
+            const cx = i * 35 + 15;
+            const cy = 440 + Math.sin(i * 1.7 + this.frameCount * 0.03) * 3;
+            const headR = 8 + (i % 3) * 2;
+            ctx.beginPath();
+            ctx.arc(cx, cy - headR, headR, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillRect(cx - headR * 0.6, cy - headR * 0.2, headR * 1.2, 30);
+        }
+
+        // Arena floor with perspective lines
+        ctx.fillStyle = '#1a1230';
+        ctx.fillRect(0, 490, this.canvas.width, 110);
+
+        // Floor reflection lines
+        ctx.strokeStyle = 'rgba(180, 100, 255, 0.18)';
+        ctx.lineWidth = 1;
+        for (let i = 0; i < 15; i++) {
+            ctx.beginPath();
+            ctx.moveTo(i * 70, 490);
+            ctx.lineTo(i * 70 + 30, 600);
+            ctx.stroke();
+        }
+
+        // Glowing floor edge
+        const floorGlow = ctx.createLinearGradient(0, 488, 0, 498);
+        floorGlow.addColorStop(0, 'rgba(180, 100, 255, 0.6)');
+        floorGlow.addColorStop(1, 'rgba(80, 40, 180, 0)');
+        ctx.fillStyle = floorGlow;
+        ctx.fillRect(0, 488, this.canvas.width, 10);
+
+        // Neon border lights
+        ctx.strokeStyle = 'rgba(200, 80, 255, 0.4)';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(2, 2, this.canvas.width - 4, this.canvas.height - 4);
+
+        // === PROJECTILES — energy orbs ===
         this.projectiles.forEach(proj => {
-            this.ctx.fillStyle = '#ff0';
-            this.ctx.fillRect(proj.x, proj.y, proj.width, proj.height);
+            const orbGrad = ctx.createRadialGradient(proj.x + 15, proj.y + 10, 2, proj.x + 15, proj.y + 10, 18);
+            orbGrad.addColorStop(0, '#fff');
+            orbGrad.addColorStop(0.3, '#80ffff');
+            orbGrad.addColorStop(1, 'rgba(0, 200, 255, 0)');
+            ctx.fillStyle = orbGrad;
+            ctx.beginPath();
+            ctx.arc(proj.x + 15, proj.y + 10, 18, 0, Math.PI * 2);
+            ctx.fill();
+            // Core
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.arc(proj.x + 15, proj.y + 10, 5, 0, Math.PI * 2);
+            ctx.fill();
         });
-        
-        // Draw particles
+
+        // === PARTICLES ===
         this.particles.forEach(p => {
-            this.ctx.globalAlpha = p.alpha;
-            this.ctx.fillStyle = p.color;
-            this.ctx.fillRect(p.x, p.y, p.size, p.size);
+            ctx.globalAlpha = p.alpha;
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fill();
         });
-        this.ctx.globalAlpha = 1;
-        
-        // Draw players
+        ctx.globalAlpha = 1;
+
+        // === FIGHTERS ===
         this.players.forEach(player => {
-            if (player.invincible % 200 > 100) return;
-            
-            // Shadow
-            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-            this.ctx.fillRect(player.x + 10, player.y + player.height, player.width - 20, 10);
-            
-            // Fighter
-            this.ctx.font = '60px Arial';
-            this.ctx.save();
-            this.ctx.translate(player.x + player.width / 2, player.y + player.height / 2);
-            if (!player.facingRight) this.ctx.scale(-1, 1);
-            this.ctx.fillText(player.emoji, -30, 30);
-            this.ctx.restore();
-            
-            // Blocking effect
+            // Flicker on invincibility
+            if (player.invincible > 0 && Math.floor(player.invincible / INVINCIBILITY_FLICKER_RATE) % 2 === 0) return;
+
+            // Ground shadow
+            ctx.save();
+            ctx.globalAlpha = 0.3;
+            ctx.fillStyle = '#000';
+            ctx.beginPath();
+            ctx.ellipse(
+                player.x + player.width / 2, player.y + player.height + 5,
+                player.width * 0.55, 8, 0, 0, Math.PI * 2
+            );
+            ctx.fill();
+            ctx.restore();
+
+            // Blocking shield effect
             if (player.blocking) {
-                this.ctx.strokeStyle = '#0ff';
-                this.ctx.lineWidth = 3;
-                this.ctx.strokeRect(player.x, player.y, player.width, player.height);
-            }
-            
-            // Attack effect
-            if (player.attacking) {
-                this.ctx.fillStyle = 'rgba(255, 255, 0, 0.5)';
-                const hitbox = {
-                    x: player.x + (player.facingRight ? player.width : -30),
-                    y: player.y,
-                    width: 30,
-                    height: player.height
-                };
-                this.ctx.fillRect(hitbox.x, hitbox.y, hitbox.width, hitbox.height);
-            }
-            
-            // Special charge
-            if (player.specialCharge > 0) {
-                const barWidth = 40;
-                const barHeight = 5;
-                this.ctx.fillStyle = '#333';
-                this.ctx.fillRect(player.x + 5, player.y - 15, barWidth, barHeight);
-                this.ctx.fillStyle = '#ff0';
-                this.ctx.fillRect(
-                    player.x + 5,
-                    player.y - 15,
-                    barWidth * (player.specialCharge / 100),
-                    barHeight
+                ctx.save();
+                ctx.globalAlpha = 0.4;
+                const shieldGrad = ctx.createRadialGradient(
+                    player.x + player.width / 2, player.y + player.height / 2, 5,
+                    player.x + player.width / 2, player.y + player.height / 2, 55
                 );
+                shieldGrad.addColorStop(0, 'rgba(0, 200, 255, 0.6)');
+                shieldGrad.addColorStop(1, 'rgba(0, 100, 255, 0)');
+                ctx.fillStyle = shieldGrad;
+                ctx.beginPath();
+                ctx.arc(player.x + player.width / 2, player.y + player.height / 2, 55, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+
+            // === Draw character with CharacterRenderer ===
+            if (this.charRenderer) {
+                this.charRenderer.drawFighter(
+                    ctx,
+                    player.id,
+                    player.x + player.width / 2,   // feet centre X
+                    player.y + player.height,        // feet Y
+                    {
+                        facing: player.facingRight ? 'right' : 'left',
+                        animState: player.animState || 'idle',
+                        frame: player.animFrame || 0,
+                        scale: 1.2
+                    }
+                );
+            } else {
+                // Fallback coloured rectangle
+                ctx.fillStyle = '#4a90e2';
+                ctx.fillRect(player.x, player.y, player.width, player.height);
+            }
+
+            // Attack flash
+            if (player.attacking) {
+                ctx.save();
+                ctx.globalAlpha = 0.35;
+                ctx.fillStyle = '#ffdd00';
+                const hx = player.x + (player.facingRight ? player.width : -36);
+                ctx.beginPath();
+                ctx.ellipse(hx + 18, player.y + 30, 24, 20, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+
+            // Special charge pip bar above fighter
+            if (player.specialCharge > 0) {
+                const bw = 46, bh = 5;
+                const bx = player.x + (player.width - bw) / 2;
+                const by = player.y - 22;
+                ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                ctx.fillRect(bx - 1, by - 1, bw + 2, bh + 2);
+                const chargeGrad = ctx.createLinearGradient(bx, by, bx + bw, by);
+                chargeGrad.addColorStop(0, '#ff8c00');
+                chargeGrad.addColorStop(1, '#ffee00');
+                ctx.fillStyle = chargeGrad;
+                ctx.fillRect(bx, by, bw * (player.specialCharge / 100), bh);
             }
         });
     }
@@ -547,14 +674,24 @@ class TournamentFighters {
         document.getElementById('p1Name').textContent = this.players[0].name;
         document.getElementById('p2Name').textContent = this.players[1].name;
         
-        const p1HealthPercent = (this.players[0].health / this.players[0].maxHealth) * 100;
-        const p2HealthPercent = (this.players[1].health / this.players[1].maxHealth) * 100;
+        const p1hp = Math.max(0, (this.players[0].health / this.players[0].maxHealth) * 100);
+        const p2hp = Math.max(0, (this.players[1].health / this.players[1].maxHealth) * 100);
         
-        document.getElementById('p1Health').style.width = p1HealthPercent + '%';
-        document.getElementById('p2Health').style.width = p2HealthPercent + '%';
-        
-        document.getElementById('p1Wins').textContent = this.wins[0];
-        document.getElementById('p2Wins').textContent = this.wins[1];
+        document.getElementById('p1Health').style.width = p1hp + '%';
+        document.getElementById('p2Health').style.width = p2hp + '%';
+
+        // Win dots
+        for (let p = 0; p < 2; p++) {
+            for (let w = 0; w < 2; w++) {
+                const dot = document.getElementById(`p${p + 1}w${w}`);
+                if (dot) dot.className = 'win-dot' + (this.wins[p] > w ? ' filled' : '');
+            }
+        }
+
+        // Timer colour
+        const timerEl = document.getElementById('timer');
+        timerEl.textContent = Math.ceil(this.timer);
+        timerEl.className = 'timer' + (this.timer <= 10 ? ' urgent' : '');
     }
     
     gameLoop() {
