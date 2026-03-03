@@ -5,25 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Primary Meta Tags -->
-    <title>Zelda Adventure - Top-Down Action RPG | 9DTTT</title>
-    <meta name="title" content="Zelda Adventure - Top-Down Action RPG | 9DTTT">
-    <meta name="description" content="Play Zelda Adventure free online! Top-down action RPG – explore the overworld, battle slimes and skeletons, enter the dungeon and defeat the boss!">
-    <meta name="keywords" content="zelda adventure, action rpg, top-down game, dungeon game, browser adventure game, free online rpg">
+    <title>ATOMIC FIZZ CAPS: Wasteland Quest | 9DTTT</title>
+    <meta name="title" content="ATOMIC FIZZ CAPS: Wasteland Quest | 9DTTT">
+    <meta name="description" content="Roam the Mojave Wasteland as a Vault-77 dweller! Collect FIZZ caps, battle Radroaches and Ghouls, and defeat The Overseer in this Fallout-themed Zelda-style adventure!">
+    <meta name="keywords" content="atomic fizz caps, fallout game, wasteland quest, vault 77, fizz token, solana game">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://www.d9ttt.com/games/zelda-adventure.html">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://www.d9ttt.com/games/zelda-adventure.html">
-    <meta property="og:title" content="Zelda Adventure - Top-Down Action RPG">
-    <meta property="og:description" content="Top-down action RPG – explore, battle enemies, conquer the dungeon!">
+    <meta property="og:title" content="ATOMIC FIZZ CAPS: Wasteland Quest">
+    <meta property="og:description" content="Roam the Mojave Wasteland as a Vault-77 dweller! Collect FIZZ caps, battle Radroaches and Ghouls, and defeat The Overseer in this Fallout-themed Zelda-style adventure!">
     <meta property="og:image" content="https://www.d9ttt.com/icon.jpg">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://www.d9ttt.com/games/zelda-adventure.html">
-    <meta property="twitter:title" content="Zelda Adventure - Top-Down Action RPG">
-    <meta property="twitter:description" content="Top-down action RPG – explore, battle enemies, conquer the dungeon!">
+    <meta property="twitter:title" content="ATOMIC FIZZ CAPS: Wasteland Quest">
+    <meta property="twitter:description" content="Roam the Mojave Wasteland as a Vault-77 dweller! Collect FIZZ caps, battle Radroaches and Ghouls, and defeat The Overseer in this Fallout-themed Zelda-style adventure!">
     <meta property="twitter:image" content="https://www.d9ttt.com/icon.jpg">
 
     <!-- Mobile App -->
@@ -39,8 +39,8 @@
     {
         "@context": "https://schema.org",
         "@type": "Game",
-        "name": "Zelda Adventure",
-        "description": "Top-down action RPG. Explore the overworld, battle slimes and skeletons, enter the dungeon and defeat the boss!",
+        "name": "ATOMIC FIZZ CAPS: Wasteland Quest",
+        "description": "Roam the Mojave Wasteland as a Vault-77 dweller! Collect FIZZ caps, battle Radroaches and Ghouls, and defeat The Overseer in this Fallout-themed Zelda-style adventure!",
         "gamePlatform": "Web Browser",
         "numberOfPlayers": "1",
         "playMode": "SinglePlayer",
@@ -55,8 +55,8 @@
 
     <div class="container">
         <header role="banner">
-            <h1>&#x2694;&#xFE0F; Zelda Adventure</h1>
-            <p class="subtitle">Top-down action RPG adventure</p>
+            <h1>&#x2622;&#xFE0F; ATOMIC FIZZ CAPS</h1>
+            <p class="subtitle">Vault-77 Wasteland Quest</p>
         </header>
 
         <div id="gamepad-status"></div>
@@ -64,8 +64,8 @@
         <main id="main-content" role="main">
             <div class="game-container">
                 <canvas id="game-canvas" width="800" height="540"
-                        style="display:block;max-width:100%;border:2px solid #ffd700;border-radius:8px;"
-                        aria-label="Zelda Adventure game canvas"></canvas>
+                        style="display:block;max-width:100%;border:2px solid #39ff14;border-radius:8px;"
+                        aria-label="Atomic Fizz Caps Wasteland Quest game canvas"></canvas>
                 <div id="sr-announcer" role="status" aria-live="polite" aria-atomic="true"
                      style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;"></div>
 
@@ -77,20 +77,20 @@
                     </div>
                     <div>
                         <h4>Combat</h4>
-                        <p><kbd>Z</kbd> or <kbd>Space</kbd> &ndash; Sword</p>
+                        <p><kbd>Z</kbd> or <kbd>Space</kbd> &ndash; Pipe Wrench</p>
                         <p>Gamepad: A Button</p>
                     </div>
                     <div>
                         <h4>Objective</h4>
-                        <p>Collect &#x1F48E; Rupees for score</p>
-                        <p>Find the Dungeon Door &amp; defeat the Boss!</p>
+                        <p>Collect &#x1F376; FIZZ Caps for score</p>
+                        <p>Find Vault 77 entrance &amp; defeat The Overseer!</p>
                     </div>
                 </div>
             </div>
         </main>
 
         <footer role="contentinfo">
-            <p>&copy; 2026 Zelda Adventure | 9DTTT Game Library</p>
+            <p>&copy; 2026 AtomicFizzCaps.xyz | 9DTTT Game Library</p>
             <p><a href="../index.html" style="color:#4a90e2;">&#x2190; Back to Game Library</a></p>
         </footer>
     </div>
@@ -100,19 +100,19 @@
     <script src="../js/advanced-graphics.js"></script>
     <script>
     // ================================================================
-    //  ZELDA ADVENTURE  –  Top-Down Action RPG
+    //  ATOMIC FIZZ CAPS: WASTELAND QUEST  –  Fallout-Themed Action RPG
     //  Canvas 800 × 540  |  HUD 60 px  |  World 800 × 480 (20 × 12 tiles @ 40 px)
     // ================================================================
 
     // ── Tile type constants ─────────────────────────────────────────
-    const GRASS   = 0;   // walkable – green
-    const WATER   = 1;   // solid    – blue pond
-    const TREE    = 2;   // solid    – tree canopy
-    const WALL    = 3;   // solid    – stone wall
-    const D_FLOOR = 4;   // walkable – dungeon floor
-    const D_WALL  = 5;   // solid    – dungeon stone
-    const D_DOOR  = 6;   // walkable – dungeon entrance (overworld)
-    const D_EXIT  = 7;   // walkable – exit back to overworld (dungeon)
+    const GRASS   = 0;   // walkable – wasteland dirt
+    const WATER   = 1;   // solid    – toxic pool
+    const TREE    = 2;   // solid    – car wreck / rubble
+    const WALL    = 3;   // solid    – broken concrete wall
+    const D_FLOOR = 4;   // walkable – vault metal floor
+    const D_WALL  = 5;   // solid    – vault steel wall
+    const D_DOOR  = 6;   // walkable – Vault-77 entrance (overworld)
+    const D_EXIT  = 7;   // walkable – exit hatch back to surface (vault)
 
     // ── Map data  (12 rows × 20 cols) ──────────────────────────────
     const OVERWORLD_MAP = [
@@ -146,9 +146,9 @@
     ];
 
     // ================================================================
-    //  ZeldaGame class
+    //  WastelandGame class
     // ================================================================
-    class ZeldaGame {
+    class WastelandGame {
 
         constructor(canvasId) {
             this.canvas = document.getElementById(canvasId);
@@ -237,11 +237,11 @@
                 { x:11*T+14, y:  7*T+14, w:12, h:12, collected:false },
             ];
             this.overworldEnemies = [
-                this._mkSlime(   5*T+8,  3*T+8),
-                this._mkSlime(  12*T+8,  7*T+8),
-                this._mkSlime(   3*T+8,  9*T+8),
-                this._mkSkeleton(14*T+8, 4*T+8),
-                this._mkSkeleton( 7*T+8, 9*T+8),
+                this._mkRadroach(   5*T+8,  3*T+8),
+                this._mkRadroach(  12*T+8,  7*T+8),
+                this._mkRadroach(   3*T+8,  9*T+8),
+                this._mkGhoul(14*T+8, 4*T+8),
+                this._mkGhoul( 7*T+8, 9*T+8),
             ];
         }
 
@@ -253,10 +253,10 @@
                 { x: 8*T+14, y:8*T+14, w:12, h:12, collected:false },
             ];
             this.dungeonEnemies = [
-                this._mkSlime(   5*T+8, 5*T+8),
-                this._mkSlime(  14*T+8, 6*T+8),
-                this._mkSkeleton( 8*T+8, 4*T+8),
-                this._mkSkeleton(15*T+8, 7*T+8),
+                this._mkRadroach(   5*T+8, 5*T+8),
+                this._mkRadroach(  14*T+8, 6*T+8),
+                this._mkGhoul( 8*T+8, 4*T+8),
+                this._mkGhoul(15*T+8, 7*T+8),
             ];
             this.boss = {
                 x:9*T, y:3*T, w:56, h:56,
@@ -267,15 +267,15 @@
             };
         }
 
-        _mkSlime(x,y) {
-            return { type:'slime', x, y, w:22, h:20,
+        _mkRadroach(x,y) {
+            return { type:'radroach', x, y, w:22, h:20,
                      hp:2, maxHp:2, speed:0.9,
                      angle: Math.random()*Math.PI*2,
                      changeDirTimer: 60+Math.floor(Math.random()*60),
                      attackCooldown:0, dead:false, hitFlash:0, frame:0 };
         }
-        _mkSkeleton(x,y) {
-            return { type:'skeleton', x, y, w:22, h:28,
+        _mkGhoul(x,y) {
+            return { type:'ghoul', x, y, w:22, h:28,
                      hp:3, maxHp:3, speed:1.4,
                      angle: Math.random()*Math.PI*2,
                      changeDirTimer: 90+Math.floor(Math.random()*60),
@@ -434,8 +434,8 @@
             e.hp -= dmg; e.hitFlash = 12;
             if (e.hp <= 0) {
                 e.dead = true;
-                this.score += e.type==='slime' ? 25 : 50;
-                this._burst(e.x+e.w/2, e.y+e.h/2, e.type==='slime'?'#00c853':'#ecf0f1', 10);
+                this.score += e.type==='radroach' ? 25 : 50;
+                this._burst(e.x+e.w/2, e.y+e.h/2, e.type==='radroach'?'#8B5E3C':'#7aad6a', 10);
             }
         }
 
@@ -444,17 +444,17 @@
             b.hp -= dmg; b.hitFlash = 14;
             if (b.phase===1 && b.hp <= b.maxHp/2) {
                 b.phase=2; b.speed=1.9;
-                this._announce('Boss entered phase 2 – watch out for projectiles!');
+                this._announce('ALERT: Overseer activated defense turrets!');
             }
             if (b.hp <= 0) {
                 b.hp = 0; b.dead = true; this.bossDefeated = true;
                 this.score += 500;
                 this._burst(b.x+b.w/2, b.y+b.h/2, '#ff5722', 24);
                 this._burst(b.x+b.w/2, b.y+b.h/2, '#ffd700', 16);
-                this._announce('Boss defeated! You win!');
+                this._announce('Overseer neutralized! Vault-77 is yours!');
                 setTimeout(() => { if (this.state==='playing') this.state='win'; }, 1500);
             } else {
-                this._announce(`Boss HP: ${b.hp} of ${b.maxHp}`);
+                this._announce(`Overseer integrity: ${b.hp} / ${b.maxHp}`);
             }
         }
 
@@ -471,7 +471,7 @@
                 e.frame++;
 
                 const dist       = Math.hypot(p.x-e.x, p.y-e.y);
-                const chaseRange = e.type==='slime' ? 150 : 220;
+                const chaseRange = e.type==='radroach' ? 150 : 220;
                 let dx=0, dy=0;
 
                 if (dist < chaseRange) {
@@ -547,7 +547,7 @@
             for (const r of this.currentRupees) {
                 if (!r.collected && this._overlap(r, this.player)) {
                     r.collected=true; this.score+=10;
-                    this._burst(r.x+6, r.y+6, '#69f0ae', 6);
+                    this._burst(r.x+6, r.y+6, '#39ff14', 6);
                 }
             }
         }
@@ -617,55 +617,77 @@
             switch(type) {
 
                 case GRASS: {
-                    ctx.fillStyle = (col+row)%3===0 ? '#338a39' : '#3a9040';
+                    // WASTELAND – sandy/dusty post-apocalyptic dirt
+                    ctx.fillStyle = (col+row)%3===0 ? '#8b7355' : '#9c8563';
                     ctx.fillRect(tx,ty,T,T);
-                    ctx.fillStyle='#4cba52';
-                    ctx.fillRect(tx+7,  ty+9,  2,5);
-                    ctx.fillRect(tx+18, ty+24, 2,5);
-                    ctx.fillRect(tx+29, ty+13, 2,4);
-                    ctx.fillRect(tx+12, ty+31, 2,4);
+                    // scattered debris dots
+                    ctx.fillStyle='#7a6245';
+                    ctx.fillRect(tx+7,  ty+9,  3,3);
+                    ctx.fillRect(tx+18, ty+24, 2,2);
+                    ctx.fillRect(tx+29, ty+13, 3,2);
+                    ctx.fillRect(tx+12, ty+31, 2,3);
+                    // radioactive symbol hint (tiny glow)
+                    ctx.fillStyle='rgba(100,255,0,0.08)'; ctx.fillRect(tx,ty,T,T);
                     break;
                 }
                 case WATER: {
-                    ctx.fillStyle='#1565c0'; ctx.fillRect(tx,ty,T,T);
+                    // TOXIC_POOL – glowing toxic green/yellow irradiated pool
+                    ctx.fillStyle='#1a3a0a'; ctx.fillRect(tx,ty,T,T);
                     const wv=Math.sin(f*0.06+col*0.9)*2;
-                    ctx.fillStyle='#1976d2'; ctx.fillRect(tx+3, ty+5+wv,  T-6, 9);
-                    ctx.fillStyle='#42a5f5'; ctx.fillRect(tx+6, ty+19+wv, T-12,4);
+                    ctx.fillStyle='#2d5a14'; ctx.fillRect(tx+3, ty+5+wv, T-6, 9);
+                    ctx.fillStyle='#39ff14'; ctx.fillRect(tx+6, ty+19+wv, T-12,4);
+                    // toxic glow pulse
+                    const glow=0.04+Math.sin(f*0.07+col*0.5)*0.03;
+                    ctx.fillStyle=`rgba(57,255,20,${glow})`; ctx.fillRect(tx,ty,T,T);
                     break;
                 }
                 case TREE: {
-                    ctx.fillStyle='#2e7d32'; ctx.fillRect(tx,ty,T,T);
-                    ctx.fillStyle='#5d4037'; ctx.fillRect(tx+15,ty+27,10,13);
-                    ctx.fillStyle='#1b5e20';
-                    ctx.beginPath(); ctx.arc(tx+T/2,   ty+16, 17,0,Math.PI*2); ctx.fill();
-                    ctx.fillStyle='#2e7d32';
-                    ctx.beginPath(); ctx.arc(tx+T/2-4, ty+11, 13,0,Math.PI*2); ctx.fill();
-                    ctx.fillStyle='#43a047';
-                    ctx.beginPath(); ctx.arc(tx+T/2+3, ty+9,  10,0,Math.PI*2); ctx.fill();
+                    // WRECK – rusted car wreck / building rubble
+                    // Ground base
+                    ctx.fillStyle='#7a6245'; ctx.fillRect(tx,ty,T,T);
+                    // Rusted car body
+                    ctx.fillStyle='#8B4513'; ctx.fillRect(tx+4,ty+14,T-8,18);
+                    ctx.fillStyle='#6b3410'; ctx.fillRect(tx+4,ty+14,T-8,6);
+                    // Broken windows (dark)
+                    ctx.fillStyle='#1a1a1a'; ctx.fillRect(tx+7,ty+16,10,8); ctx.fillRect(tx+23,ty+16,10,8);
+                    // Rust streaks
+                    ctx.fillStyle='#5c2d0a'; ctx.fillRect(tx+6,ty+22,3,10); ctx.fillRect(tx+28,ty+22,3,10);
+                    // Wheels
+                    ctx.fillStyle='#333';
+                    ctx.beginPath(); ctx.arc(tx+10,ty+32,5,0,Math.PI*2); ctx.fill();
+                    ctx.beginPath(); ctx.arc(tx+30,ty+32,5,0,Math.PI*2); ctx.fill();
                     break;
                 }
                 case WALL: {
-                    ctx.fillStyle='#546e7a'; ctx.fillRect(tx,ty,T,T);
-                    ctx.fillStyle='#455a64';
+                    // RUBBLE – broken concrete/cinder block walls
+                    ctx.fillStyle='#4a4a4a'; ctx.fillRect(tx,ty,T,T);
+                    ctx.fillStyle='#3d3d3d';
                     const bo=(row%2)*(T/2);
                     ctx.fillRect(tx+bo,           ty+2, T/2-2, T/2-4);
                     ctx.fillRect(tx+bo+T/2,       ty+2, T/2-2, T/2-4);
                     ctx.fillRect(tx+((bo+T/4)%T), ty+T/2+2, T/2-2, T/2-4);
-                    ctx.strokeStyle='#37474f'; ctx.lineWidth=1; ctx.strokeRect(tx,ty,T,T);
+                    ctx.strokeStyle='#2a2a2a'; ctx.lineWidth=1; ctx.strokeRect(tx,ty,T,T);
+                    // Crack lines
+                    ctx.strokeStyle='#1a1a1a'; ctx.lineWidth=1;
+                    ctx.beginPath(); ctx.moveTo(tx+5,ty+3); ctx.lineTo(tx+12,ty+18); ctx.stroke();
                     break;
                 }
                 case D_FLOOR: {
-                    ctx.fillStyle='#1c252c'; ctx.fillRect(tx,ty,T,T);
-                    ctx.strokeStyle='#263238'; ctx.lineWidth=0.5; ctx.strokeRect(tx,ty,T,T);
-                    // Subtle torch-glow on inner walls border
-                    if ((col===1||col===18) || (row===1||row===10)) {
-                        ctx.fillStyle='rgba(255,180,50,0.04)'; ctx.fillRect(tx,ty,T,T);
-                    }
+                    // VAULT_FLOOR – metal grated vault floor
+                    ctx.fillStyle='#1a1f2e'; ctx.fillRect(tx,ty,T,T);
+                    // Metal grid lines
+                    ctx.strokeStyle='#2a3a4a'; ctx.lineWidth=0.5;
+                    ctx.strokeRect(tx,ty,T,T);
+                    // Floor grate pattern
+                    if ((col+row)%2===0) { ctx.fillStyle='rgba(0,200,255,0.04)'; ctx.fillRect(tx,ty,T,T); }
+                    // Yellow stripe near walls (Vault-Tec aesthetic)
+                    if (col===1||col===18) { ctx.fillStyle='rgba(255,220,0,0.15)'; ctx.fillRect(tx,ty,T,T); }
                     break;
                 }
                 case D_WALL: {
-                    ctx.fillStyle='#0d1b6e'; ctx.fillRect(tx,ty,T,T);
-                    ctx.fillStyle='#1a237e';
+                    // VAULT_WALL – blue/grey steel vault walls
+                    ctx.fillStyle='#0d1b3e'; ctx.fillRect(tx,ty,T,T);
+                    ctx.fillStyle='#1a2a50';
                     if ((col+row)%2===0) {
                         ctx.fillRect(tx+2,      ty+2,      T/2-3, T/2-3);
                         ctx.fillRect(tx+T/2+1,  ty+T/2+1,  T/2-3, T/2-3);
@@ -673,48 +695,72 @@
                         ctx.fillRect(tx+T/2+1,  ty+2,      T/2-3, T/2-3);
                         ctx.fillRect(tx+2,      ty+T/2+1,  T/2-3, T/2-3);
                     }
-                    ctx.strokeStyle='#283593'; ctx.lineWidth=1; ctx.strokeRect(tx,ty,T,T);
+                    ctx.strokeStyle='#2a3d7a'; ctx.lineWidth=1; ctx.strokeRect(tx,ty,T,T);
+                    // Vault rivets at corners
+                    ctx.fillStyle='#3a5080';
+                    ctx.beginPath(); ctx.arc(tx+3,ty+3,2,0,Math.PI*2); ctx.fill();
+                    ctx.beginPath(); ctx.arc(tx+T-3,ty+3,2,0,Math.PI*2); ctx.fill();
                     break;
                 }
                 case D_DOOR: {
-                    // Dungeon entrance archway on overworld
-                    ctx.fillStyle='#2e7d32'; ctx.fillRect(tx,ty,T,T);
-                    ctx.fillStyle='#3e2723'; ctx.fillRect(tx+5,ty+8,30,32);
-                    ctx.fillStyle='#111'; ctx.fillRect(tx+9,ty+12,22,28);
-                    ctx.fillStyle='#3e2723';
-                    ctx.beginPath(); ctx.arc(tx+T/2,ty+12,11,Math.PI,0); ctx.fill();
-                    ctx.fillStyle='#ffd700';
-                    ctx.beginPath(); ctx.arc(tx+T/2+5,ty+28,2.5,0,Math.PI*2); ctx.fill();
-                    const gl=0.25+Math.sin(f*0.08)*0.2;
-                    ctx.fillStyle=`rgba(255,200,50,${gl})`; ctx.fillRect(tx+9,ty+12,22,28);
+                    // VAULT_ENTRANCE – big circular Vault-77 door entrance on wasteland
+                    ctx.fillStyle='#8b7355'; ctx.fillRect(tx,ty,T,T);
+                    // Vault door circle
+                    ctx.fillStyle='#3a3a3a'; ctx.beginPath(); ctx.arc(tx+T/2,ty+T/2,18,0,Math.PI*2); ctx.fill();
+                    ctx.fillStyle='#555'; ctx.beginPath(); ctx.arc(tx+T/2,ty+T/2,15,0,Math.PI*2); ctx.fill();
+                    // Vault-Tec yellow ring
+                    ctx.strokeStyle='#ffd700'; ctx.lineWidth=3;
+                    ctx.beginPath(); ctx.arc(tx+T/2,ty+T/2,15,0,Math.PI*2); ctx.stroke();
+                    // Gear spokes
+                    ctx.strokeStyle='#888'; ctx.lineWidth=2;
+                    for(let a=0;a<Math.PI*2;a+=Math.PI/4) {
+                        ctx.beginPath();
+                        ctx.moveTo(tx+T/2+Math.cos(a)*7, ty+T/2+Math.sin(a)*7);
+                        ctx.lineTo(tx+T/2+Math.cos(a)*14, ty+T/2+Math.sin(a)*14);
+                        ctx.stroke();
+                    }
+                    // Glow
+                    const gld=0.2+Math.sin(f*0.08)*0.15;
+                    ctx.fillStyle=`rgba(255,220,0,${gld})`; ctx.beginPath(); ctx.arc(tx+T/2,ty+T/2,13,0,Math.PI*2); ctx.fill();
+                    // "77" text
+                    ctx.fillStyle='#000'; ctx.font='bold 11px Arial'; ctx.textAlign='center';
+                    ctx.fillText('77', tx+T/2, ty+T/2+4);
                     break;
                 }
                 case D_EXIT: {
-                    // Exit arch in dungeon
-                    ctx.fillStyle='#1c252c'; ctx.fillRect(tx,ty,T,T);
-                    ctx.fillStyle='#3e2723'; ctx.fillRect(tx+4,ty+6,28,34);
-                    ctx.fillStyle='#795548'; ctx.fillRect(tx+8,ty+10,20,30);
-                    const eg=0.35+Math.sin(f*0.1)*0.25;
-                    ctx.fillStyle=`rgba(100,220,100,${eg})`; ctx.fillRect(tx+8,ty+10,20,30);
-                    ctx.fillStyle='#fff'; ctx.font='7px Arial'; ctx.textAlign='center';
-                    ctx.fillText('EXIT', tx+T/2, ty+7);
+                    // VAULT_EXIT – exit hatch back to surface
+                    ctx.fillStyle='#1a1f2e'; ctx.fillRect(tx,ty,T,T);
+                    ctx.fillStyle='#2a3a3a'; ctx.beginPath(); ctx.arc(tx+T/2,ty+T/2,16,0,Math.PI*2); ctx.fill();
+                    ctx.strokeStyle='#39ff14'; ctx.lineWidth=2;
+                    ctx.beginPath(); ctx.arc(tx+T/2,ty+T/2,14,0,Math.PI*2); ctx.stroke();
+                    const eg=0.3+Math.sin(f*0.1)*0.25;
+                    ctx.fillStyle=`rgba(57,255,20,${eg})`; ctx.beginPath(); ctx.arc(tx+T/2,ty+T/2,12,0,Math.PI*2); ctx.fill();
+                    ctx.fillStyle='#000'; ctx.font='bold 7px Arial'; ctx.textAlign='center';
+                    ctx.fillText('EXIT', tx+T/2, ty+T/2+3);
                     break;
                 }
             }
         }
 
-        // ── Rupees ────────────────────────────────────────────────
+        // ── FIZZ Caps ─────────────────────────────────────────────
         _renderRupees() {
             const ctx=this.ctx, {HUD}=this;
             for (const r of this.currentRupees) {
                 if (r.collected) continue;
                 ctx.save();
                 const pulse=Math.sin(this.frames*0.12)*1.5;
-                const s=7+pulse;
-                ctx.translate(r.x+r.w/2, r.y+r.h/2+HUD);
-                ctx.rotate(Math.PI/4);
-                ctx.fillStyle='#00e676'; ctx.fillRect(-s/2,-s/2,s,s);
-                ctx.fillStyle='rgba(255,255,255,0.45)'; ctx.fillRect(-s/2,-s/2,s/3,s/2);
+                const s=8+pulse;
+                const cx=r.x+r.w/2, cy=r.y+r.h/2+HUD;
+                // Outer cap ring
+                ctx.strokeStyle='#39ff14'; ctx.lineWidth=2;
+                ctx.beginPath(); ctx.arc(cx,cy,s,0,Math.PI*2); ctx.stroke();
+                // Cap body
+                ctx.fillStyle='#c8b400'; ctx.beginPath(); ctx.arc(cx,cy,s-2,0,Math.PI*2); ctx.fill();
+                // FIZZ text on cap
+                ctx.fillStyle='#000'; ctx.font=`bold ${Math.max(5,s*0.6)}px Arial`; ctx.textAlign='center';
+                ctx.fillText('F', cx, cy+2);
+                // Glow
+                ctx.fillStyle=`rgba(57,255,20,${0.15+pulse*0.08})`; ctx.beginPath(); ctx.arc(cx,cy,s+3,0,Math.PI*2); ctx.fill();
                 ctx.restore();
             }
         }
@@ -726,8 +772,8 @@
                 const ex=e.x, ey=e.y+this.HUD;
                 this.ctx.save();
                 if (e.hitFlash>0 && e.hitFlash%3<2) this.ctx.globalAlpha=0.3;
-                if (e.type==='slime') this._drawSlime(ex,ey,e);
-                else                  this._drawSkeleton(ex,ey,e);
+                if (e.type==='radroach') this._drawRadroach(ex,ey,e);
+                else                     this._drawGhoul(ex,ey,e);
                 this.ctx.restore();
                 if (e.hp < e.maxHp) {
                     this.ctx.fillStyle='#b71c1c'; this.ctx.fillRect(ex,ey-7,e.w,4);
@@ -736,54 +782,65 @@
             }
         }
 
-        _drawSlime(ex, ey, e) {
-            const ctx=this.ctx, bob=Math.sin(e.frame*0.15)*3;
-            const w=e.w, h=e.h, cx=ex+w/2, cy=ey+h/2;
-            ctx.fillStyle='#00c853';
-            ctx.beginPath(); ctx.ellipse(cx, cy+bob*0.5, w/2, (h-bob*0.5)/2, 0,0,Math.PI*2); ctx.fill();
-            ctx.fillStyle='rgba(255,255,255,0.3)';
-            ctx.beginPath(); ctx.ellipse(cx-3, cy-3+bob*0.5, 4,3, -0.4,0,Math.PI*2); ctx.fill();
-            ctx.fillStyle='#fff';
-            ctx.beginPath(); ctx.arc(cx-4, cy-1+bob*0.5, 3.5,0,Math.PI*2); ctx.fill();
-            ctx.beginPath(); ctx.arc(cx+4, cy-1+bob*0.5, 3.5,0,Math.PI*2); ctx.fill();
-            ctx.fillStyle='#111';
-            ctx.beginPath(); ctx.arc(cx-3.5, cy-1+bob*0.5, 1.8,0,Math.PI*2); ctx.fill();
-            ctx.beginPath(); ctx.arc(cx+4.5, cy-1+bob*0.5, 1.8,0,Math.PI*2); ctx.fill();
+        _drawRadroach(ex, ey, e) {
+            const ctx=this.ctx, bob=Math.sin(e.frame*0.2)*2;
+            const w=e.w, h=e.h, cx=ex+w/2, cy=ey+h/2+bob;
+            // Body (oval carapace)
+            ctx.fillStyle='#5d3a1a';
+            ctx.beginPath(); ctx.ellipse(cx, cy, w/2, h/2-1, 0,0,Math.PI*2); ctx.fill();
+            // Shiny back
+            ctx.fillStyle='#8B5E3C';
+            ctx.beginPath(); ctx.ellipse(cx-2, cy-2, w/3, h/3-1, -0.3,0,Math.PI*2); ctx.fill();
+            // Head
+            ctx.fillStyle='#3d2409'; ctx.beginPath(); ctx.ellipse(cx, cy-h/2+2, w/3, 5, 0,0,Math.PI*2); ctx.fill();
+            // Antennae
+            ctx.strokeStyle='#3d2409'; ctx.lineWidth=1;
+            ctx.beginPath(); ctx.moveTo(cx-3,cy-h/2); ctx.lineTo(cx-10,cy-h/2-7); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(cx+3,cy-h/2); ctx.lineTo(cx+10,cy-h/2-7); ctx.stroke();
+            // Eyes (tiny red)
+            ctx.fillStyle='#ff2200';
+            ctx.beginPath(); ctx.arc(cx-3, cy-h/2+2, 1.5,0,Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(cx+3, cy-h/2+2, 1.5,0,Math.PI*2); ctx.fill();
+            // Legs (3 per side)
+            ctx.strokeStyle='#3d2409'; ctx.lineWidth=1;
+            for(let i=0;i<3;i++) {
+                const ly=cy-3+i*5;
+                ctx.beginPath(); ctx.moveTo(cx-w/2+2,ly); ctx.lineTo(cx-w/2-6,ly+4); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(cx+w/2-2,ly); ctx.lineTo(cx+w/2+6,ly+4); ctx.stroke();
+            }
         }
 
-        _drawSkeleton(ex, ey, e) {
-            const ctx=this.ctx, rattle=Math.sin(e.frame*0.25)*1.5;
+        _drawGhoul(ex, ey, e) {
+            const ctx=this.ctx, sway=Math.sin(e.frame*0.18)*2.5;
             const w=e.w, h=e.h, cx=ex+w/2;
-            const c=(e.hitFlash>0&&e.hitFlash%3<2)?'#ff7070':'#ecf0f1';
-            // Skull
-            ctx.fillStyle=c; ctx.beginPath(); ctx.arc(cx, ey+8, 8,0,Math.PI*2); ctx.fill();
-            ctx.fillStyle='#222';
-            ctx.fillRect(cx-6,ey+5,4,4); ctx.fillRect(cx+2,ey+5,4,4);
-            // Jaw teeth
-            ctx.strokeStyle=c; ctx.lineWidth=1.5;
-            for (let i=-4;i<=4;i+=4) {
-                ctx.beginPath(); ctx.moveTo(cx+i,ey+14); ctx.lineTo(cx+i,ey+17); ctx.stroke();
-            }
-            // Spine, arms, legs, ribs
-            ctx.lineWidth=2; ctx.strokeStyle=c;
-            ctx.beginPath(); ctx.moveTo(cx,ey+16); ctx.lineTo(cx,ey+h-6); ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(cx,ey+20+rattle); ctx.lineTo(ex+1,   ey+26);
-            ctx.moveTo(cx,ey+20+rattle); ctx.lineTo(ex+w-1, ey+26); ctx.stroke();
-            ctx.lineWidth=1;
-            for (let i=0;i<3;i++) {
-                const ry=ey+20+i*4;
-                ctx.beginPath();
-                ctx.moveTo(cx,ry); ctx.lineTo(cx-5,ry+3);
-                ctx.moveTo(cx,ry); ctx.lineTo(cx+5,ry+3); ctx.stroke();
-            }
-            ctx.lineWidth=2;
-            ctx.beginPath();
-            ctx.moveTo(cx,ey+h-6); ctx.lineTo(ex+3,    ey+h+rattle);
-            ctx.moveTo(cx,ey+h-6); ctx.lineTo(ex+w-3,  ey+h+rattle); ctx.stroke();
+            const c=(e.hitFlash>0&&e.hitFlash%3<2)?'#ff7070':'#7aad6a';
+            // Tattered robe/clothes
+            ctx.fillStyle='#4a5a3a'; ctx.fillRect(cx-7,ey+14,14,h-18);
+            // Head (slightly larger, rotted)
+            ctx.fillStyle=c; ctx.beginPath(); ctx.arc(cx+sway*0.3, ey+8, 8.5,0,Math.PI*2); ctx.fill();
+            // Sunken dark eyes
+            ctx.fillStyle='#ff4400';
+            ctx.beginPath(); ctx.arc(cx+sway*0.3-4, ey+7, 3,0,Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(cx+sway*0.3+4, ey+7, 3,0,Math.PI*2); ctx.fill();
+            ctx.fillStyle='#200';
+            ctx.beginPath(); ctx.arc(cx+sway*0.3-4, ey+7, 1.5,0,Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(cx+sway*0.3+4, ey+7, 1.5,0,Math.PI*2); ctx.fill();
+            // Gaping mouth
+            ctx.fillStyle='#1a0000'; ctx.fillRect(cx+sway*0.3-4,ey+13,8,4);
+            // Arms (reaching forward, hunched)
+            ctx.fillStyle=c;
+            ctx.fillRect(cx-w/2-2, ey+16+sway, 7, 10);
+            ctx.fillRect(cx+w/2-5, ey+16-sway, 7, 10);
+            // Legs
+            ctx.fillStyle='#3a4a2a';
+            ctx.fillRect(cx-6, ey+h-10, 5, 10);
+            ctx.fillRect(cx+1, ey+h-10, 5, 10);
+            // Radiation glow outline
+            ctx.strokeStyle='rgba(57,255,20,0.25)'; ctx.lineWidth=2;
+            ctx.beginPath(); ctx.arc(cx+sway*0.3, ey+8, 10,0,Math.PI*2); ctx.stroke();
         }
 
-        // ── Boss ──────────────────────────────────────────────────
+        // ── Boss (The Overseer) ───────────────────────────────────
         _renderBoss() {
             const b=this.boss;
             if (b.dead) return;
@@ -796,60 +853,69 @@
             const flash=(b.hitFlash>0&&b.hitFlash%3<2);
             if (flash) ctx.globalAlpha=0.3;
 
-            // Phase 2 spiky aura
+            // Phase 2: warning alarms (red flickering border)
             if (b.phase===2) {
-                ctx.strokeStyle='#ff6f00'; ctx.lineWidth=2;
-                for (let a=0;a<Math.PI*2;a+=Math.PI/5) {
-                    const ang=a+b.frame*0.05, r1=w/2+5, r2=w/2+15+pulse;
-                    ctx.beginPath();
-                    ctx.moveTo(cx+Math.cos(ang)*r1, cy+Math.sin(ang)*r1);
-                    ctx.lineTo(cx+Math.cos(ang)*r2, cy+Math.sin(ang)*r2); ctx.stroke();
-                }
+                ctx.strokeStyle=`rgba(255,0,0,${0.5+Math.sin(b.frame*0.3)*0.5})`; ctx.lineWidth=4;
+                ctx.strokeRect(bx-5, by-5, w+10, h+10);
             }
 
-            // Shadow
-            ctx.globalAlpha=flash?0.1:0.25;
-            ctx.fillStyle='#000';
-            ctx.beginPath(); ctx.ellipse(cx,by+h+5,w*0.45,8,0,0,Math.PI*2); ctx.fill();
-            ctx.globalAlpha=flash?0.3:1;
+            // Control chair
+            ctx.fillStyle='#1a3a50'; ctx.fillRect(bx+4, by+h-22, w-8, 22);
+            ctx.fillStyle='#0a2a40'; ctx.fillRect(bx+2, by+12, 6, h-22);
+            ctx.fillStyle='#0a2a40'; ctx.fillRect(bx+w-8, by+12, 6, h-22);
 
-            // Body
-            ctx.fillStyle=b.phase===2?'#b71c1c':'#c62828';
-            ctx.beginPath(); ctx.ellipse(cx, cy+pulse/2, w/2+pulse/3, h/2,0,0,Math.PI*2); ctx.fill();
+            // Vault-Tec uniform (blue/yellow)
+            ctx.fillStyle=b.phase===2?'#2a0000':'#0d47a1';
+            ctx.fillRect(bx+12, by+22, w-24, h-36);
+            ctx.fillStyle='#ffd700'; ctx.fillRect(bx+12, by+22, w-24, 5); // shoulder stripe
+            ctx.fillStyle='#ffd700'; ctx.fillRect(bx+12, by+22, 5, h-36); // side stripe
 
-            // Horns
-            ctx.fillStyle='#880e4f';
-            ctx.beginPath(); ctx.moveTo(cx-16,by+12); ctx.lineTo(cx-9,by-13); ctx.lineTo(cx-2,by+8); ctx.fill();
-            ctx.beginPath(); ctx.moveTo(cx+16,by+12); ctx.lineTo(cx+9,by-13); ctx.lineTo(cx+2,by+8); ctx.fill();
+            // Head
+            ctx.fillStyle=b.phase===2?'#ff6b6b':'#f4d4b4';
+            ctx.beginPath(); ctx.ellipse(cx, by+16+pulse/3, 12, 13, 0,0,Math.PI*2); ctx.fill();
 
-            // Eyes
-            const ec=b.phase===2?'#ff6f00':'#f9a825';
-            ctx.fillStyle=ec;
-            ctx.beginPath(); ctx.arc(cx-11, cy-7+pulse/2, 7.5,0,Math.PI*2); ctx.fill();
-            ctx.beginPath(); ctx.arc(cx+11, cy-7+pulse/2, 7.5,0,Math.PI*2); ctx.fill();
-            ctx.fillStyle='#111';
-            ctx.beginPath(); ctx.arc(cx-11, cy-7+pulse/2, 3.5,0,Math.PI*2); ctx.fill();
-            ctx.beginPath(); ctx.arc(cx+11, cy-7+pulse/2, 3.5,0,Math.PI*2); ctx.fill();
+            // Vault-Tec executive glasses
+            ctx.strokeStyle='#333'; ctx.lineWidth=1.5;
+            ctx.strokeRect(cx-11, by+11+pulse/3, 9, 6);
+            ctx.strokeRect(cx+2, by+11+pulse/3, 9, 6);
+            ctx.beginPath(); ctx.moveTo(cx-2,by+14+pulse/3); ctx.lineTo(cx+2,by+14+pulse/3); ctx.stroke();
+            // Red glowing eyes (Overseer is watching)
+            ctx.fillStyle='#ff0000';
+            ctx.beginPath(); ctx.arc(cx-7,by+14+pulse/3,2.5,0,Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(cx+7,by+14+pulse/3,2.5,0,Math.PI*2); ctx.fill();
 
-            // Jagged mouth
-            ctx.fillStyle='#1a0000';
-            ctx.beginPath(); ctx.moveTo(cx-13, cy+7+pulse/2);
-            for (let i=0;i<=5;i++) ctx.lineTo(cx-13+i*5.2, cy+(i%2===0?7:15)+pulse/2);
-            ctx.fill();
+            // Terminal screen in front (flickering green text)
+            const termGlow=0.6+Math.sin(b.frame*0.2)*0.3;
+            ctx.fillStyle=`rgba(0,255,50,${termGlow*0.3})`;
+            ctx.fillRect(bx+14, by+h-32, w-28, 12);
+            ctx.fillStyle=`rgba(0,255,50,${termGlow})`; ctx.font='5px monospace'; ctx.textAlign='center';
+            ctx.fillText('VAULT-TEC ONLINE', cx, by+h-23);
+
+            // Arms
+            ctx.fillStyle='#f4d4b4'; ctx.fillRect(bx+3, by+26, 9, 18);
+            ctx.fillStyle='#f4d4b4'; ctx.fillRect(bx+w-12, by+26, 9, 18);
+
+            // Pip-Boy on left arm
+            ctx.fillStyle='#2d8a2d'; ctx.fillRect(bx+2, by+28, 8, 10);
+            ctx.fillStyle='#39ff14'; ctx.fillRect(bx+3, by+29, 6, 8);
+
+            // "OVERSEER" nameplate
+            ctx.fillStyle='#ffd700'; ctx.font='bold 7px Arial'; ctx.textAlign='center';
+            ctx.fillText('OVERSEER', cx, by+h-8);
 
             ctx.restore();
 
-            // Boss HP bar in HUD
+            // HP bar in HUD (styled as Vault-Tec terminal readout)
             const bw=280, bh=14;
             const bbx=(this.W-bw)/2, bby=6;
-            ctx.fillStyle='#1a1a1a'; ctx.fillRect(bbx-2,bby-2,bw+4,bh+4);
-            ctx.fillStyle='#4a0000'; ctx.fillRect(bbx,bby,bw,bh);
-            ctx.fillStyle=b.phase===2?'#ff5722':'#c62828';
+            ctx.fillStyle='#0a1a0a'; ctx.fillRect(bbx-2,bby-2,bw+4,bh+4);
+            ctx.fillStyle='#0d3d0d'; ctx.fillRect(bbx,bby,bw,bh);
+            ctx.fillStyle=b.phase===2?'#ff0000':'#39ff14';
             ctx.fillRect(bbx,bby,bw*(b.hp/b.maxHp),bh);
-            ctx.fillStyle='rgba(255,160,160,0.3)';
+            ctx.fillStyle='rgba(57,255,20,0.2)';
             ctx.fillRect(bbx,bby,bw*(b.hp/b.maxHp)*0.4,bh/2);
-            ctx.fillStyle='#fff'; ctx.font='bold 10px Arial'; ctx.textAlign='center';
-            ctx.fillText(`\u2620\uFE0F  DUNGEON BOSS   ${b.hp} / ${b.maxHp}`, this.W/2, bby+bh-1);
+            ctx.fillStyle=b.phase===2?'#ff0000':'#39ff14'; ctx.font='bold 10px monospace'; ctx.textAlign='center';
+            ctx.fillText(`\u2622\uFE0F  THE OVERSEER  INTEGRITY: ${b.hp} / ${b.maxHp}`, this.W/2, bby+bh-1);
         }
 
         // ── Projectiles ───────────────────────────────────────────
@@ -867,7 +933,7 @@
             }
         }
 
-        // ── Player ────────────────────────────────────────────────
+        // ── Player (Vault Dweller) ────────────────────────────────
         _renderPlayer() {
             // Invincibility flicker
             if (this.invincible>0 && Math.floor(this.invincible/5)%2===0) return;
@@ -879,15 +945,15 @@
             ctx.fillStyle='rgba(0,0,0,0.18)';
             ctx.beginPath(); ctx.ellipse(cx, py+h+2, w/2,4,0,0,Math.PI*2); ctx.fill();
 
-            // Boots
-            ctx.fillStyle='#4e342e';
+            // Vault boots (dark grey)
+            ctx.fillStyle='#333';
             ctx.fillRect(px+4,      py+h-8, 7,8);
             ctx.fillRect(px+w-11,   py+h-8, 7,8);
 
-            // Tunic body + belt + collar
-            ctx.fillStyle='#2e7d32'; ctx.fillRect(px+3, py+10, w-6, h-18);
-            ctx.fillStyle='#4e342e'; ctx.fillRect(px+3, py+h-16, w-6, 4);
-            ctx.fillStyle='#1b5e20'; ctx.fillRect(px+7, py+10, w-14, 4);
+            // Vault jumpsuit body (blue) + yellow stripe belt + darker collar
+            ctx.fillStyle='#1565c0'; ctx.fillRect(px+3, py+10, w-6, h-18);
+            ctx.fillStyle='#ffd700'; ctx.fillRect(px+3, py+h-16, w-6, 4);
+            ctx.fillStyle='#0d47a1'; ctx.fillRect(px+7, py+10, w-14, 4);
 
             // Arms
             ctx.fillStyle='#f4c77d';
@@ -906,10 +972,9 @@
             ctx.fillStyle='#f4c77d';
             ctx.beginPath(); ctx.ellipse(cx, py+8, 9,9,0,0,Math.PI*2); ctx.fill();
 
-            // Hat (classic elf-triangle)
-            ctx.fillStyle='#2e7d32';
-            ctx.beginPath(); ctx.moveTo(cx,py-10); ctx.lineTo(cx-11,py+4); ctx.lineTo(cx+11,py+4); ctx.closePath(); ctx.fill();
-            ctx.fillStyle='#1b5e20'; ctx.fillRect(cx-11,py+3,22,3);
+            // Pip-Boy on left wrist
+            ctx.fillStyle='#2d8a2d'; ctx.fillRect(px-3, py+14, 7, 8);
+            ctx.fillStyle='#39ff14'; ctx.fillRect(px-2, py+15, 5, 6);
 
             // Eyes per direction
             ctx.fillStyle='#333';
@@ -917,10 +982,10 @@
             else if (p.dir==='left')  { ctx.fillRect(cx-7,py+7,3,3); }
             else if (p.dir==='right') { ctx.fillRect(cx+4,py+7,3,3); }
 
-            // Sword (while attacking)
+            // Pipe Wrench (while attacking) – rusty iron color
             if (p.attacking) {
                 const prog=p.attackTimer/15, sLen=32;
-                ctx.strokeStyle='#e8eaf6'; ctx.lineWidth=3; ctx.lineCap='round';
+                ctx.strokeStyle='#8b6914'; ctx.lineWidth=4; ctx.lineCap='round';
                 ctx.beginPath();
                 switch(p.dir) {
                     case 'up':    ctx.moveTo(cx-4,py+h/2-4); ctx.lineTo(cx-4,py+h/2-4-sLen); break;
@@ -929,15 +994,15 @@
                     case 'right': ctx.moveTo(cx+5,py+h/2-4); ctx.lineTo(cx+5+sLen,py+h/2-4); break;
                 }
                 ctx.stroke();
-                // Glow
-                ctx.strokeStyle=`rgba(160,210,255,${prog*0.65})`; ctx.lineWidth=9; ctx.stroke();
-                // Guard (gold crosspiece)
-                ctx.fillStyle='#ffd700';
+                // Orange rust glow
+                ctx.strokeStyle=`rgba(255,140,0,${prog*0.65})`; ctx.lineWidth=9; ctx.stroke();
+                // Wrench head (U-shape at the end)
+                ctx.fillStyle='#6b4f10';
                 switch(p.dir) {
-                    case 'up':    ctx.fillRect(cx-9,  py+h/2-8, 16,4); break;
-                    case 'down':  ctx.fillRect(cx-4,  py+h/2+6, 16,4); break;
-                    case 'left':  ctx.fillRect(cx-8,  py+h/2,    4,16); break;
-                    case 'right': ctx.fillRect(cx+4,  py+h/2-8,  4,16); break;
+                    case 'up':    ctx.fillRect(cx-9,  py+h/2-8, 5,6); ctx.fillRect(cx-1, py+h/2-8, 5,6); break;
+                    case 'down':  ctx.fillRect(cx-4,  py+h/2+6, 5,6); ctx.fillRect(cx+4, py+h/2+6, 5,6); break;
+                    case 'left':  ctx.fillRect(cx-8,  py+h/2-4, 6,5); ctx.fillRect(cx-8, py+h/2+3, 6,5); break;
+                    case 'right': ctx.fillRect(cx+4,  py+h/2-8, 6,5); ctx.fillRect(cx+4, py+h/2-1, 6,5); break;
                 }
             }
             ctx.restore();
@@ -954,44 +1019,50 @@
             ctx.globalAlpha=1;
         }
 
-        // ── HUD ───────────────────────────────────────────────────
+        // ── HUD (Vault-Tec terminal style) ────────────────────────
         _renderHUD() {
             const ctx=this.ctx, {W,HUD}=this;
-            ctx.fillStyle='#0a0e27'; ctx.fillRect(0,0,W,HUD);
-            ctx.strokeStyle='#ffd700'; ctx.lineWidth=2; ctx.strokeRect(0,0,W,HUD);
+            // Dark terminal background
+            ctx.fillStyle='#0a0e0a'; ctx.fillRect(0,0,W,HUD);
+            ctx.strokeStyle='#39ff14'; ctx.lineWidth=2; ctx.strokeRect(0,0,W,HUD);
 
-            // Hearts
-            for (let i=0;i<this.maxHearts;i++) this._drawHeart(ctx, 14+i*34, 9, i<this.hearts);
+            // Scanline effect
+            for(let y=0;y<HUD;y+=4) { ctx.fillStyle='rgba(0,0,0,0.12)'; ctx.fillRect(0,y,W,2); }
 
-            // Score
-            ctx.fillStyle='#ffd700'; ctx.font='bold 20px Arial'; ctx.textAlign='center';
-            ctx.fillText(`\u{1F48E} ${this.score}`, W/2, 38);
+            // Stimpaks
+            for (let i=0;i<this.maxHearts;i++) this._drawStimpak(ctx, 14+i*34, 9, i<this.hearts);
+
+            // FIZZ CAPS score
+            ctx.fillStyle='#39ff14'; ctx.font='bold 20px monospace'; ctx.textAlign='center';
+            ctx.fillText(`\uD83C\uDF76 ${this.score} CAPS`, W/2, 38);
 
             // Room label
-            ctx.fillStyle='#90a4ae'; ctx.font='14px Arial'; ctx.textAlign='right';
-            ctx.fillText(this.scene==='overworld'?'\u{1F30D} Overworld':'\u2694\uFE0F Dungeon', W-14, 38);
+            ctx.fillStyle='#5a8a5a'; ctx.font='14px monospace'; ctx.textAlign='right';
+            const areaName = this.scene==='overworld' ? '\u{1F4E1} MOJAVE WASTELAND' : '\uD83D\uDD12 VAULT-77';
+            ctx.fillText(areaName, W-14, 38);
 
-            // Hint line
+            // Hint
             if (this.scene==='overworld') {
-                ctx.fillStyle='#546e7a'; ctx.font='11px Arial'; ctx.textAlign='center';
-                ctx.fillText('Find the dungeon door \u2192 (east edge, row 5)', W/2, HUD-8);
+                ctx.fillStyle='#3a5a3a'; ctx.font='11px monospace'; ctx.textAlign='center';
+                ctx.fillText('Find the Vault-77 entrance \u2192 (east edge, row 5)', W/2, HUD-8);
             }
         }
 
-        _drawHeart(ctx, x, y, filled) {
+        _drawStimpak(ctx, x, y, filled) {
             ctx.save(); ctx.translate(x+13, y+13);
-            const s=0.72;
-            ctx.beginPath();
-            ctx.moveTo(0,-3*s);
-            ctx.bezierCurveTo( 0,   -10*s, -13*s,-10*s, -13*s,-3*s);
-            ctx.bezierCurveTo(-13*s,  4*s,   0,   12*s,   0,   15*s);
-            ctx.bezierCurveTo( 0,    12*s,  13*s,  4*s,  13*s, -3*s);
-            ctx.bezierCurveTo(13*s, -10*s,   0,  -10*s,   0,   -3*s);
-            ctx.closePath();
-            ctx.fillStyle=filled?'#e53935':'#2d3e50'; ctx.fill();
+            // Syringe body
+            ctx.fillStyle=filled?'#e53935':'#2d3e50';
+            ctx.fillRect(-4,-10,8,18); // barrel
+            ctx.fillStyle=filled?'#ffcdd2':'#1a2a3a';
+            ctx.fillRect(-3,-9,6,16); // liquid fill
             if (filled) {
-                ctx.fillStyle='rgba(255,200,200,0.45)';
-                ctx.beginPath(); ctx.arc(-3*s,-2*s,3.5*s,0,Math.PI*2); ctx.fill();
+                ctx.fillStyle='rgba(255,100,100,0.6)'; ctx.fillRect(-3,-9,6,8); // fluid level
+            }
+            ctx.fillStyle=filled?'#c62828':'#1a1a2e'; ctx.fillRect(-6,-10,12,4); // top flange
+            ctx.fillStyle=filled?'#b71c1c':'#0d1b2a'; ctx.fillRect(-1, 8, 2,6);  // needle
+            // Red cross label on barrel
+            if (filled) {
+                ctx.fillStyle='#fff'; ctx.fillRect(-1,-6,2,6); ctx.fillRect(-3,-4,6,2);
             }
             ctx.restore();
         }
@@ -999,83 +1070,126 @@
         // ── Title screen ──────────────────────────────────────────
         _renderTitle() {
             const ctx=this.ctx, {W,H}=this;
-            ctx.fillStyle='#0d1b2a'; ctx.fillRect(0,0,W,H);
+            // Wasteland sky (dark brownish haze)
+            ctx.fillStyle='#1a1208'; ctx.fillRect(0,0,W,H);
 
-            // Stars
-            for (let i=0;i<60;i++) {
+            // Radioactive particle dust (replaces stars)
+            for (let i=0;i<80;i++) {
                 const sx=(i*137+5)%W, sy=(i*79+11)%(H-80);
-                const br=0.3+Math.abs(Math.sin(this.frames*0.04+i))*0.7;
-                ctx.fillStyle=`rgba(255,255,255,${br})`; ctx.fillRect(sx,sy,1.5,1.5);
-            }
-            // Ground
-            ctx.fillStyle='#1b5e20'; ctx.fillRect(0,H-80,W,80);
-            ctx.fillStyle='#2e7d32'; ctx.fillRect(0,H-80,W,12);
-            // Decorative trees
-            for (let i=0;i<5;i++) {
-                const tx=50+i*165, ty=H-145;
-                ctx.fillStyle='#5d4037'; ctx.fillRect(tx+8,ty+40,9,30);
-                ctx.fillStyle='#1b5e20'; ctx.beginPath(); ctx.arc(tx+12,ty+26,20,0,Math.PI*2); ctx.fill();
-                ctx.fillStyle='#2e7d32'; ctx.beginPath(); ctx.arc(tx+8, ty+18,15,0,Math.PI*2); ctx.fill();
+                const br=0.2+Math.abs(Math.sin(this.frames*0.04+i))*0.6;
+                const isGreen=i%3===0;
+                ctx.fillStyle=isGreen?`rgba(57,255,20,${br})`:`rgba(200,180,100,${br*0.5})`;
+                ctx.fillRect(sx,sy,isGreen?2:1.5,isGreen?2:1.5);
             }
 
-            // Title
+            // Wasteland ground (dusty brown)
+            ctx.fillStyle='#3d2e14'; ctx.fillRect(0,H-80,W,80);
+            ctx.fillStyle='#5a4520'; ctx.fillRect(0,H-80,W,10);
+
+            // Ruined buildings silhouette
+            const ruins = [[30,H-200,60,120],[120,H-160,40,80],[250,H-240,80,160],
+                           [420,H-180,50,100],[540,H-220,70,140],[680,H-170,45,90],[760,H-150,50,70]];
+            for(const [rx,ry,rw,rh] of ruins) {
+                ctx.fillStyle='#2a1f0e'; ctx.fillRect(rx,ry,rw,rh);
+                // broken windows
+                ctx.fillStyle='rgba(57,255,20,0.15)';
+                for(let wi=0;wi<Math.floor(rw/16);wi++) for(let hi=0;hi<Math.floor(rh/20);hi++) {
+                    if(Math.sin(rx*wi+ry*hi)>0.2) ctx.fillRect(rx+4+wi*14,ry+8+hi*18,8,10);
+                }
+            }
+
+            // Vault-77 door visible in ground center
+            ctx.fillStyle='#3a3a3a'; ctx.beginPath(); ctx.arc(W/2,H-60,28,0,Math.PI*2); ctx.fill();
+            ctx.strokeStyle='#ffd700'; ctx.lineWidth=4; ctx.beginPath(); ctx.arc(W/2,H-60,25,0,Math.PI*2); ctx.stroke();
+            ctx.fillStyle='#000'; ctx.font='bold 14px Arial'; ctx.textAlign='center';
+            ctx.fillText('77',W/2,H-56);
+
+            // Main title with nuclear glow
             ctx.save();
-            ctx.shadowColor='#ffd700'; ctx.shadowBlur=30;
-            ctx.fillStyle='#ffd700'; ctx.font='bold 56px Arial'; ctx.textAlign='center';
-            ctx.fillText('\u2694\uFE0F  ZELDA ADVENTURE  \u2694\uFE0F', W/2, 172);
+            ctx.shadowColor='#39ff14'; ctx.shadowBlur=40;
+            ctx.fillStyle='#39ff14'; ctx.font='bold 22px monospace'; ctx.textAlign='center';
+            ctx.fillText('\u2622  A T O M I C  F I Z Z  C A P S  \u2622', W/2, 120);
             ctx.restore();
 
-            ctx.fillStyle='#81c784'; ctx.font='21px Arial'; ctx.textAlign='center';
-            ctx.fillText('Top-Down Action RPG', W/2, 222);
+            ctx.save();
+            ctx.shadowColor='#ffd700'; ctx.shadowBlur=25;
+            ctx.fillStyle='#ffd700'; ctx.font='bold 44px Arial'; ctx.textAlign='center';
+            ctx.fillText('WASTELAND  QUEST', W/2, 178);
+            ctx.restore();
 
-            // Instruction box
-            ctx.fillStyle='rgba(0,0,0,0.55)'; ctx.fillRect(W/2-285,250,570,148);
-            ctx.strokeStyle='#ffd700'; ctx.lineWidth=1.5; ctx.strokeRect(W/2-285,250,570,148);
-            ctx.fillStyle='#cfd8dc'; ctx.font='14.5px Arial'; ctx.textAlign='center';
-            ctx.fillText('\u{1F579}  WASD / Arrows \u2013 Move        Z / Space \u2013 Sword Attack',  W/2, 278);
-            ctx.fillText('\u{1F48E}  Collect green Rupees for score points',                             W/2, 306);
-            ctx.fillText('\u{1F5E1}  Defeat Slimes (\u{1F7E2}) & Skeletons (\u{1F480}) to earn kills', W/2, 332);
-            ctx.fillText('\u{1F6AA}  Walk to the Dungeon Door (east side) to enter',                    W/2, 358);
-            ctx.fillText('\u{1F480}  Defeat the Dungeon Boss to WIN!  (boss shoots in phase 2)',         W/2, 384);
+            ctx.fillStyle='#8aad6a'; ctx.font='18px monospace'; ctx.textAlign='center';
+            ctx.fillText('A Vault-77 Fan Adventure', W/2, 216);
 
-            // Pulsing start
+            // Instruction box (terminal style)
+            ctx.fillStyle='rgba(0,10,0,0.8)'; ctx.fillRect(W/2-285,242,570,165);
+            ctx.strokeStyle='#39ff14'; ctx.lineWidth=1.5; ctx.strokeRect(W/2-285,242,570,165);
+            ctx.fillStyle='#39ff14'; ctx.font='bold 11px monospace'; ctx.textAlign='left';
+            ctx.fillText('> VAULT-TEC SURVIVAL MANUAL v77.1', W/2-270, 264);
+            ctx.fillStyle='#8aad6a'; ctx.font='13.5px monospace'; ctx.textAlign='center';
+            ctx.fillText('\uD83C\uDFAE  WASD / Arrows \u2013 Move         Z / Space \u2013 Pipe Wrench', W/2, 288);
+            ctx.fillText('\uD83C\uDF76  Collect glowing FIZZ Caps (bottle caps) for score', W/2, 314);
+            ctx.fillText('\u2622\uFE0F  Battle Radroaches (\uD83E\uDEB2) and Ghouls for survival', W/2, 338);
+            ctx.fillText('\uD83D\uDD12  Walk to the Vault-77 entrance (east edge) to enter', W/2, 362);
+            ctx.fillText('\uD83D\uDC80  Defeat THE OVERSEER to reclaim the Vault!', W/2, 386);
+
+            // Pulsing start prompt
             const pulse=0.5+Math.sin(this.frames*0.09)*0.5;
-            ctx.fillStyle=`rgba(255,215,0,${pulse})`; ctx.font='bold 24px Arial';
-            ctx.fillText('Press  ENTER  to Begin', W/2, 433);
+            ctx.fillStyle=`rgba(57,255,20,${pulse})`; ctx.font='bold 22px monospace'; ctx.textAlign='center';
+            ctx.fillText('[ PRESS  ENTER  TO  BEGIN ]', W/2, 428);
+
+            // AtomicFizzCaps branding
+            ctx.fillStyle='rgba(255,220,0,0.4)'; ctx.font='11px monospace'; ctx.textAlign='center';
+            ctx.fillText('AtomicFizzCaps.xyz  |  Fan Game  |  FIZZ token on Solana', W/2, 520);
         }
 
         // ── Game Over screen ──────────────────────────────────────
         _renderGameOver() {
             const ctx=this.ctx, {W,H}=this;
-            ctx.fillStyle='rgba(0,0,0,0.78)'; ctx.fillRect(0,0,W,H);
+            ctx.fillStyle='rgba(20,0,0,0.88)'; ctx.fillRect(0,0,W,H);
+            // Nuclear flash effect lines
+            for(let i=0;i<5;i++) {
+                ctx.fillStyle=`rgba(255,${i*20},0,0.06)`; ctx.fillRect(0,i*H/5,W,H/5);
+            }
             ctx.save();
-            ctx.shadowColor='#e53935'; ctx.shadowBlur=40;
-            ctx.fillStyle='#e53935'; ctx.font='bold 68px Arial'; ctx.textAlign='center';
-            ctx.fillText('GAME  OVER', W/2, H/2-60);
+            ctx.shadowColor='#ff3300'; ctx.shadowBlur=50;
+            ctx.fillStyle='#ff3300'; ctx.font='bold 62px Arial'; ctx.textAlign='center';
+            ctx.fillText('\u2622  YOU DIED  \u2622', W/2, H/2-60);
             ctx.restore();
-            ctx.fillStyle='#ffd700'; ctx.font='bold 28px Arial'; ctx.textAlign='center';
-            ctx.fillText(`Score: ${this.score}`, W/2, H/2+8);
+            ctx.fillStyle='#aaa'; ctx.font='20px monospace'; ctx.textAlign='center';
+            ctx.fillText('"War. War never changes."', W/2, H/2-8);
+            ctx.fillStyle='#ffd700'; ctx.font='bold 26px monospace'; ctx.textAlign='center';
+            ctx.fillText(`FIZZ CAPS collected: ${this.score}`, W/2, H/2+38);
             const pulse=0.5+Math.sin(this.frames*0.1)*0.5;
-            ctx.fillStyle=`rgba(255,255,255,${pulse})`; ctx.font='22px Arial';
-            ctx.fillText('Press  ENTER  to Try Again', W/2, H/2+70);
+            ctx.fillStyle=`rgba(57,255,20,${pulse})`; ctx.font='20px monospace';
+            ctx.fillText('[ PRESS  ENTER  TO  TRY  AGAIN ]', W/2, H/2+90);
         }
 
         // ── Win screen ────────────────────────────────────────────
         _renderWin() {
             const ctx=this.ctx, {W,H}=this;
-            ctx.fillStyle='rgba(0,0,0,0.78)'; ctx.fillRect(0,0,W,H);
+            ctx.fillStyle='rgba(0,10,0,0.85)'; ctx.fillRect(0,0,W,H);
+            // Celebration particles (nuclear green)
+            for(let i=0;i<40;i++) {
+                const gx=(i*113+this.frames*2)%W, gy=((i*79+this.frames)%(H-80));
+                ctx.fillStyle=`rgba(57,255,20,${0.3+Math.sin(this.frames*0.1+i)*0.3})`;
+                ctx.fillRect(gx,gy,3,3);
+            }
             ctx.save();
-            ctx.shadowColor='#ffd700'; ctx.shadowBlur=40;
-            ctx.fillStyle='#ffd700'; ctx.font='bold 54px Arial'; ctx.textAlign='center';
-            ctx.fillText('\u2694\uFE0F   VICTORY!   \u2694\uFE0F', W/2, H/2-80);
+            ctx.shadowColor='#39ff14'; ctx.shadowBlur=50;
+            ctx.fillStyle='#39ff14'; ctx.font='bold 48px Arial'; ctx.textAlign='center';
+            ctx.fillText('\u2622  VAULT  SECURED!  \u2622', W/2, H/2-90);
             ctx.restore();
-            ctx.fillStyle='#a5d6a7'; ctx.font='24px Arial'; ctx.textAlign='center';
-            ctx.fillText('The Dungeon Boss has been defeated!', W/2, H/2-22);
-            ctx.fillStyle='#fff'; ctx.font='20px Arial';
-            ctx.fillText(`Final Score:  ${this.score}`, W/2, H/2+26);
+            ctx.fillStyle='#ffd700'; ctx.font='22px monospace'; ctx.textAlign='center';
+            ctx.fillText('The Overseer has been neutralized!', W/2, H/2-30);
+            ctx.fillStyle='#8aad6a'; ctx.font='18px monospace';
+            ctx.fillText('FIZZ-CO. rises again. The caps are yours.', W/2, H/2+10);
+            ctx.fillStyle='#fff'; ctx.font='20px monospace';
+            ctx.fillText(`Final Score: ${this.score} FIZZ CAPS`, W/2, H/2+56);
             const pulse=0.5+Math.sin(this.frames*0.1)*0.5;
-            ctx.fillStyle=`rgba(255,215,0,${pulse})`; ctx.font='bold 22px Arial';
-            ctx.fillText('Press  ENTER  to Play Again', W/2, H/2+90);
+            ctx.fillStyle=`rgba(255,220,0,${pulse})`; ctx.font='bold 20px monospace';
+            ctx.fillText('[ PRESS  ENTER  TO  PLAY  AGAIN ]', W/2, H/2+110);
+            ctx.fillStyle='rgba(255,220,0,0.5)'; ctx.font='13px monospace';
+            ctx.fillText('AtomicFizzCaps.xyz \u2014 collect FIZZ IRL on Solana!', W/2, H/2+150);
         }
 
         // ── Main loop ─────────────────────────────────────────────
@@ -1090,7 +1204,7 @@
     // ── Bootstrap ─────────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', () => {
         if (window.GameUI) { window.gameUI = new GameUI(); window.gameUI.init(); }
-        window.zeldaGame = new ZeldaGame('game-canvas');
+        window.wastelandGame = new WastelandGame('game-canvas');
         if (window.GamepadWidget) new GamepadWidget('gamepad-status');
     });
     </script>
