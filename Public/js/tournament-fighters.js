@@ -1,6 +1,11 @@
 /**
  * Tournament Fighters - Street Fighter style fighting game with tournament mode
  */
+
+// Animation/timing constants
+const HURT_ANIMATION_THRESHOLD = 200; // invincibility ms above which 'hurt' anim plays
+const INVINCIBILITY_FLICKER_RATE = 80; // ms per flicker cycle during invincibility
+
 class TournamentFighters {
     constructor() {
         this.canvas = document.getElementById('gameCanvas');
@@ -318,7 +323,7 @@ class TournamentFighters {
         player.vx *= 0.8;
 
         // Update animation state
-        if (player.invincible > 200) {
+        if (player.invincible > HURT_ANIMATION_THRESHOLD) {
             player.animState = 'hurt';
         } else if (!player.onGround) {
             player.animState = 'jump';
@@ -586,7 +591,7 @@ class TournamentFighters {
         // === FIGHTERS ===
         this.players.forEach(player => {
             // Flicker on invincibility
-            if (player.invincible > 0 && Math.floor(player.invincible / 80) % 2 === 0) return;
+            if (player.invincible > 0 && Math.floor(player.invincible / INVINCIBILITY_FLICKER_RATE) % 2 === 0) return;
 
             // Ground shadow
             ctx.save();
