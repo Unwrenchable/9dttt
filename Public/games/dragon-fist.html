@@ -1317,65 +1317,6 @@
                     }
                 }
             }
-                        this.ctx.fill();
-                        // Red eyes
-                        this.ctx.fillStyle = '#e74c3c';
-                        this.ctx.fillRect(-6, -52, 4, 3);
-                        this.ctx.fillRect(2, -52, 4, 3);
-                    } else if (enemy.type === 'kang') {
-                        // Dragon helmet
-                        this.ctx.fillStyle = '#8B0000';
-                        this.ctx.beginPath();
-                        this.ctx.arc(0, -52, 16, Math.PI, 0);
-                        this.ctx.fill();
-                        // Dragon horns
-                        this.ctx.fillStyle = '#FFD700';
-                        this.ctx.beginPath();
-                        this.ctx.moveTo(-12, -58);
-                        this.ctx.lineTo(-18, -78);
-                        this.ctx.lineTo(-8, -62);
-                        this.ctx.closePath();
-                        this.ctx.fill();
-                        this.ctx.beginPath();
-                        this.ctx.moveTo(12, -58);
-                        this.ctx.lineTo(18, -78);
-                        this.ctx.lineTo(8, -62);
-                        this.ctx.closePath();
-                        this.ctx.fill();
-                        // Glowing eyes
-                        this.ctx.fillStyle = '#FF4500';
-                        this.ctx.fillRect(-7, -52, 5, 4);
-                        this.ctx.fillRect(2, -52, 5, 4);
-                    } else {
-                        // Default boss - sunglasses and scar
-                        this.ctx.fillStyle = '#000';
-                        this.ctx.fillRect(-10, -52, 20, 6);
-                        this.ctx.strokeStyle = '#a93226';
-                        this.ctx.lineWidth = 2;
-                        this.ctx.beginPath();
-                        this.ctx.moveTo(-8, -45);
-                        this.ctx.lineTo(8, -55);
-                        this.ctx.stroke();
-                    }
-                }
-                
-                this.ctx.restore();
-                
-                // Health bar for boss
-                if (enemy.isBoss) {
-                    const barWidth = 80;
-                    const healthPercent = enemy.health / enemy.maxHealth;
-                    this.ctx.fillStyle = '#333';
-                    this.ctx.fillRect(screenX - barWidth/2 + enemy.width/2, screenY - 95, barWidth, 8);
-                    this.ctx.fillStyle = '#e74c3c';
-                    this.ctx.fillRect(screenX - barWidth/2 + enemy.width/2, screenY - 95, barWidth * healthPercent, 8);
-                    
-                    this.ctx.fillStyle = '#FFF';
-                    this.ctx.font = 'bold 10px Arial';
-                    this.ctx.textAlign = 'center';
-                    this.ctx.fillText('BOSS', screenX + enemy.width/2, screenY - 100);
-                }
-            }
             
             renderEffects() {
                 this.effects.forEach(effect => {

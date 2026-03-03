@@ -184,7 +184,7 @@
                     break;
                 case 'dead':
                     deadSlump = true;
-                    hurtTilt = 80;
+                    hurtTilt = 25;
                     break;
             }
 

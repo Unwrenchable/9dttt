@@ -702,22 +702,41 @@ class ContraCommando {
         // Draw enemies
         this.enemies.forEach(enemy => {
             if (enemy.health <= 0) return;
-            
-            this.ctx.fillStyle = enemy.color;
-            this.ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
-            
+
             // Health bar
             const healthPercent = enemy.health / enemy.maxHealth;
             this.ctx.fillStyle = '#000';
             this.ctx.fillRect(enemy.x, enemy.y - 8, enemy.width, 4);
             this.ctx.fillStyle = healthPercent > 0.5 ? '#00ff00' : '#ff0000';
             this.ctx.fillRect(enemy.x, enemy.y - 8, enemy.width * healthPercent, 4);
-            
-            // Boss indicator
+
             if (enemy.isBoss) {
                 this.ctx.fillStyle = '#fff';
                 this.ctx.font = 'bold 12px Arial';
-                this.ctx.fillText('BOSS', enemy.x + enemy.width / 2 - 18, enemy.y - 12);
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText('BOSS', enemy.x + enemy.width / 2, enemy.y - 12);
+                this.ctx.textAlign = 'left';
+            }
+
+            if (window.humanoidRenderer) {
+                window.humanoidRenderer.draw(this.ctx,
+                    enemy.x + enemy.width / 2, enemy.y + enemy.height, {
+                    facing:    enemy.facingRight ? 1 : -1,
+                    scale:     enemy.isBoss ? 0.58 : 0.45,
+                    state:     'idle',
+                    animTime:  Date.now(),
+                    cloth:     enemy.color || '#c03030',
+                    accent:    '#660000',
+                    skin:      '#c89060',
+                    hair:      '#1a1a1a',
+                    boot:      '#1a1a1a',
+                    muscular:  enemy.isBoss || false,
+                    headStyle: 'helmet',
+                    headColor: '#333',
+                });
+            } else {
+                this.ctx.fillStyle = enemy.color;
+                this.ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
             }
         });
         
@@ -740,25 +759,40 @@ class ContraCommando {
             // Shadow
             this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
             this.ctx.fillRect(player.x + 5, player.y + player.height, player.width - 10, 4);
-            
-            // Body
-            this.ctx.fillStyle = player.color;
-            this.ctx.fillRect(player.x, player.y, player.width, player.height);
-            
-            // Gun
-            this.ctx.fillStyle = '#888';
-            if (player.facingRight) {
-                this.ctx.fillRect(player.x + player.width, player.y + player.height / 2, 15, 4);
-            } else {
-                this.ctx.fillRect(player.x - 15, player.y + player.height / 2, 15, 4);
-            }
-            
+
             // Health bar
             const healthPercent = player.health / player.maxHealth;
             this.ctx.fillStyle = '#000';
             this.ctx.fillRect(player.x, player.y - 10, player.width, 4);
             this.ctx.fillStyle = healthPercent > 0.5 ? '#00ff00' : '#ff0000';
             this.ctx.fillRect(player.x, player.y - 10, player.width * healthPercent, 4);
+
+            if (window.humanoidRenderer) {
+                window.humanoidRenderer.draw(this.ctx,
+                    player.x + player.width / 2, player.y + player.height, {
+                    facing:    player.facingRight ? 1 : -1,
+                    scale:     0.48,
+                    state:     !player.onGround ? 'jump' : (Math.abs(player.vx) > 0.5 ? 'walk' : 'idle'),
+                    animTime:  Date.now(),
+                    cloth:     player.color || '#3a7a3a',
+                    accent:    '#c8a030',
+                    skin:      '#e8c090',
+                    hair:      '#1a1a1a',
+                    boot:      '#2a2a1a',
+                    muscular:  false,
+                    headStyle: 'normal',
+                    weapon:    'rifle',
+                });
+            } else {
+                this.ctx.fillStyle = player.color;
+                this.ctx.fillRect(player.x, player.y, player.width, player.height);
+                this.ctx.fillStyle = '#888';
+                if (player.facingRight) {
+                    this.ctx.fillRect(player.x + player.width, player.y + player.height / 2, 15, 4);
+                } else {
+                    this.ctx.fillRect(player.x - 15, player.y + player.height / 2, 15, 4);
+                }
+            }
         });
         
         // Draw explosions

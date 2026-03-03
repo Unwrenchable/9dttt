@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monster Rampage - 9DTTT Arcade</title>
+    <title>Monster Rampage — 9DTTT Arcade</title>
     <link rel="stylesheet" href="../css/styles.css">
     <link rel="stylesheet" href="../css/game-ui.css">
     <link rel="stylesheet" href="../css/responsive.css">
@@ -11,8 +11,8 @@
         body {
             margin: 0;
             padding: 0;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            font-family: 'Press Start 2P', cursive;
+            background: linear-gradient(135deg, #0a0a1e 0%, #12183a 100%);
+            font-family: 'Press Start 2P', cursive, monospace;
             overflow: hidden;
         }
 
@@ -22,132 +22,310 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            padding: 20px;
+            padding: 16px;
+            box-sizing: border-box;
+        }
+
+        #gameTitle {
+            color: #ff4757;
+            text-shadow: 0 0 18px rgba(255, 71, 87, 0.8), 0 0 36px rgba(255, 71, 87, 0.4);
+            font-size: 28px;
+            margin: 0 0 14px 0;
+            letter-spacing: 3px;
         }
 
         #gameCanvas {
-            border: 4px solid #00ff00;
-            box-shadow: 0 0 30px rgba(0, 255, 0, 0.5);
+            border: 3px solid #ff4757;
+            box-shadow: 0 0 28px rgba(255, 71, 87, 0.5), 0 0 60px rgba(255, 71, 87, 0.15);
             background: #000;
-            image-rendering: pixelated;
-            image-rendering: crisp-edges;
+            display: block;
+            /* NO image-rendering: pixelated — breaks gradients */
         }
 
+        /* ── HUD ─────────────────────────────────────────────────── */
         #hud {
             width: 100%;
             max-width: 1000px;
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            margin-top: 20px;
-            color: #fff;
+            gap: 12px;
+            margin-top: 12px;
         }
 
         .player-hud {
-            background: rgba(0, 0, 0, 0.8);
-            padding: 15px;
+            background: rgba(0, 0, 0, 0.82);
+            padding: 12px 14px;
             border: 2px solid;
             border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+        .player-hud::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            opacity: 0.6;
         }
 
-        .player-hud.player1 { border-color: #ff6b6b; }
-        .player-hud.player2 { border-color: #4ecdc4; }
-        .player-hud.player3 { border-color: #ffe66d; }
+        .player-hud.player1 { border-color: #c8b08a; }
+        .player-hud.player1::before { background: #c8b08a; }
+
+        .player-hud.player2 { border-color: #4a9a38; }
+        .player-hud.player2::before { background: #4a9a38; }
+
+        .player-hud.player3 { border-color: #aa6640; }
+        .player-hud.player3::before { background: #aa6640; }
+
+        .monster-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .monster-icon {
+            font-size: 28px;
+            line-height: 1;
+        }
+
+        .monster-name {
+            color: #fff;
+            font-size: 9px;
+            line-height: 1.5;
+        }
+        .monster-name .title { color: #ffcc44; font-size: 10px; }
+
+        .score-display {
+            color: #fff;
+            font-size: 9px;
+            margin-bottom: 6px;
+        }
+        .score-display span { color: #ffcc44; }
+
+        .stat-label {
+            color: #aaa;
+            font-size: 7px;
+            margin-bottom: 2px;
+        }
 
         .stat-bar {
-            background: #333;
-            height: 20px;
-            border: 2px solid #fff;
-            margin: 10px 0;
-            position: relative;
+            background: rgba(255,255,255,0.1);
+            height: 10px;
+            border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 3px;
+            margin-bottom: 6px;
             overflow: hidden;
         }
 
         .stat-fill {
             height: 100%;
-            transition: width 0.3s;
+            border-radius: 2px;
+            transition: width 0.2s ease-out;
         }
 
-        .health-fill { background: #ff4757; }
-        .energy-fill { background: #ffa502; }
-        .size-fill { background: #2ed573; }
+        .health-fill {
+            background: linear-gradient(90deg, #ff4757, #ff6b8a);
+            box-shadow: 0 0 6px rgba(255, 71, 87, 0.5);
+        }
+        .size-fill {
+            background: linear-gradient(90deg, #2ed573, #7effa0);
+            box-shadow: 0 0 6px rgba(46, 213, 115, 0.4);
+        }
 
-        .controls {
-            text-align: center;
-            color: #fff;
-            font-size: 10px;
+        /* ── CONTROLS HINT ───────────────────────────────────────── */
+        #controlsHint {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            width: 100%;
+            max-width: 1000px;
             margin-top: 10px;
-            padding: 10px;
-            background: rgba(0, 0, 0, 0.8);
-            border-radius: 5px;
         }
 
-        .game-over-screen {
-            position: absolute;
+        .ctrl-block {
+            background: rgba(0,0,0,0.7);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 6px;
+            padding: 8px 10px;
+            color: #888;
+            font-size: 7px;
+            line-height: 1.8;
+            text-align: center;
+        }
+        .ctrl-block strong { color: #ccc; font-size: 8px; display: block; margin-bottom: 4px; }
+        .key {
+            display: inline-block;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 3px;
+            padding: 1px 5px;
+            font-family: monospace;
+            color: #fff;
+            font-size: 8px;
+        }
+
+        /* ── GAME OVER SCREEN ────────────────────────────────────── */
+        #gameOverScreen {
+            position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.95);
-            padding: 40px;
-            border: 4px solid #00ff00;
+            background: rgba(5, 0, 10, 0.97);
+            padding: 36px 44px;
+            border: 3px solid #8b0000;
+            box-shadow: 0 0 40px rgba(180, 0, 0, 0.6), inset 0 0 60px rgba(100, 0, 0, 0.3);
             text-align: center;
             color: #fff;
+            border-radius: 10px;
             display: none;
+            z-index: 1000;
+            min-width: 320px;
         }
 
-        .game-over-screen.show {
-            display: block;
+        #gameOverScreen.show { display: block; }
+
+        #gameOverScreen h2 {
+            color: #ff4757;
+            font-size: 24px;
+            margin: 0 0 6px 0;
+            text-shadow: 0 0 20px rgba(255,71,87,0.8);
         }
 
-        .monster-icon {
-            font-size: 48px;
-            margin: 10px 0;
+        #gameOverScreen .skull-row {
+            font-size: 32px;
+            margin-bottom: 12px;
+            letter-spacing: 8px;
         }
+
+        #finalScores {
+            margin: 14px 0;
+            font-size: 13px;
+            line-height: 2;
+        }
+
+        #playAgainBtn {
+            margin-top: 20px;
+            padding: 12px 28px;
+            background: linear-gradient(135deg, #8b0000, #cc0000);
+            border: 2px solid #ff4757;
+            border-radius: 6px;
+            color: #fff;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 10px;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(255,71,87,0.4);
+            transition: all 0.2s;
+        }
+        #playAgainBtn:hover {
+            background: linear-gradient(135deg, #cc0000, #ff2020);
+            box-shadow: 0 0 25px rgba(255,71,87,0.7);
+            transform: scale(1.04);
+        }
+
+        /* ── LEVEL FLASH OVERLAY ─────────────────────────────────── */
+        #levelFlash {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(46, 213, 115, 0.15);
+            pointer-events: none;
+            z-index: 500;
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+        #levelFlash.show { opacity: 1; }
     </style>
 </head>
 <body>
     <div id="gameContainer">
-        <h1 style="color: #00ff00; text-shadow: 0 0 10px #00ff00; font-size: 32px; margin-bottom: 20px;">
-            🦎 MONSTER RAMPAGE 🐵
-        </h1>
-        
+        <h1 id="gameTitle">👾 MONSTER RAMPAGE</h1>
+
         <canvas id="gameCanvas" width="1000" height="600"></canvas>
-        
+
         <div id="hud">
+            <!-- Player 1: FANG the Werewolf -->
             <div class="player-hud player1">
-                <div class="monster-icon">🐶</div>
-                <div>Player 1: GEORGE (Dog)</div>
-                <div>Score: <span id="p1-score">0</span></div>
-                <div class="stat-bar"><div class="stat-fill health-fill" id="p1-health"></div></div>
-                <div class="stat-bar"><div class="stat-fill size-fill" id="p1-size"></div></div>
+                <div class="monster-badge">
+                    <div class="monster-icon">🐺</div>
+                    <div class="monster-name">
+                        <div class="title">P1 — FANG</div>
+                        <div>Werewolf</div>
+                    </div>
+                </div>
+                <div class="score-display">Score: <span id="p1-score">0</span></div>
+                <div class="stat-label">HEALTH</div>
+                <div class="stat-bar"><div class="stat-fill health-fill" id="p1-health" style="width:100%"></div></div>
+                <div class="stat-label">SIZE</div>
+                <div class="stat-bar"><div class="stat-fill size-fill"   id="p1-size"   style="width:33%"></div></div>
             </div>
-            
+
+            <!-- Player 2: GORATH the Godzilla -->
             <div class="player-hud player2">
-                <div class="monster-icon">🦎</div>
-                <div>Player 2: LIZZIE (Lizard)</div>
-                <div>Score: <span id="p2-score">0</span></div>
-                <div class="stat-bar"><div class="stat-fill health-fill" id="p2-health"></div></div>
-                <div class="stat-bar"><div class="stat-fill size-fill" id="p2-size"></div></div>
+                <div class="monster-badge">
+                    <div class="monster-icon">🦎</div>
+                    <div class="monster-name">
+                        <div class="title">P2 — GORATH</div>
+                        <div>Godzilla</div>
+                    </div>
+                </div>
+                <div class="score-display">Score: <span id="p2-score">0</span></div>
+                <div class="stat-label">HEALTH</div>
+                <div class="stat-bar"><div class="stat-fill health-fill" id="p2-health" style="width:100%"></div></div>
+                <div class="stat-label">SIZE</div>
+                <div class="stat-bar"><div class="stat-fill size-fill"   id="p2-size"   style="width:33%"></div></div>
             </div>
-            
+
+            <!-- Player 3: KONG the King Kong -->
             <div class="player-hud player3">
-                <div class="monster-icon">🐵</div>
-                <div>Player 3: RALPH (Monkey)</div>
-                <div>Score: <span id="p3-score">0</span></div>
-                <div class="stat-bar"><div class="stat-fill health-fill" id="p3-health"></div></div>
-                <div class="stat-bar"><div class="stat-fill size-fill" id="p3-size"></div></div>
+                <div class="monster-badge">
+                    <div class="monster-icon">🦍</div>
+                    <div class="monster-name">
+                        <div class="title">P3 — KONG</div>
+                        <div>King Kong</div>
+                    </div>
+                </div>
+                <div class="score-display">Score: <span id="p3-score">0</span></div>
+                <div class="stat-label">HEALTH</div>
+                <div class="stat-bar"><div class="stat-fill health-fill" id="p3-health" style="width:100%"></div></div>
+                <div class="stat-label">SIZE</div>
+                <div class="stat-bar"><div class="stat-fill size-fill"   id="p3-size"   style="width:33%"></div></div>
             </div>
         </div>
 
-        <div class="controls">
-            P1: WASD + Space | P2: Arrows + Enter | P3: IJKL + Shift | Destroy Buildings! Eat Food! Avoid Bombs!
+        <div id="controlsHint">
+            <div class="ctrl-block">
+                <strong>🐺 FANG (P1)</strong>
+                <span class="key">A</span><span class="key">D</span> Move &nbsp;
+                <span class="key">W</span> Jump/Climb<br>
+                <span class="key">S</span> Climb down &nbsp;
+                <span class="key">Space</span> Attack/Roar
+            </div>
+            <div class="ctrl-block">
+                <strong>🦎 GORATH (P2)</strong>
+                <span class="key">←</span><span class="key">→</span> Move &nbsp;
+                <span class="key">↑</span> Jump/Climb<br>
+                <span class="key">↓</span> Climb down &nbsp;
+                <span class="key">Enter</span> Attack/Roar
+            </div>
+            <div class="ctrl-block">
+                <strong>🦍 KONG (P3)</strong>
+                <span class="key">J</span><span class="key">L</span> Move &nbsp;
+                <span class="key">I</span> Jump/Climb<br>
+                <span class="key">K</span> Climb down &nbsp;
+                <span class="key">Shift</span> Attack/Roar
+            </div>
         </div>
+    </div>
 
-        <div id="gameOverScreen" class="game-over-screen">
-            <h2>GAME OVER</h2>
-            <div id="finalScores"></div>
-            <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px;">Play Again</button>
-        </div>
+    <!-- Level complete flash overlay -->
+    <div id="levelFlash"></div>
+
+    <!-- Game Over Screen -->
+    <div id="gameOverScreen">
+        <div class="skull-row">💀 💀 💀</div>
+        <h2>GAME OVER</h2>
+        <div id="finalScores"></div>
+        <button id="playAgainBtn" onclick="location.reload()">▶ PLAY AGAIN</button>
     </div>
 
     <!-- Core Enhancement Systems -->
@@ -155,7 +333,7 @@
     <script src="../js/controller-guide.js"></script>
     <script src="../js/advanced-graphics.js"></script>
     <script src="../js/game-error-handler.js"></script>
-    
+
     <!-- Universal Integration Systems -->
     <script src="../js/multi-chain-wallet.js"></script>
     <script src="../js/unified-auth.js"></script>
@@ -166,12 +344,13 @@
     <script src="../js/gamepad-config.js"></script>
     <script src="../js/game-polish.js"></script>
     <script src="../js/universal-game-integration.js"></script>
-    
+
     <script src="../js/monster-rampage.js"></script>
     <script>
-        // Initialize Universal Integration
         document.addEventListener('DOMContentLoaded', () => {
-            window.gameIntegration = new UniversalGameIntegration('monster-rampage', 'Monster Rampage');
+            if (window.UniversalGameIntegration) {
+                window.gameIntegration = new UniversalGameIntegration('monster-rampage', 'Monster Rampage');
+            }
             if (window.GamepadConfigurator) {
                 window.gamepadConfig = new GamepadConfigurator();
                 window.gamepadConfig.applyPreset('beatEmUp');
