@@ -9,6 +9,7 @@ require('dotenv').config();
 
 const express = require('express');
 const http = require('http');
+const crypto = require('crypto');
 const { Server } = require('socket.io');
 const path = require('path');
 const config = require('./server/config');
@@ -635,6 +636,11 @@ function authenticateToken(req, res, next) {
 const connectedUsers = new Map();
 const userSockets = new Map();
 
+// Monster Rampage arcade sessions (co-op, up to 3 players per room)
+const rampageSessions = new Map(); // sessionId -> { players, hostSocket, created }
+const RAMPAGE_MAX_PLAYERS   = 3;
+const RAMPAGE_MIN_REMOTE_SLOT = 2; // slots 2-3 are remote players; slot 1 is always host
+
 io.on('connection', (socket) => {
     console.log(`Socket connected: ${socket.id}`);
 
@@ -989,6 +995,85 @@ io.on('connection', (socket) => {
     });
 
     // Disconnect handling
+    // ── Monster Rampage: Online Co-op ────────────────────────────────
+
+    // Create a new co-op session (host)
+    socket.on('rampage_create', (data) => {
+        // Use crypto for a collision-resistant, URL-safe session ID
+        const sessionId = crypto.randomBytes(3).toString('hex').toUpperCase(); // e.g. "A3F7B2"
+        rampageSessions.set(sessionId, {
+            players: [{ socketId: socket.id, name: (data && data.name) || 'P1', slot: 1 }],
+            hostSocket: socket.id,
+            created: Date.now()
+        });
+        socket.join(`rampage:${sessionId}`);
+        socket.emit('rampage_created', { sessionId, slot: 1 });
+        console.log(`[rampage] Session created: ${sessionId}`);
+    });
+
+    // Join an existing co-op session
+    socket.on('rampage_join', (data) => {
+        if (!data || !data.sessionId) return;
+        const session = rampageSessions.get(data.sessionId);
+        if (!session) {
+            socket.emit('rampage_error', { error: 'Session not found' });
+            return;
+        }
+        if (session.players.length >= RAMPAGE_MAX_PLAYERS) {
+            socket.emit('rampage_error', { error: `Session is full (max ${RAMPAGE_MAX_PLAYERS} players)` });
+            return;
+        }
+        const slot = session.players.length + 1;
+        const name = (data.name) || `P${slot}`;
+        session.players.push({ socketId: socket.id, name, slot });
+        socket.join(`rampage:${data.sessionId}`);
+        socket.emit('rampage_joined', { sessionId: data.sessionId, slot });
+        io.to(`rampage:${data.sessionId}`).emit('rampage_player_joined', {
+            slot, name, playerCount: session.players.length
+        });
+        console.log(`[rampage] Player joined session ${data.sessionId} as slot ${slot}`);
+    });
+
+    // Relay remote player input to the host for authoritative simulation
+    socket.on('rampage_input', (data) => {
+        if (!data || !data.sessionId) return;
+        const session = rampageSessions.get(data.sessionId);
+        if (!session) return;
+        // Only relay valid slot numbers and compact input objects
+        const slot = parseInt(data.slot, 10);
+        if (isNaN(slot) || slot < RAMPAGE_MIN_REMOTE_SLOT || slot > RAMPAGE_MAX_PLAYERS) return;
+        io.to(session.hostSocket).emit('rampage_remote_input', { slot, input: data.input });
+    });
+
+    // Host broadcasts authoritative game state to all remote players
+    socket.on('rampage_state', (data) => {
+        if (!data || !data.sessionId) return;
+        const session = rampageSessions.get(data.sessionId);
+        if (!session || session.hostSocket !== socket.id) return;
+        socket.to(`rampage:${data.sessionId}`).emit('rampage_state_update', { state: data.state });
+    });
+
+    // Leave a co-op session
+    socket.on('rampage_leave', (data) => {
+        if (!data || !data.sessionId) return;
+        const session = rampageSessions.get(data.sessionId);
+        if (!session) return;
+        session.players = session.players.filter(p => p.socketId !== socket.id);
+        socket.leave(`rampage:${data.sessionId}`);
+        if (session.players.length === 0) {
+            rampageSessions.delete(data.sessionId);
+            console.log(`[rampage] Session ${data.sessionId} closed (empty)`);
+        } else {
+            // If the host left, promote the next player as host
+            if (session.hostSocket === socket.id && session.players.length > 0) {
+                session.hostSocket = session.players[0].socketId;
+            }
+            io.to(`rampage:${data.sessionId}`).emit('rampage_player_left', {
+                playerCount: session.players.length
+            });
+        }
+    });
+
     socket.on('disconnect', async () => {
         const user = connectedUsers.get(socket.id);
         if (user) {
@@ -1007,6 +1092,23 @@ io.on('connection', (socket) => {
             });
 
             console.log(`User disconnected: ${user.username}`);
+        }
+
+        // Clean up any Monster Rampage co-op sessions this socket was part of
+        for (const [sid, session] of rampageSessions) {
+            const wasInSession = session.players.some(p => p.socketId === socket.id);
+            if (!wasInSession) continue;
+            session.players = session.players.filter(p => p.socketId !== socket.id);
+            if (session.players.length === 0) {
+                rampageSessions.delete(sid);
+            } else {
+                if (session.hostSocket === socket.id) {
+                    session.hostSocket = session.players[0].socketId;
+                }
+                io.to(`rampage:${sid}`).emit('rampage_player_left', {
+                    playerCount: session.players.length
+                });
+            }
         }
     });
 });

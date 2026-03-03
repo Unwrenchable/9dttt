@@ -234,11 +234,61 @@
             transition: opacity 0.4s;
         }
         #levelFlash.show { opacity: 1; }
+
+        /* ── ONLINE CO-OP PANEL ──────────────────────────────────── */
+        #onlinePanel {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            font-size: 10px;
+        }
+        #onlinePanel button {
+            background: linear-gradient(135deg, #1a1a3e, #2d2d6b);
+            color: #fff;
+            border: 1px solid #4a4aaa;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-family: inherit;
+            font-size: 9px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        #onlinePanel button:hover { background: linear-gradient(135deg, #2d2d6b, #4a4aaa); border-color: #8080ff; }
+        #sessionInfo { color: #7bed9f; gap: 8px; display: flex; align-items: center; }
+        #sessionCode { color: #ffa502; font-size: 14px; letter-spacing: 2px; margin: 0 6px; }
+        #playerCount { color: #eccc68; }
+        #joinForm { display: flex; align-items: center; gap: 6px; }
+        #joinCode {
+            background: #0a0a1e; color: #fff; border: 1px solid #4a4aaa;
+            border-radius: 4px; padding: 5px 8px; font-family: inherit;
+            font-size: 11px; width: 120px; text-transform: uppercase;
+        }
     </style>
 </head>
 <body>
     <div id="gameContainer">
         <h1 id="gameTitle">👾 MONSTER RAMPAGE</h1>
+
+        <!-- Online Co-op Panel -->
+        <div id="onlinePanel">
+            <div id="onlineBtns">
+                <button id="btnHostSession">🌐 Host Online Session</button>
+                <button id="btnJoinSession">🔗 Join Session</button>
+            </div>
+            <div id="sessionInfo" style="display:none">
+                Session Code: <strong id="sessionCode"></strong>
+                <span id="playerCount">1/3 players</span>
+                <button id="btnLeaveSession">✕ Leave</button>
+            </div>
+            <div id="joinForm" style="display:none">
+                <input id="joinCode" placeholder="Enter session code" maxlength="6">
+                <button id="btnConfirmJoin">Join</button>
+                <button id="btnCancelJoin">Cancel</button>
+            </div>
+        </div>
 
         <canvas id="gameCanvas" width="1000" height="600"></canvas>
 
@@ -298,21 +348,24 @@
                 <span class="key">A</span><span class="key">D</span> Move &nbsp;
                 <span class="key">W</span> Jump/Climb<br>
                 <span class="key">S</span> Climb down &nbsp;
-                <span class="key">Space</span> Attack/Roar
+                <span class="key">Space</span> Attack/Roar<br>
+                🎮 Gamepad 1 <em>d-pad/stick</em> + <span class="key">A</span> Attack
             </div>
             <div class="ctrl-block">
                 <strong>🦎 GORATH (P2)</strong>
                 <span class="key">←</span><span class="key">→</span> Move &nbsp;
                 <span class="key">↑</span> Jump/Climb<br>
                 <span class="key">↓</span> Climb down &nbsp;
-                <span class="key">Enter</span> Attack/Roar
+                <span class="key">Enter</span> Attack/Roar<br>
+                🎮 Gamepad 2 <em>d-pad/stick</em> + <span class="key">A</span> Attack
             </div>
             <div class="ctrl-block">
                 <strong>🦍 KONG (P3)</strong>
                 <span class="key">J</span><span class="key">L</span> Move &nbsp;
                 <span class="key">I</span> Jump/Climb<br>
                 <span class="key">K</span> Climb down &nbsp;
-                <span class="key">Shift</span> Attack/Roar
+                <span class="key">Shift</span> Attack/Roar<br>
+                🎮 Gamepad 3 <em>d-pad/stick</em> + <span class="key">A</span> Attack
             </div>
         </div>
     </div>
@@ -356,6 +409,238 @@
                 window.gamepadConfig.applyPreset('beatEmUp');
             }
         });
+    </script>
+
+    <!-- Socket.io client (served by backend) -->
+    <script src="/socket.io/socket.io.js"></script>
+
+    <!-- ── Monster Rampage Online Co-op ──────────────────────────── -->
+    <script>
+    (function () {
+        'use strict';
+
+        // ── State ────────────────────────────────────────────────────
+        let socket = null;
+        let sessionId = null;
+        let mySlot = null;          // 1 = host, 2-3 = remote player
+        let isHost = false;
+        let stateIntervalId = null;
+        const STATE_HZ = 20;        // broadcast game state 20 times/sec
+
+        // DOM refs
+        const panel       = document.getElementById('onlinePanel');
+        const onlineBtns  = document.getElementById('onlineBtns');
+        const sessionInfo = document.getElementById('sessionInfo');
+        const sessionCode = document.getElementById('sessionCode');
+        const playerCount = document.getElementById('playerCount');
+        const btnLeave    = document.getElementById('btnLeaveSession');
+        const joinForm    = document.getElementById('joinForm');
+        const joinCodeEl  = document.getElementById('joinCode');
+
+        // ── Helpers ──────────────────────────────────────────────────
+        function getGame() { return window._monsterRampageGame || null; }
+
+        function showInfo(id, count) {
+            onlineBtns.style.display  = 'none';
+            joinForm.style.display    = 'none';
+            sessionInfo.style.display = 'flex';
+            sessionCode.textContent   = id;
+            playerCount.textContent   = `${count}/3 players`;
+        }
+
+        function resetPanel() {
+            sessionId = null; mySlot = null; isHost = false;
+            clearInterval(stateIntervalId);
+            onlineBtns.style.display  = 'flex';
+            sessionInfo.style.display = 'none';
+            joinForm.style.display    = 'none';
+            // clear any injected remote inputs
+            const g = getGame(); if (g) g.remoteInputs = {};
+        }
+
+        function connectSocket() {
+            if (socket && socket.connected) return;
+            if (typeof io === 'undefined') {
+                // Socket.io client script failed to load (e.g. backend unreachable)
+                alert('Online co-op is unavailable: could not connect to the server.\nPlease check your connection and try again.');
+                return;
+            }
+            try {
+                // Connect without forcing a specific path so it uses the
+                // server's default /socket.io namespace
+                socket = io({ transports: ['websocket', 'polling'] });
+                bindSocketEvents();
+            } catch (err) {
+                console.warn('[rampage-coop] Socket.io not available:', err.message);
+                alert('Online co-op is unavailable: ' + err.message);
+            }
+        }
+
+        // ── Collect local keyboard/gamepad snapshot for a player slot ─
+        function collectLocalInput() {
+            const g = getGame();
+            if (!g || !mySlot) return null;
+            // Map slot → player index in g.players array (slot 1=idx0, 2=idx1, 3=idx2)
+            const p = g.players && g.players[mySlot - 1];
+            if (!p) return null;
+            const k = g.keys || {};
+            const gp = window.gamepadManager?.getState(mySlot - 1) || null;
+            return {
+                left:  !!(k[p.controls.left]  || gp?.buttons.left  || (gp?.axes.leftX < -0.3)),
+                right: !!(k[p.controls.right] || gp?.buttons.right || (gp?.axes.leftX >  0.3)),
+                up:    !!(k[p.controls.up]    || gp?.buttons.up    || (gp?.axes.leftY < -0.3)),
+                down:  !!(k[p.controls.down]  || gp?.buttons.down  || (gp?.axes.leftY >  0.3)),
+                act:   !!(k[p.controls.action]
+                           || (p.controls.action2 && k[p.controls.action2])
+                           || gp?.buttons.a || gp?.buttons.x || gp?.buttons.rb)
+            };
+        }
+
+        // ── Socket event bindings ─────────────────────────────────────
+        function bindSocketEvents() {
+            socket.on('rampage_created', ({ sessionId: sid, slot }) => {
+                sessionId = sid; mySlot = slot; isHost = true;
+                showInfo(sid, 1);
+                startHostBroadcast();
+                console.log('[rampage-coop] Session created:', sid);
+            });
+
+            socket.on('rampage_joined', ({ sessionId: sid, slot }) => {
+                sessionId = sid; mySlot = slot; isHost = false;
+                showInfo(sid, slot);
+                startClientInputLoop();
+                console.log('[rampage-coop] Joined session:', sid, 'slot:', slot);
+            });
+
+            socket.on('rampage_error', ({ error }) => {
+                alert('Co-op error: ' + error);
+                resetPanel();
+            });
+
+            socket.on('rampage_player_joined', ({ slot, name, playerCount: pc }) => {
+                playerCount.textContent = `${pc}/3 players`;
+                console.log('[rampage-coop] Player joined slot', slot, name);
+            });
+
+            socket.on('rampage_player_left', ({ playerCount: pc }) => {
+                playerCount.textContent = `${pc}/3 players`;
+            });
+
+            // HOST: receive remote player input and inject into remoteInputs
+            socket.on('rampage_remote_input', ({ slot, input }) => {
+                const g = getGame();
+                if (!g) return;
+                if (!g.remoteInputs) g.remoteInputs = {};
+                g.remoteInputs[slot] = input;
+            });
+
+            // CLIENT: receive authoritative game state from host and apply it
+            socket.on('rampage_state_update', ({ state }) => {
+                const g = getGame();
+                if (!g || !state) return;
+                applyRemoteState(g, state);
+            });
+        }
+
+        // ── Host: broadcast full game state at STATE_HZ ───────────────
+        function startHostBroadcast() {
+            clearInterval(stateIntervalId);
+            stateIntervalId = setInterval(() => {
+                if (!socket || !sessionId) return;
+                const g = getGame();
+                if (!g) return;
+                const state = captureState(g);
+                socket.emit('rampage_state', { sessionId, state });
+            }, 1000 / STATE_HZ);
+        }
+
+        // ── Client: send local input at STATE_HZ ──────────────────────
+        function startClientInputLoop() {
+            clearInterval(stateIntervalId);
+            stateIntervalId = setInterval(() => {
+                if (!socket || !sessionId || !mySlot) return;
+                const input = collectLocalInput();
+                if (!input) return;
+                socket.emit('rampage_input', { sessionId, slot: mySlot, input });
+            }, 1000 / STATE_HZ);
+        }
+
+        // ── Capture minimal game state for network transmission ───────
+        function captureState(g) {
+            if (!g.players) return null;
+            return {
+                players: g.players.map(p => ({
+                    id: p.id, x: p.x, y: p.y, vx: p.vx, vy: p.vy,
+                    health: p.health, size: p.size, score: p.score,
+                    facing: p.facing, animState: p.animState,
+                    onGround: p.onGround, climbing: p.climbing
+                })),
+                level: g.level,
+                wave: g.wave
+            };
+        }
+
+        // ── Apply received state to local game (client-side) ──────────
+        function applyRemoteState(g, state) {
+            if (!state.players || !g.players) return;
+            state.players.forEach(statePlayer => {
+                const localPlayer = g.players.find(p => p.id === statePlayer.id);
+                if (!localPlayer) return;
+                // Only apply positions for remote slots (not the client's own slot)
+                if (statePlayer.id !== mySlot) {
+                    localPlayer.x = statePlayer.x; localPlayer.y = statePlayer.y;
+                    localPlayer.vx = statePlayer.vx; localPlayer.vy = statePlayer.vy;
+                    localPlayer.facing = statePlayer.facing;
+                    localPlayer.animState = statePlayer.animState;
+                    localPlayer.onGround = statePlayer.onGround;
+                    localPlayer.climbing = statePlayer.climbing;
+                }
+                // Always sync health/score/size (authoritative from host)
+                localPlayer.health = statePlayer.health;
+                localPlayer.size   = statePlayer.size;
+                lp.score  = sp.score;
+            });
+        }
+
+        // ── Button handlers ──────────────────────────────────────────
+        document.getElementById('btnHostSession').addEventListener('click', () => {
+            connectSocket();
+            if (!socket) return;
+            const name = localStorage.getItem('username') || 'P1';
+            socket.emit('rampage_create', { name });
+        });
+
+        document.getElementById('btnJoinSession').addEventListener('click', () => {
+            onlineBtns.style.display = 'none';
+            joinForm.style.display   = 'flex';
+            joinCodeEl.focus();
+        });
+
+        document.getElementById('btnConfirmJoin').addEventListener('click', () => {
+            const code = joinCodeEl.value.trim().toUpperCase();
+            if (!code || code.length !== 6) { alert('Enter a valid 6-character session code'); return; }
+            connectSocket();
+            if (!socket) return;
+            const name = localStorage.getItem('username') || 'Player';
+            socket.emit('rampage_join', { sessionId: code, name });
+        });
+
+        document.getElementById('btnCancelJoin').addEventListener('click', () => {
+            joinCodeEl.value = '';
+            joinForm.style.display  = 'none';
+            onlineBtns.style.display = 'flex';
+        });
+
+        btnLeave.addEventListener('click', () => {
+            if (socket && sessionId) socket.emit('rampage_leave', { sessionId });
+            resetPanel();
+        });
+
+        // Allow pressing Enter in the code input field
+        joinCodeEl.addEventListener('keydown', e => {
+            if (e.key === 'Enter') document.getElementById('btnConfirmJoin').click();
+        });
+    })();
     </script>
 </body>
 </html>

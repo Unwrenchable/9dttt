@@ -12,6 +12,8 @@
     const cos = Math.cos;
     const abs = Math.abs;
 
+    const ANALOG_DEADZONE = 0.3; // Gamepad analog stick deadzone threshold
+
     function osc(t, period, amp) { return sin(t / period) * amp; }
 
     /* ─── COLOR HELPERS ───────────────────────────────────────────────────── */
@@ -625,6 +627,7 @@
             this.clouds = this._initClouds();
 
             this.keys = {};
+            this.remoteInputs = {}; // slot→{left,right,up,down,act} injected by online co-op
             this._setupInput();
             this._init();
 
@@ -796,12 +799,37 @@
             if (p.roarCooldown   > 0) p.roarCooldown--;
             if (p.hurtFlash      > 0) p.hurtFlash--;
 
-            const mvL     = this.keys[p.controls.left];
-            const mvR     = this.keys[p.controls.right];
-            const pressU  = this.keys[p.controls.up];
-            const pressD  = this.keys[p.controls.down];
-            const pressAct = this.keys[p.controls.action] ||
-                             (p.controls.action2 && this.keys[p.controls.action2]);
+            // Keyboard input
+            let mvL     = this.keys[p.controls.left];
+            let mvR     = this.keys[p.controls.right];
+            let pressU  = this.keys[p.controls.up];
+            let pressD  = this.keys[p.controls.down];
+            let pressAct = this.keys[p.controls.action] ||
+                           (p.controls.action2 && this.keys[p.controls.action2]);
+
+            // Gamepad input — OR with keyboard so both work simultaneously
+            // Player 1 → gamepad index 0, Player 2 → 1, Player 3 → 2
+            // window.gamepadManager is a GamepadManager instance from Public/js/gamepad-manager.js
+            // getState(idx) → { connected, buttons:{a,b,x,y,lb,rb,up,down,left,right,...},
+            //                   axes:{leftX,leftY,rightX,rightY} } or null
+            const gp = window.gamepadManager?.getState(p.id - 1);
+            if (gp) {
+                mvL      = mvL      || gp.buttons.left  || gp.axes.leftX < -ANALOG_DEADZONE;
+                mvR      = mvR      || gp.buttons.right || gp.axes.leftX >  ANALOG_DEADZONE;
+                pressU   = pressU   || gp.buttons.up    || gp.axes.leftY < -ANALOG_DEADZONE;
+                pressD   = pressD   || gp.buttons.down  || gp.axes.leftY >  ANALOG_DEADZONE;
+                pressAct = pressAct || gp.buttons.a     || gp.buttons.x  || gp.buttons.rb;
+            }
+
+            // Remote co-op input — injected by online session client (OR with local)
+            const ri = this.remoteInputs && this.remoteInputs[p.id];
+            if (ri) {
+                mvL      = mvL      || ri.left;
+                mvR      = mvR      || ri.right;
+                pressU   = pressU   || ri.up;
+                pressD   = pressD   || ri.down;
+                pressAct = pressAct || ri.act;
+            }
 
             if (mvR) p.facing =  1;
             if (mvL) p.facing = -1;
@@ -1335,6 +1363,6 @@
         }
     }
 
-    window.addEventListener('load', () => { new MonsterRampageGame(); });
+    window.addEventListener('load', () => { window._monsterRampageGame = new MonsterRampageGame(); });
 
 })();
