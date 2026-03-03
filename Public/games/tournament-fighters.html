@@ -4,156 +4,309 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tournament Fighters - 9DTTT Arcade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            background: #000;
+            background: #04020a;
             font-family: 'Press Start 2P', cursive;
             overflow: hidden;
         }
         #gameCanvas {
             display: block;
-            margin: 20px auto;
-            border: 4px solid #ff0;
-            box-shadow: 0 0 30px #ff0;
+            margin: 10px auto 0;
+            border: 3px solid #7c3aed;
+            box-shadow: 0 0 40px #7c3aed, 0 0 80px rgba(124,58,237,0.3);
         }
+        /* === HUD === */
         #hud {
             position: absolute;
-            top: 20px;
+            top: 0;
             width: 100%;
             display: flex;
             justify-content: space-between;
-            padding: 0 50px;
-            color: #fff;
-            font-size: 14px;
+            align-items: flex-start;
+            padding: 8px 30px;
+            pointer-events: none;
         }
         .fighter-hud {
-            width: 300px;
+            width: 320px;
         }
-        .health-bar {
+        .fighter-hud.p2 { text-align: right; }
+        .fighter-name {
+            font-size: 11px;
+            color: #e0d0ff;
+            letter-spacing: 2px;
+            text-shadow: 0 0 8px #7c3aed;
+        }
+        .health-bar-wrap {
             width: 100%;
-            height: 30px;
-            background: #333;
-            border: 2px solid #fff;
-            margin-top: 10px;
+            height: 20px;
+            background: #111;
+            border: 2px solid #5b21b6;
+            margin-top: 6px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.8), 0 0 10px rgba(124,58,237,0.3);
+            position: relative;
         }
         .health-fill {
             height: 100%;
-            background: linear-gradient(90deg, #f00, #ff0, #0f0);
-            transition: width 0.3s;
+            background: linear-gradient(90deg, #ef4444, #f97316, #22c55e);
+            transition: width 0.15s ease-out;
+            position: relative;
+        }
+        .health-fill::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 40%;
+            background: rgba(255,255,255,0.15);
+        }
+        .p2 .health-fill {
+            background: linear-gradient(270deg, #ef4444, #f97316, #22c55e);
+            float: right;
+        }
+        .wins-dots {
+            margin-top: 5px;
+            display: flex;
+            gap: 6px;
+        }
+        .p2 .wins-dots { flex-direction: row-reverse; }
+        .win-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            border: 1px solid #5b21b6;
+            background: #111;
+        }
+        .win-dot.filled { background: #fbbf24; box-shadow: 0 0 6px #fbbf24; }
+
+        /* === CENTRE HUD === */
+        .hud-centre {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            min-width: 120px;
         }
         .timer {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 48px;
+            font-size: 36px;
             color: #fff;
-            text-shadow: 3px 3px #000;
+            text-shadow: 0 0 12px #7c3aed, 3px 3px #000;
+            line-height: 1;
         }
+        .timer.urgent { color: #ef4444; animation: pulse 0.5s infinite alternate; }
+        @keyframes pulse { to { text-shadow: 0 0 20px #ef4444; } }
+        .round-label {
+            font-size: 8px;
+            color: #a78bfa;
+            letter-spacing: 2px;
+        }
+
+        /* === ROUND DISPLAY === */
         .round-display {
             position: absolute;
-            top: 100px;
+            top: 120px;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 64px;
-            color: #ff0;
-            text-shadow: 4px 4px #000;
+            font-size: 56px;
+            color: #fbbf24;
+            text-shadow: 4px 4px #000, 0 0 20px #f59e0b;
+            pointer-events: none;
             display: none;
+            white-space: nowrap;
         }
         .round-display.show {
             display: block;
-            animation: roundAnnounce 2s;
+            animation: roundAnnounce 2.2s ease-out forwards;
         }
         @keyframes roundAnnounce {
-            0% { transform: translateX(-50%) scale(0); }
-            50% { transform: translateX(-50%) scale(1.2); }
-            100% { transform: translateX(-50%) scale(1); opacity: 0; }
+            0%   { transform: translateX(-50%) scale(0) rotate(-5deg); opacity: 0; }
+            20%  { transform: translateX(-50%) scale(1.25) rotate(2deg); opacity: 1; }
+            50%  { transform: translateX(-50%) scale(1.1) rotate(0deg); opacity: 1; }
+            80%  { transform: translateX(-50%) scale(1.0) rotate(0deg); opacity: 1; }
+            100% { transform: translateX(-50%) scale(0.9) rotate(0deg); opacity: 0; }
         }
+
+        /* === MENU === */
         #menu {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.95);
-            padding: 40px;
-            border: 4px solid #ff0;
+            background: rgba(5, 2, 20, 0.97);
+            padding: 36px 40px;
+            border: 3px solid #7c3aed;
+            box-shadow: 0 0 60px rgba(124,58,237,0.5), inset 0 0 40px rgba(0,0,0,0.9);
             text-align: center;
             color: #fff;
+            min-width: 720px;
+            /* scanlines */
+            background-image: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 3px,
+                rgba(0,0,0,0.15) 3px,
+                rgba(0,0,0,0.15) 4px
+            );
         }
         #menu.hidden { display: none; }
+
+        .menu-title {
+            font-size: 28px;
+            color: #fbbf24;
+            text-shadow: 3px 3px #000, 0 0 20px #f59e0b, 0 0 40px rgba(251,191,36,0.5);
+            margin-bottom: 6px;
+            letter-spacing: 4px;
+        }
+        .menu-subtitle {
+            font-size: 9px;
+            color: #a78bfa;
+            letter-spacing: 3px;
+            margin-bottom: 24px;
+        }
+
+        .select-header {
+            font-size: 10px;
+            color: #e0d0ff;
+            letter-spacing: 3px;
+            margin-bottom: 16px;
+            border-bottom: 1px solid #5b21b6;
+            padding-bottom: 10px;
+        }
+
         .fighter-select {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin: 20px 0;
+            gap: 12px;
+            margin: 0 0 24px;
         }
         .fighter-card {
-            padding: 15px;
-            border: 2px solid #666;
+            padding: 10px 6px 12px;
+            border: 2px solid #3b1f6e;
+            background: rgba(30,10,60,0.8);
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.2s;
+            text-align: center;
         }
         .fighter-card:hover {
-            border-color: #ff0;
-            background: #222;
+            border-color: #a78bfa;
+            background: rgba(60,20,100,0.9);
+            box-shadow: 0 0 16px rgba(167,139,250,0.4);
+            transform: translateY(-2px);
         }
-        .fighter-card.selected {
-            border-color: #0f0;
-            background: #2d5;
+        .fighter-card.selected-p1 {
+            border-color: #22c55e;
+            background: rgba(20,60,20,0.8);
+            box-shadow: 0 0 16px rgba(34,197,94,0.5);
         }
+        .fighter-card.selected-p2 {
+            border-color: #ef4444;
+            background: rgba(60,10,10,0.8);
+            box-shadow: 0 0 16px rgba(239,68,68,0.5);
+        }
+
+        .p-select-labels {
+            display: flex;
+            justify-content: space-around;
+            font-size: 8px;
+            margin-bottom: 6px;
+        }
+        .p1-label { color: #22c55e; }
+        .p2-label { color: #ef4444; }
+
         .btn {
-            background: #ff0;
-            color: #000;
-            border: none;
-            padding: 15px 30px;
-            font-size: 14px;
+            background: linear-gradient(135deg, #7c3aed, #4c1d95);
+            color: #fff;
+            border: 2px solid #a78bfa;
+            padding: 12px 24px;
+            font-size: 10px;
             font-family: 'Press Start 2P', cursive;
             cursor: pointer;
-            margin: 10px;
+            margin: 6px;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+            box-shadow: 0 0 12px rgba(124,58,237,0.4);
+        }
+        .btn:hover {
+            background: linear-gradient(135deg, #9333ea, #6d28d9);
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(124,58,237,0.7);
+        }
+        .btn.gold {
+            background: linear-gradient(135deg, #d97706, #92400e);
+            border-color: #fbbf24;
+            box-shadow: 0 0 12px rgba(251,191,36,0.4);
+        }
+        .btn.gold:hover {
+            background: linear-gradient(135deg, #f59e0b, #b45309);
+            box-shadow: 0 0 20px rgba(251,191,36,0.7);
         }
     </style>
 </head>
 <body>
+    <!-- HUD -->
     <div id="hud">
-        <div class="fighter-hud">
-            <div id="p1Name">PLAYER 1</div>
-            <div class="health-bar">
-                <div class="health-fill" id="p1Health" style="width: 100%"></div>
+        <div class="fighter-hud p1">
+            <div class="fighter-name" id="p1Name">P1</div>
+            <div class="health-bar-wrap">
+                <div class="health-fill" id="p1Health" style="width:100%"></div>
             </div>
-            <div style="margin-top: 10px;">
-                <span id="p1Wins">0</span> WINS
+            <div class="wins-dots" id="p1WinDots">
+                <div class="win-dot" id="p1w0"></div>
+                <div class="win-dot" id="p1w1"></div>
             </div>
         </div>
-        <div class="fighter-hud" style="text-align: right;">
-            <div id="p2Name">PLAYER 2</div>
-            <div class="health-bar">
-                <div class="health-fill" id="p2Health" style="width: 100%"></div>
+
+        <div class="hud-centre">
+            <div class="round-label">ROUND</div>
+            <div class="timer" id="timer">99</div>
+        </div>
+
+        <div class="fighter-hud p2">
+            <div class="fighter-name" id="p2Name">P2</div>
+            <div class="health-bar-wrap">
+                <div class="health-fill" id="p2Health" style="width:100%"></div>
             </div>
-            <div style="margin-top: 10px;">
-                <span id="p2Wins">0</span> WINS
+            <div class="wins-dots" id="p2WinDots">
+                <div class="win-dot" id="p2w0"></div>
+                <div class="win-dot" id="p2w1"></div>
             </div>
         </div>
     </div>
-    <div class="timer" id="timer">99</div>
+
     <div class="round-display" id="roundDisplay">ROUND 1</div>
-    
-    <canvas id="gameCanvas" width="1000" height="600"></canvas>
-    
+
+    <canvas id="gameCanvas" width="1000" height="560"></canvas>
+
+    <!-- MENU -->
     <div id="menu">
-        <h1 style="color: #ff0; margin-bottom: 30px;">🥊 TOURNAMENT FIGHTERS 🥊</h1>
-        <h3>SELECT YOUR FIGHTER</h3>
+        <div class="menu-title">⚔ TOURNAMENT FIGHTERS ⚔</div>
+        <div class="menu-subtitle">9DTTT ARCADE — SELECT YOUR CHAMPION</div>
+
+        <div class="p-select-labels">
+            <span class="p1-label">▶ P1 SELECT</span>
+            <span class="p2-label">P2 SELECT ◀</span>
+        </div>
+
+        <div class="select-header">CHOOSE YOUR FIGHTER</div>
         <div class="fighter-select" id="fighterSelect"></div>
-        <button class="btn" onclick="game.startTournament()">START TOURNAMENT</button>
-        <button class="btn" onclick="game.startVersus()">VS MODE (2P)</button>
+
+        <div>
+            <button class="btn gold" onclick="game.startTournament()">🏆 START TOURNAMENT</button>
+            <button class="btn" onclick="game.startVersus()">⚔ VS MODE (2P)</button>
+        </div>
+
+        <div style="font-size: 7px; color: #6b21a8; margin-top: 16px; letter-spacing: 2px;">
+            P1: WASD + J/K/L/I &nbsp;|&nbsp; P2: ARROWS + NUMPAD 4/5/6/8
+        </div>
     </div>
-    
+
     <!-- Core Enhancement Systems -->
     <script src="../js/gamepad-manager.js"></script>
     <script src="../js/controller-guide.js"></script>
     <script src="../js/advanced-graphics.js"></script>
     <script src="../js/game-error-handler.js"></script>
-    
+
     <!-- Universal Integration Systems -->
     <script src="../js/multi-chain-wallet.js"></script>
     <script src="../js/unified-auth.js"></script>
@@ -165,10 +318,12 @@
     <script src="../js/gamepad-config.js"></script>
     <script src="../js/game-polish.js"></script>
     <script src="../js/universal-game-integration.js"></script>
-    
+
+    <!-- Professional Character Renderer (must come before game logic) -->
+    <script src="../js/character-renderer.js"></script>
+
     <script src="../js/tournament-fighters.js"></script>
     <script>
-        // Initialize Universal Integration
         document.addEventListener('DOMContentLoaded', () => {
             window.gameIntegration = new UniversalGameIntegration('tournament-fighters', 'Tournament Fighters');
             if (window.GamepadConfigurator) {
