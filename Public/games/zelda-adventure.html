@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Primary Meta Tags -->
+    <title>Zelda Adventure - Top-Down Action RPG | 9DTTT</title>
+    <meta name="title" content="Zelda Adventure - Top-Down Action RPG | 9DTTT">
+    <meta name="description" content="Play Zelda Adventure free online! Top-down action RPG – explore the overworld, battle slimes and skeletons, enter the dungeon and defeat the boss!">
+    <meta name="keywords" content="zelda adventure, action rpg, top-down game, dungeon game, browser adventure game, free online rpg">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://www.d9ttt.com/games/zelda-adventure.html">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.d9ttt.com/games/zelda-adventure.html">
+    <meta property="og:title" content="Zelda Adventure - Top-Down Action RPG">
+    <meta property="og:description" content="Top-down action RPG – explore, battle enemies, conquer the dungeon!">
+    <meta property="og:image" content="https://www.d9ttt.com/icon.jpg">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://www.d9ttt.com/games/zelda-adventure.html">
+    <meta property="twitter:title" content="Zelda Adventure - Top-Down Action RPG">
+    <meta property="twitter:description" content="Top-down action RPG – explore, battle enemies, conquer the dungeon!">
+    <meta property="twitter:image" content="https://www.d9ttt.com/icon.jpg">
+
+    <!-- Mobile App -->
+    <meta name="theme-color" content="#0a0e27">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/jpeg" href="../icon.jpg">
+
+    <link rel="stylesheet" href="../css/styles.css">
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Game",
+        "name": "Zelda Adventure",
+        "description": "Top-down action RPG. Explore the overworld, battle slimes and skeletons, enter the dungeon and defeat the boss!",
+        "gamePlatform": "Web Browser",
+        "numberOfPlayers": "1",
+        "playMode": "SinglePlayer",
+        "url": "https://www.d9ttt.com/games/zelda-adventure.html",
+        "genre": "Action RPG",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+    }
+    </script>
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <div class="container">
+        <header role="banner">
+            <h1>&#x2694;&#xFE0F; Zelda Adventure</h1>
+            <p class="subtitle">Top-down action RPG adventure</p>
+        </header>
+
+        <div id="gamepad-status"></div>
+
+        <main id="main-content" role="main">
+            <div class="game-container">
+                <canvas id="game-canvas" width="800" height="540"
+                        style="display:block;max-width:100%;border:2px solid #ffd700;border-radius:8px;"></canvas>
+
+                <div class="control-hint">
+                    <div>
+                        <h4>Movement</h4>
+                        <p><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> or Arrows</p>
+                        <p>Gamepad: Left Stick / D-Pad</p>
+                    </div>
+                    <div>
+                        <h4>Combat</h4>
+                        <p><kbd>Z</kbd> or <kbd>Space</kbd> &ndash; Sword</p>
+                        <p>Gamepad: A Button</p>
+                    </div>
+                    <div>
+                        <h4>Objective</h4>
+                        <p>Collect &#x1F48E; Rupees for score</p>
+                        <p>Find the Dungeon Door &amp; defeat the Boss!</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer role="contentinfo">
+            <p>&copy; 2026 Zelda Adventure | 9DTTT Game Library</p>
+            <p><a href="../index.html" style="color:#4a90e2;">&#x2190; Back to Game Library</a></p>
+        </footer>
+    </div>
+
+    <script src="../js/gamepad-manager.js"></script>
+    <script src="../js/controller-guide.js"></script>
+    <script src="../js/advanced-graphics.js"></script>
+    <script>
+    // ================================================================
+    //  ZELDA ADVENTURE  –  Top-Down Action RPG
+    //  Canvas 800 × 540  |  HUD 60 px  |  World 800 × 480 (20 × 12 tiles @ 40 px)
+    // ================================================================
+
+    // ── Tile type constants ─────────────────────────────────────────
+    const GRASS   = 0;   // walkable – green
+    const WATER   = 1;   // solid    – blue pond
+    const TREE    = 2;   // solid    – tree canopy
+    const WALL    = 3;   // solid    – stone wall
+    const D_FLOOR = 4;   // walkable – dungeon floor
+    const D_WALL  = 5;   // solid    – dungeon stone
+    const D_DOOR  = 6;   // walkable – dungeon entrance (overworld)
+    const D_EXIT  = 7;   // walkable – exit back to overworld (dungeon)
+
+    // ── Map data  (12 rows × 20 cols) ──────────────────────────────
+    const OVERWORLD_MAP = [
+        [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
+        [3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3],
+        [3,0,2,0,0,2,0,0,0,0,0,0,0,2,2,0,0,0,0,3],
+        [3,0,0,0,0,0,0,0,1,1,0,0,0,2,0,0,0,0,0,3],
+        [3,0,0,2,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,3],
+        [3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,3],
+        [3,0,0,0,0,3,3,0,0,0,0,0,0,0,0,0,0,0,0,3],
+        [3,0,2,0,0,3,3,0,0,0,0,0,0,0,0,2,0,0,0,3],
+        [3,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,3],
+        [3,0,0,0,0,0,0,0,0,1,1,0,0,0,2,2,0,0,0,3],
+        [3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3],
+        [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3]
+    ];
+
+    const DUNGEON_MAP = [
+        [5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5],
+        [5,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,5],
+        [5,4,5,5,4,4,4,4,4,4,4,4,4,4,5,5,4,4,4,5],
+        [5,4,5,5,4,4,4,4,4,4,4,4,4,4,5,5,4,4,4,5],
+        [5,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,5],
+        [5,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,5],
+        [5,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,5],
+        [5,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,5],
+        [5,4,5,5,4,4,4,4,4,4,4,4,4,4,5,5,4,4,4,5],
+        [5,4,5,5,4,4,4,4,4,4,4,4,4,4,5,5,4,4,4,5],
+        [7,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,5],
+        [5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5]
+    ];
+
+    // ================================================================
+    //  ZeldaGame class
+    // ================================================================
+    class ZeldaGame {
+
+        constructor(canvasId) {
+            this.canvas = document.getElementById(canvasId);
+            if (!this.canvas) return;
+            this.ctx = this.canvas.getContext('2d');
+            if (!this.ctx) return;
+
+            // Dimensions
+            this.W    = 800;
+            this.H    = 540;
+            this.T    = 40;    // tile size px
+            this.COLS = 20;
+            this.ROWS = 12;
+            this.HUD  = 60;    // HUD strip height
+
+            this.keys   = {};
+            this.frames = 0;
+            this.state  = 'title';   // title | playing | gameover | win
+
+            this.setupInput();
+            this.initGame();
+            requestAnimationFrame(() => this.gameLoop());
+        }
+
+        // ── Input ────────────────────────────────────────────────
+        setupInput() {
+            if (this._inputSetup) return;
+            this._inputSetup = true;
+
+            window.addEventListener('keydown', e => {
+                this.keys[e.code] = true;
+                if (e.code === 'Enter') {
+                    if (this.state === 'title') {
+                        this.state = 'playing';
+                    } else if (this.state === 'gameover' || this.state === 'win') {
+                        this.initGame();
+                        this.state = 'playing';
+                    }
+                }
+                if (['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code)) {
+                    e.preventDefault();
+                }
+            });
+            window.addEventListener('keyup', e => { delete this.keys[e.code]; });
+        }
+
+        // ── Init / Reset ─────────────────────────────────────────
+        initGame() {
+            this.scene         = 'overworld';
+            this.score         = 0;
+            this.hearts        = 3;
+            this.maxHearts     = 3;
+            this.invincible    = 0;
+            this.fadeAlpha     = 0;
+            this.transitioning = false;
+            this._fadingIn     = false;
+            this.particles     = [];
+            this.projectiles   = [];
+            this.bossDefeated  = false;
+            this.startCooldown = 6;   // prevent input bleed from title screen
+
+            this.player = {
+                x: 2 * 40 + 8,
+                y: 1 * 40 + 6,
+                w: 24, h: 28,
+                speed: 3,
+                dir: 'down',
+                attacking: false,
+                attackTimer: 0,
+                attackCooldown: 0
+            };
+
+            this.buildOverworldEntities();
+            this.buildDungeonEntities();
+        }
+
+        buildOverworldEntities() {
+            const T = this.T;
+            this.overworldRupees = [
+                { x: 3*T+14, y:  2*T+14, w:12, h:12, collected:false },
+                { x:10*T+14, y:  5*T+14, w:12, h:12, collected:false },
+                { x: 7*T+14, y:  3*T+14, w:12, h:12, collected:false },
+                { x:15*T+14, y:  8*T+14, w:12, h:12, collected:false },
+                { x:16*T+14, y:  2*T+14, w:12, h:12, collected:false },
+                { x: 4*T+14, y:  9*T+14, w:12, h:12, collected:false },
+                { x:11*T+14, y:  7*T+14, w:12, h:12, collected:false },
+            ];
+            this.overworldEnemies = [
+                this._mkSlime(   5*T+8,  3*T+8),
+                this._mkSlime(  12*T+8,  7*T+8),
+                this._mkSlime(   3*T+8,  9*T+8),
+                this._mkSkeleton(14*T+8, 4*T+8),
+                this._mkSkeleton( 7*T+8, 9*T+8),
+            ];
+        }
+
+        buildDungeonEntities() {
+            const T = this.T;
+            this.dungeonRupees = [
+                { x: 5*T+14, y:6*T+14, w:12, h:12, collected:false },
+                { x:13*T+14, y:6*T+14, w:12, h:12, collected:false },
+                { x: 8*T+14, y:8*T+14, w:12, h:12, collected:false },
+            ];
+            this.dungeonEnemies = [
+                this._mkSlime(   5*T+8, 5*T+8),
+                this._mkSlime(  14*T+8, 6*T+8),
+                this._mkSkeleton( 8*T+8, 4*T+8),
+                this._mkSkeleton(15*T+8, 7*T+8),
+            ];
+            this.boss = {
+                x:9*T, y:3*T, w:56, h:56,
+                hp:8, maxHp:8,
+                speed:1.2, phase:1,
+                attackCooldown:0, shootTimer:140,
+                dead:false, hitFlash:0, frame:0
+            };
+        }
+
+        _mkSlime(x,y) {
+            return { type:'slime', x, y, w:22, h:20,
+                     hp:2, maxHp:2, speed:0.9,
+                     angle: Math.random()*Math.PI*2,
+                     changeDirTimer: 60+Math.floor(Math.random()*60),
+                     attackCooldown:0, dead:false, hitFlash:0, frame:0 };
+        }
+        _mkSkeleton(x,y) {
+            return { type:'skeleton', x, y, w:22, h:28,
+                     hp:3, maxHp:3, speed:1.4,
+                     angle: Math.random()*Math.PI*2,
+                     changeDirTimer: 90+Math.floor(Math.random()*60),
+                     attackCooldown:0, dead:false, hitFlash:0, frame:0 };
+        }
+
+        // ── Map helpers ──────────────────────────────────────────
+        get currentMap()     { return this.scene==='overworld' ? OVERWORLD_MAP : DUNGEON_MAP; }
+        get currentEnemies() { return this.scene==='overworld' ? this.overworldEnemies : this.dungeonEnemies; }
+        get currentRupees()  { return this.scene==='overworld' ? this.overworldRupees  : this.dungeonRupees; }
+
+        tileAt(col, row) {
+            if (col<0||col>=this.COLS||row<0||row>=this.ROWS) return WALL;
+            return this.currentMap[row][col];
+        }
+        isSolid(t) { return t===WALL||t===WATER||t===TREE||t===D_WALL; }
+
+        _collidesMap(ex, ey, ew, eh) {
+            const T = this.T;
+            const pts = [
+                [ex+2,    ey+4   ],
+                [ex+ew-2, ey+4   ],
+                [ex+2,    ey+eh-2],
+                [ex+ew-2, ey+eh-2],
+            ];
+            for (const [px,py] of pts) {
+                if (this.isSolid(this.tileAt(Math.floor(px/T), Math.floor(py/T)))) return true;
+            }
+            return false;
+        }
+
+        _moveEntity(e, dx, dy) {
+            const T   = this.T;
+            if (dx) { const nx=e.x+dx; if (!this._collidesMap(nx,e.y,e.w,e.h)) e.x=nx; }
+            if (dy) { const ny=e.y+dy; if (!this._collidesMap(e.x,ny,e.w,e.h)) e.y=ny; }
+            e.x = Math.max(0, Math.min(this.COLS*T - e.w, e.x));
+            e.y = Math.max(0, Math.min(this.ROWS*T - e.h, e.y));
+        }
+
+        _overlap(a, b) {
+            return a.x < b.x+b.w && a.x+a.w > b.x &&
+                   a.y < b.y+b.h && a.y+a.h > b.y;
+        }
+
+        _swordBox() {
+            const {x,y,w,h,dir} = this.player;
+            const cx=x+w/2, cy=y+h/2;
+            switch(dir) {
+                case 'up':    return {x:cx-10, y:y-34,  w:20, h:34};
+                case 'down':  return {x:cx-10, y:y+h,   w:20, h:34};
+                case 'left':  return {x:x-34,  y:cy-8,  w:34, h:16};
+                case 'right': return {x:x+w,   y:cy-8,  w:34, h:16};
+            }
+        }
+
+        // ── Transitions ──────────────────────────────────────────
+        _startTransition(toScene, px, py, pdir) {
+            if (this.transitioning) return;
+            this.transitioning   = true;
+            this._fadingIn       = true;
+            this.fadeAlpha       = 0;
+            this._pendingScene   = toScene;
+            this._pendingX       = px;
+            this._pendingY       = py;
+            this._pendingDir     = pdir;
+        }
+
+        _tickTransition() {
+            if (!this.transitioning) return;
+            const SPEED = 0.07;
+            if (this._fadingIn) {
+                this.fadeAlpha = Math.min(1, this.fadeAlpha + SPEED);
+                if (this.fadeAlpha >= 1) {
+                    // Switch scene at peak black
+                    this.scene      = this._pendingScene;
+                    this.player.x   = this._pendingX;
+                    this.player.y   = this._pendingY;
+                    this.player.dir = this._pendingDir;
+                    this.projectiles = [];
+                    this._fadingIn   = false;
+                }
+            } else {
+                this.fadeAlpha = Math.max(0, this.fadeAlpha - SPEED);
+                if (this.fadeAlpha <= 0) {
+                    this.fadeAlpha     = 0;
+                    this.transitioning = false;
+                }
+            }
+        }
+
+        // ── Update ───────────────────────────────────────────────
+        update() {
+            if (this.state !== 'playing') return;
+            this._tickTransition();
+            if (this.transitioning) return;
+            if (this.startCooldown > 0) { this.startCooldown--; return; }
+
+            this._updatePlayer();
+            this._updateEnemies();
+            if (this.scene === 'dungeon') { this._updateBoss(); this._updateProjectiles(); }
+            this._checkRupees();
+            this._updateParticles();
+            this._checkTransition();
+            if (this.invincible > 0) this.invincible--;
+        }
+
+        _updatePlayer() {
+            const p = this.player;
+            let dx = 0, dy = 0;
+
+            if (this.keys['ArrowUp']    || this.keys['KeyW']) { dy=-p.speed; p.dir='up'; }
+            if (this.keys['ArrowDown']  || this.keys['KeyS']) { dy= p.speed; p.dir='down'; }
+            if (this.keys['ArrowLeft']  || this.keys['KeyA']) { dx=-p.speed; p.dir='left'; }
+            if (this.keys['ArrowRight'] || this.keys['KeyD']) { dx= p.speed; p.dir='right'; }
+            if (dx && dy) { dx *= 0.707; dy *= 0.707; }
+            this._moveEntity(p, dx, dy);
+
+            // Gamepad
+            const gp = window.gamepadManager;
+            if (gp) {
+                const lx = gp.getAxis(0,'leftX')||0, ly = gp.getAxis(0,'leftY')||0;
+                if (Math.abs(lx)>0.25||Math.abs(ly)>0.25) {
+                    if (Math.abs(lx)>=Math.abs(ly)) p.dir = lx>0?'right':'left';
+                    else                             p.dir = ly>0?'down':'up';
+                    this._moveEntity(p, lx*p.speed, ly*p.speed);
+                }
+                if (gp.isPressed(0,'up'))    { this._moveEntity(p,0,-p.speed); p.dir='up'; }
+                if (gp.isPressed(0,'down'))  { this._moveEntity(p,0, p.speed); p.dir='down'; }
+                if (gp.isPressed(0,'left'))  { this._moveEntity(p,-p.speed,0); p.dir='left'; }
+                if (gp.isPressed(0,'right')) { this._moveEntity(p, p.speed,0); p.dir='right'; }
+                if (gp.isPressed(0,'a') && !p.attacking && p.attackCooldown===0) this._startAttack();
+            }
+
+            if (p.attackTimer > 0 && --p.attackTimer === 0) p.attacking = false;
+            if (p.attackCooldown > 0) p.attackCooldown--;
+            if ((this.keys['KeyZ']||this.keys['Space']) && !p.attacking && p.attackCooldown===0) {
+                this._startAttack();
+            }
+        }
+
+        _startAttack() {
+            const p = this.player;
+            p.attacking     = true;
+            p.attackTimer   = 15;
+            p.attackCooldown = 22;
+            const sword = this._swordBox();
+            for (const e of this.currentEnemies) {
+                if (!e.dead && this._overlap(sword, e)) this._hitEnemy(e, 1);
+            }
+            if (this.scene==='dungeon' && !this.boss.dead && this._overlap(sword, this.boss)) {
+                this._hitBoss(1);
+            }
+        }
+
+        _hitEnemy(e, dmg) {
+            e.hp -= dmg; e.hitFlash = 12;
+            if (e.hp <= 0) {
+                e.dead = true;
+                this.score += e.type==='slime' ? 25 : 50;
+                this._burst(e.x+e.w/2, e.y+e.h/2, e.type==='slime'?'#00c853':'#ecf0f1', 10);
+            }
+        }
+
+        _hitBoss(dmg) {
+            const b = this.boss;
+            b.hp -= dmg; b.hitFlash = 14;
+            if (b.phase===1 && b.hp <= b.maxHp/2) { b.phase=2; b.speed=1.9; }
+            if (b.hp <= 0) {
+                b.hp = 0; b.dead = true; this.bossDefeated = true;
+                this.score += 500;
+                this._burst(b.x+b.w/2, b.y+b.h/2, '#ff5722', 24);
+                this._burst(b.x+b.w/2, b.y+b.h/2, '#ffd700', 16);
+                setTimeout(() => { if (this.state==='playing') this.state='win'; }, 1500);
+            }
+        }
+
+        _updateEnemies() {
+            const p = this.player;
+            for (const e of this.currentEnemies) {
+                if (e.dead) continue;
+                if (e.hitFlash > 0) e.hitFlash--;
+                e.frame++;
+
+                const dist       = Math.hypot(p.x-e.x, p.y-e.y);
+                const chaseRange = e.type==='slime' ? 150 : 220;
+                let dx=0, dy=0;
+
+                if (dist < chaseRange) {
+                    const ang = Math.atan2(p.y-e.y, p.x-e.x);
+                    e.angle = ang;
+                    dx = Math.cos(ang)*e.speed;
+                    dy = Math.sin(ang)*e.speed;
+                } else {
+                    if (--e.changeDirTimer <= 0) {
+                        e.angle = Math.random()*Math.PI*2;
+                        e.changeDirTimer = 60+Math.floor(Math.random()*90);
+                    }
+                    dx = Math.cos(e.angle)*e.speed*0.55;
+                    dy = Math.sin(e.angle)*e.speed*0.55;
+                }
+
+                const px0=e.x, py0=e.y;
+                this._moveEntity(e, dx, dy);
+                // Stuck against wall while patrolling → new direction
+                if (e.x===px0 && e.y===py0) { e.angle=Math.random()*Math.PI*2; e.changeDirTimer=30; }
+
+                if (e.attackCooldown > 0) {
+                    e.attackCooldown--;
+                } else if (this._overlap(e,p) && this.invincible===0) {
+                    this._hurtPlayer(); e.attackCooldown=60;
+                }
+            }
+        }
+
+        _updateBoss() {
+            const b=this.boss;
+            if (b.dead) return;
+            b.frame++; if (b.hitFlash>0) b.hitFlash--;
+            const p=this.player;
+            const dist=Math.hypot(p.x-b.x, p.y-b.y);
+            if (dist > 30) {
+                const ang=Math.atan2(p.y-b.y, p.x-b.x);
+                this._moveEntity(b, Math.cos(ang)*b.speed, Math.sin(ang)*b.speed);
+            }
+            if (b.phase===2 && --b.shootTimer<=0) {
+                b.shootTimer=80;
+                const cx=b.x+b.w/2, cy=b.y+b.h/2;
+                for (let i=0;i<4;i++) {
+                    const a=(Math.PI/2)*i;
+                    this.projectiles.push({x:cx-5,y:cy-5,w:10,h:10,vx:Math.cos(a)*3.2,vy:Math.sin(a)*3.2,active:true});
+                }
+            }
+            if (b.attackCooldown>0) { b.attackCooldown--; }
+            else if (this._overlap(b,p) && this.invincible===0) { this._hurtPlayer(); b.attackCooldown=90; }
+        }
+
+        _updateProjectiles() {
+            for (const pr of this.projectiles) {
+                if (!pr.active) continue;
+                pr.x+=pr.vx; pr.y+=pr.vy;
+                if (this._collidesMap(pr.x,pr.y,pr.w,pr.h) ||
+                    pr.x<0||pr.x>this.COLS*this.T||pr.y<0||pr.y>this.ROWS*this.T) {
+                    pr.active=false; continue;
+                }
+                if (this._overlap(pr,this.player) && this.invincible===0) {
+                    pr.active=false; this._hurtPlayer();
+                }
+            }
+            this.projectiles = this.projectiles.filter(pr=>pr.active);
+        }
+
+        _hurtPlayer() {
+            this.hearts--; this.invincible=90;
+            if (this.hearts<=0) { this.hearts=0; this.state='gameover'; }
+        }
+
+        _checkRupees() {
+            for (const r of this.currentRupees) {
+                if (!r.collected && this._overlap(r, this.player)) {
+                    r.collected=true; this.score+=10;
+                    this._burst(r.x+6, r.y+6, '#69f0ae', 6);
+                }
+            }
+        }
+
+        _updateParticles() {
+            for (const p of this.particles) { p.x+=p.vx; p.y+=p.vy; p.vy+=0.08; p.life--; }
+            this.particles = this.particles.filter(p=>p.life>0);
+        }
+
+        _burst(cx, cy, color, n=10) {
+            for (let i=0;i<n;i++) {
+                const a=(Math.PI*2/n)*i+Math.random()*0.4;
+                const s=1.5+Math.random()*2.5;
+                this.particles.push({x:cx,y:cy, vx:Math.cos(a)*s, vy:Math.sin(a)*s-1,
+                    color, life:25+Math.floor(Math.random()*20), size:2+Math.random()*4});
+            }
+        }
+
+        _checkTransition() {
+            if (this.transitioning) return;
+            const T=this.T, p=this.player;
+            const col=Math.floor((p.x+p.w/2)/T);
+            const row=Math.floor((p.y+p.h/2)/T);
+            if (this.scene==='overworld') {
+                if (this.tileAt(col,row)===D_DOOR)
+                    this._startTransition('dungeon', 1*T+8, 9*T+6, 'up');
+            } else {
+                if (this.tileAt(col,row)===D_EXIT)
+                    this._startTransition('overworld', 16*T, 5*T, 'left');
+            }
+        }
+
+        // ── Render ───────────────────────────────────────────────
+        render() {
+            const ctx=this.ctx;
+            ctx.clearRect(0,0,this.W,this.H);
+
+            if (this.state==='title') { this._renderTitle(); return; }
+
+            this._renderMap();
+            this._renderRupees();
+            this._renderParticles();
+            this._renderEnemies();
+            if (this.scene==='dungeon') { this._renderProjectiles(); this._renderBoss(); }
+            this._renderPlayer();
+            this._renderHUD();
+
+            // Fade overlay
+            if (this.fadeAlpha>0) {
+                ctx.fillStyle=`rgba(0,0,0,${this.fadeAlpha})`;
+                ctx.fillRect(0,0,this.W,this.H);
+            }
+            if (this.state==='gameover') this._renderGameOver();
+            if (this.state==='win')      this._renderWin();
+        }
+
+        // ── Map tiles ─────────────────────────────────────────────
+        _renderMap() {
+            const {COLS,ROWS,T,HUD}=this;
+            for (let r=0;r<ROWS;r++)
+                for (let c=0;c<COLS;c++)
+                    this._drawTile(c*T, r*T+HUD, this.currentMap[r][c], c, r);
+        }
+
+        _drawTile(tx, ty, type, col, row) {
+            const ctx=this.ctx, T=this.T, f=this.frames;
+            switch(type) {
+
+                case GRASS: {
+                    ctx.fillStyle = (col+row)%3===0 ? '#338a39' : '#3a9040';
+                    ctx.fillRect(tx,ty,T,T);
+                    ctx.fillStyle='#4cba52';
+                    ctx.fillRect(tx+7,  ty+9,  2,5);
+                    ctx.fillRect(tx+18, ty+24, 2,5);
+                    ctx.fillRect(tx+29, ty+13, 2,4);
+                    ctx.fillRect(tx+12, ty+31, 2,4);
+                    break;
+                }
+                case WATER: {
+                    ctx.fillStyle='#1565c0'; ctx.fillRect(tx,ty,T,T);
+                    const wv=Math.sin(f*0.06+col*0.9)*2;
+                    ctx.fillStyle='#1976d2'; ctx.fillRect(tx+3, ty+5+wv,  T-6, 9);
+                    ctx.fillStyle='#42a5f5'; ctx.fillRect(tx+6, ty+19+wv, T-12,4);
+                    break;
+                }
+                case TREE: {
+                    ctx.fillStyle='#2e7d32'; ctx.fillRect(tx,ty,T,T);
+                    ctx.fillStyle='#5d4037'; ctx.fillRect(tx+15,ty+27,10,13);
+                    ctx.fillStyle='#1b5e20';
+                    ctx.beginPath(); ctx.arc(tx+T/2,   ty+16, 17,0,Math.PI*2); ctx.fill();
+                    ctx.fillStyle='#2e7d32';
+                    ctx.beginPath(); ctx.arc(tx+T/2-4, ty+11, 13,0,Math.PI*2); ctx.fill();
+                    ctx.fillStyle='#43a047';
+                    ctx.beginPath(); ctx.arc(tx+T/2+3, ty+9,  10,0,Math.PI*2); ctx.fill();
+                    break;
+                }
+                case WALL: {
+                    ctx.fillStyle='#546e7a'; ctx.fillRect(tx,ty,T,T);
+                    ctx.fillStyle='#455a64';
+                    const bo=(row%2)*(T/2);
+                    ctx.fillRect(tx+bo,           ty+2, T/2-2, T/2-4);
+                    ctx.fillRect(tx+bo+T/2,       ty+2, T/2-2, T/2-4);
+                    ctx.fillRect(tx+((bo+T/4)%T), ty+T/2+2, T/2-2, T/2-4);
+                    ctx.strokeStyle='#37474f'; ctx.lineWidth=1; ctx.strokeRect(tx,ty,T,T);
+                    break;
+                }
+                case D_FLOOR: {
+                    ctx.fillStyle='#1c252c'; ctx.fillRect(tx,ty,T,T);
+                    ctx.strokeStyle='#263238'; ctx.lineWidth=0.5; ctx.strokeRect(tx,ty,T,T);
+                    // Subtle torch-glow on inner walls border
+                    if ((col===1||col===18) || (row===1||row===10)) {
+                        ctx.fillStyle='rgba(255,180,50,0.04)'; ctx.fillRect(tx,ty,T,T);
+                    }
+                    break;
+                }
+                case D_WALL: {
+                    ctx.fillStyle='#0d1b6e'; ctx.fillRect(tx,ty,T,T);
+                    ctx.fillStyle='#1a237e';
+                    if ((col+row)%2===0) {
+                        ctx.fillRect(tx+2,      ty+2,      T/2-3, T/2-3);
+                        ctx.fillRect(tx+T/2+1,  ty+T/2+1,  T/2-3, T/2-3);
+                    } else {
+                        ctx.fillRect(tx+T/2+1,  ty+2,      T/2-3, T/2-3);
+                        ctx.fillRect(tx+2,      ty+T/2+1,  T/2-3, T/2-3);
+                    }
+                    ctx.strokeStyle='#283593'; ctx.lineWidth=1; ctx.strokeRect(tx,ty,T,T);
+                    break;
+                }
+                case D_DOOR: {
+                    // Dungeon entrance archway on overworld
+                    ctx.fillStyle='#2e7d32'; ctx.fillRect(tx,ty,T,T);
+                    ctx.fillStyle='#3e2723'; ctx.fillRect(tx+5,ty+8,30,32);
+                    ctx.fillStyle='#111'; ctx.fillRect(tx+9,ty+12,22,28);
+                    ctx.fillStyle='#3e2723';
+                    ctx.beginPath(); ctx.arc(tx+T/2,ty+12,11,Math.PI,0); ctx.fill();
+                    ctx.fillStyle='#ffd700';
+                    ctx.beginPath(); ctx.arc(tx+T/2+5,ty+28,2.5,0,Math.PI*2); ctx.fill();
+                    const gl=0.25+Math.sin(f*0.08)*0.2;
+                    ctx.fillStyle=`rgba(255,200,50,${gl})`; ctx.fillRect(tx+9,ty+12,22,28);
+                    break;
+                }
+                case D_EXIT: {
+                    // Exit arch in dungeon
+                    ctx.fillStyle='#1c252c'; ctx.fillRect(tx,ty,T,T);
+                    ctx.fillStyle='#3e2723'; ctx.fillRect(tx+4,ty+6,28,34);
+                    ctx.fillStyle='#795548'; ctx.fillRect(tx+8,ty+10,20,30);
+                    const eg=0.35+Math.sin(f*0.1)*0.25;
+                    ctx.fillStyle=`rgba(100,220,100,${eg})`; ctx.fillRect(tx+8,ty+10,20,30);
+                    ctx.fillStyle='#fff'; ctx.font='7px Arial'; ctx.textAlign='center';
+                    ctx.fillText('EXIT', tx+T/2, ty+7);
+                    break;
+                }
+            }
+        }
+
+        // ── Rupees ────────────────────────────────────────────────
+        _renderRupees() {
+            const ctx=this.ctx, {HUD}=this;
+            for (const r of this.currentRupees) {
+                if (r.collected) continue;
+                ctx.save();
+                const pulse=Math.sin(this.frames*0.12)*1.5;
+                const s=7+pulse;
+                ctx.translate(r.x+r.w/2, r.y+r.h/2+HUD);
+                ctx.rotate(Math.PI/4);
+                ctx.fillStyle='#00e676'; ctx.fillRect(-s/2,-s/2,s,s);
+                ctx.fillStyle='rgba(255,255,255,0.45)'; ctx.fillRect(-s/2,-s/2,s/3,s/2);
+                ctx.restore();
+            }
+        }
+
+        // ── Enemies ───────────────────────────────────────────────
+        _renderEnemies() {
+            for (const e of this.currentEnemies) {
+                if (e.dead) continue;
+                const ex=e.x, ey=e.y+this.HUD;
+                this.ctx.save();
+                if (e.hitFlash>0 && e.hitFlash%3<2) this.ctx.globalAlpha=0.3;
+                if (e.type==='slime') this._drawSlime(ex,ey,e);
+                else                  this._drawSkeleton(ex,ey,e);
+                this.ctx.restore();
+                if (e.hp < e.maxHp) {
+                    this.ctx.fillStyle='#b71c1c'; this.ctx.fillRect(ex,ey-7,e.w,4);
+                    this.ctx.fillStyle='#4caf50'; this.ctx.fillRect(ex,ey-7,e.w*(e.hp/e.maxHp),4);
+                }
+            }
+        }
+
+        _drawSlime(ex, ey, e) {
+            const ctx=this.ctx, bob=Math.sin(e.frame*0.15)*3;
+            const w=e.w, h=e.h, cx=ex+w/2, cy=ey+h/2;
+            ctx.fillStyle='#00c853';
+            ctx.beginPath(); ctx.ellipse(cx, cy+bob*0.5, w/2, (h-bob*0.5)/2, 0,0,Math.PI*2); ctx.fill();
+            ctx.fillStyle='rgba(255,255,255,0.3)';
+            ctx.beginPath(); ctx.ellipse(cx-3, cy-3+bob*0.5, 4,3, -0.4,0,Math.PI*2); ctx.fill();
+            ctx.fillStyle='#fff';
+            ctx.beginPath(); ctx.arc(cx-4, cy-1+bob*0.5, 3.5,0,Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(cx+4, cy-1+bob*0.5, 3.5,0,Math.PI*2); ctx.fill();
+            ctx.fillStyle='#111';
+            ctx.beginPath(); ctx.arc(cx-3.5, cy-1+bob*0.5, 1.8,0,Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(cx+4.5, cy-1+bob*0.5, 1.8,0,Math.PI*2); ctx.fill();
+        }
+
+        _drawSkeleton(ex, ey, e) {
+            const ctx=this.ctx, rattle=Math.sin(e.frame*0.25)*1.5;
+            const w=e.w, h=e.h, cx=ex+w/2;
+            const c=(e.hitFlash>0&&e.hitFlash%3<2)?'#ff7070':'#ecf0f1';
+            // Skull
+            ctx.fillStyle=c; ctx.beginPath(); ctx.arc(cx, ey+8, 8,0,Math.PI*2); ctx.fill();
+            ctx.fillStyle='#222';
+            ctx.fillRect(cx-6,ey+5,4,4); ctx.fillRect(cx+2,ey+5,4,4);
+            // Jaw teeth
+            ctx.strokeStyle=c; ctx.lineWidth=1.5;
+            for (let i=-4;i<=4;i+=4) {
+                ctx.beginPath(); ctx.moveTo(cx+i,ey+14); ctx.lineTo(cx+i,ey+17); ctx.stroke();
+            }
+            // Spine, arms, legs, ribs
+            ctx.lineWidth=2; ctx.strokeStyle=c;
+            ctx.beginPath(); ctx.moveTo(cx,ey+16); ctx.lineTo(cx,ey+h-6); ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(cx,ey+20+rattle); ctx.lineTo(ex+1,   ey+26);
+            ctx.moveTo(cx,ey+20+rattle); ctx.lineTo(ex+w-1, ey+26); ctx.stroke();
+            ctx.lineWidth=1;
+            for (let i=0;i<3;i++) {
+                const ry=ey+20+i*4;
+                ctx.beginPath();
+                ctx.moveTo(cx,ry); ctx.lineTo(cx-5,ry+3);
+                ctx.moveTo(cx,ry); ctx.lineTo(cx+5,ry+3); ctx.stroke();
+            }
+            ctx.lineWidth=2;
+            ctx.beginPath();
+            ctx.moveTo(cx,ey+h-6); ctx.lineTo(ex+3,    ey+h+rattle);
+            ctx.moveTo(cx,ey+h-6); ctx.lineTo(ex+w-3,  ey+h+rattle); ctx.stroke();
+        }
+
+        // ── Boss ──────────────────────────────────────────────────
+        _renderBoss() {
+            const b=this.boss;
+            if (b.dead) return;
+            const ctx=this.ctx, {HUD}=this;
+            const bx=b.x, by=b.y+HUD, w=b.w, h=b.h;
+            const cx=bx+w/2, cy=by+h/2;
+            const pulse=Math.sin(b.frame*0.12)*3;
+
+            ctx.save();
+            const flash=(b.hitFlash>0&&b.hitFlash%3<2);
+            if (flash) ctx.globalAlpha=0.3;
+
+            // Phase 2 spiky aura
+            if (b.phase===2) {
+                ctx.strokeStyle='#ff6f00'; ctx.lineWidth=2;
+                for (let a=0;a<Math.PI*2;a+=Math.PI/5) {
+                    const ang=a+b.frame*0.05, r1=w/2+5, r2=w/2+15+pulse;
+                    ctx.beginPath();
+                    ctx.moveTo(cx+Math.cos(ang)*r1, cy+Math.sin(ang)*r1);
+                    ctx.lineTo(cx+Math.cos(ang)*r2, cy+Math.sin(ang)*r2); ctx.stroke();
+                }
+            }
+
+            // Shadow
+            ctx.globalAlpha=flash?0.1:0.25;
+            ctx.fillStyle='#000';
+            ctx.beginPath(); ctx.ellipse(cx,by+h+5,w*0.45,8,0,0,Math.PI*2); ctx.fill();
+            ctx.globalAlpha=flash?0.3:1;
+
+            // Body
+            ctx.fillStyle=b.phase===2?'#b71c1c':'#c62828';
+            ctx.beginPath(); ctx.ellipse(cx, cy+pulse/2, w/2+pulse/3, h/2,0,0,Math.PI*2); ctx.fill();
+
+            // Horns
+            ctx.fillStyle='#880e4f';
+            ctx.beginPath(); ctx.moveTo(cx-16,by+12); ctx.lineTo(cx-9,by-13); ctx.lineTo(cx-2,by+8); ctx.fill();
+            ctx.beginPath(); ctx.moveTo(cx+16,by+12); ctx.lineTo(cx+9,by-13); ctx.lineTo(cx+2,by+8); ctx.fill();
+
+            // Eyes
+            const ec=b.phase===2?'#ff6f00':'#f9a825';
+            ctx.fillStyle=ec;
+            ctx.beginPath(); ctx.arc(cx-11, cy-7+pulse/2, 7.5,0,Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(cx+11, cy-7+pulse/2, 7.5,0,Math.PI*2); ctx.fill();
+            ctx.fillStyle='#111';
+            ctx.beginPath(); ctx.arc(cx-11, cy-7+pulse/2, 3.5,0,Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(cx+11, cy-7+pulse/2, 3.5,0,Math.PI*2); ctx.fill();
+
+            // Jagged mouth
+            ctx.fillStyle='#1a0000';
+            ctx.beginPath(); ctx.moveTo(cx-13, cy+7+pulse/2);
+            for (let i=0;i<=5;i++) ctx.lineTo(cx-13+i*5.2, cy+(i%2===0?7:15)+pulse/2);
+            ctx.fill();
+
+            ctx.restore();
+
+            // Boss HP bar in HUD
+            const bw=280, bh=14;
+            const bbx=(this.W-bw)/2, bby=6;
+            ctx.fillStyle='#1a1a1a'; ctx.fillRect(bbx-2,bby-2,bw+4,bh+4);
+            ctx.fillStyle='#4a0000'; ctx.fillRect(bbx,bby,bw,bh);
+            ctx.fillStyle=b.phase===2?'#ff5722':'#c62828';
+            ctx.fillRect(bbx,bby,bw*(b.hp/b.maxHp),bh);
+            ctx.fillStyle='rgba(255,160,160,0.3)';
+            ctx.fillRect(bbx,bby,bw*(b.hp/b.maxHp)*0.4,bh/2);
+            ctx.fillStyle='#fff'; ctx.font='bold 10px Arial'; ctx.textAlign='center';
+            ctx.fillText(`\u2620\uFE0F  DUNGEON BOSS   ${b.hp} / ${b.maxHp}`, this.W/2, bby+bh-1);
+        }
+
+        // ── Projectiles ───────────────────────────────────────────
+        _renderProjectiles() {
+            const ctx=this.ctx, {HUD}=this;
+            for (const pr of this.projectiles) {
+                if (!pr.active) continue;
+                const pcx=pr.x+pr.w/2, pcy=pr.y+pr.h/2+HUD;
+                const grd=ctx.createRadialGradient(pcx,pcy,1,pcx,pcy,pr.w*1.2);
+                grd.addColorStop(0,'#fff');
+                grd.addColorStop(0.35,'#ff6f00');
+                grd.addColorStop(1,'rgba(255,111,0,0)');
+                ctx.fillStyle=grd;
+                ctx.beginPath(); ctx.arc(pcx,pcy,pr.w*1.2,0,Math.PI*2); ctx.fill();
+            }
+        }
+
+        // ── Player ────────────────────────────────────────────────
+        _renderPlayer() {
+            // Invincibility flicker
+            if (this.invincible>0 && Math.floor(this.invincible/5)%2===0) return;
+            const ctx=this.ctx, {HUD}=this, p=this.player;
+            const px=p.x, py=p.y+HUD, w=p.w, h=p.h, cx=px+w/2;
+            ctx.save();
+
+            // Shadow
+            ctx.fillStyle='rgba(0,0,0,0.18)';
+            ctx.beginPath(); ctx.ellipse(cx, py+h+2, w/2,4,0,0,Math.PI*2); ctx.fill();
+
+            // Boots
+            ctx.fillStyle='#4e342e';
+            ctx.fillRect(px+4,      py+h-8, 7,8);
+            ctx.fillRect(px+w-11,   py+h-8, 7,8);
+
+            // Tunic body + belt + collar
+            ctx.fillStyle='#2e7d32'; ctx.fillRect(px+3, py+10, w-6, h-18);
+            ctx.fillStyle='#4e342e'; ctx.fillRect(px+3, py+h-16, w-6, 4);
+            ctx.fillStyle='#1b5e20'; ctx.fillRect(px+7, py+10, w-14, 4);
+
+            // Arms
+            ctx.fillStyle='#f4c77d';
+            if (p.dir==='left') {
+                ctx.fillRect(px-5,    py+12, 8, 10);
+                ctx.fillRect(px+w-4,  py+12, 6,  8);
+            } else if (p.dir==='right') {
+                ctx.fillRect(px+w-3,  py+12, 8, 10);
+                ctx.fillRect(px-2,    py+12, 6,  8);
+            } else {
+                ctx.fillRect(px-2,    py+12, 6, 10);
+                ctx.fillRect(px+w-4,  py+12, 6, 10);
+            }
+
+            // Head
+            ctx.fillStyle='#f4c77d';
+            ctx.beginPath(); ctx.ellipse(cx, py+8, 9,9,0,0,Math.PI*2); ctx.fill();
+
+            // Hat (classic elf-triangle)
+            ctx.fillStyle='#2e7d32';
+            ctx.beginPath(); ctx.moveTo(cx,py-10); ctx.lineTo(cx-11,py+4); ctx.lineTo(cx+11,py+4); ctx.closePath(); ctx.fill();
+            ctx.fillStyle='#1b5e20'; ctx.fillRect(cx-11,py+3,22,3);
+
+            // Eyes per direction
+            ctx.fillStyle='#333';
+            if      (p.dir==='down')  { ctx.fillRect(cx-5,py+7,3,3); ctx.fillRect(cx+2,py+7,3,3); }
+            else if (p.dir==='left')  { ctx.fillRect(cx-7,py+7,3,3); }
+            else if (p.dir==='right') { ctx.fillRect(cx+4,py+7,3,3); }
+
+            // Sword (while attacking)
+            if (p.attacking) {
+                const prog=p.attackTimer/15, sLen=32;
+                ctx.strokeStyle='#e8eaf6'; ctx.lineWidth=3; ctx.lineCap='round';
+                ctx.beginPath();
+                switch(p.dir) {
+                    case 'up':    ctx.moveTo(cx-4,py+h/2-4); ctx.lineTo(cx-4,py+h/2-4-sLen); break;
+                    case 'down':  ctx.moveTo(cx+4,py+h/2+4); ctx.lineTo(cx+4,py+h/2+4+sLen); break;
+                    case 'left':  ctx.moveTo(cx-5,py+h/2+4); ctx.lineTo(cx-5-sLen,py+h/2+4); break;
+                    case 'right': ctx.moveTo(cx+5,py+h/2-4); ctx.lineTo(cx+5+sLen,py+h/2-4); break;
+                }
+                ctx.stroke();
+                // Glow
+                ctx.strokeStyle=`rgba(160,210,255,${prog*0.65})`; ctx.lineWidth=9; ctx.stroke();
+                // Guard (gold crosspiece)
+                ctx.fillStyle='#ffd700';
+                switch(p.dir) {
+                    case 'up':    ctx.fillRect(cx-9,  py+h/2-8, 16,4); break;
+                    case 'down':  ctx.fillRect(cx-4,  py+h/2+6, 16,4); break;
+                    case 'left':  ctx.fillRect(cx-8,  py+h/2,    4,16); break;
+                    case 'right': ctx.fillRect(cx+4,  py+h/2-8,  4,16); break;
+                }
+            }
+            ctx.restore();
+        }
+
+        // ── Particles ─────────────────────────────────────────────
+        _renderParticles() {
+            const ctx=this.ctx, {HUD}=this;
+            for (const p of this.particles) {
+                ctx.globalAlpha=Math.max(0,p.life/45);
+                ctx.fillStyle=p.color;
+                ctx.beginPath(); ctx.arc(p.x, p.y+HUD, p.size,0,Math.PI*2); ctx.fill();
+            }
+            ctx.globalAlpha=1;
+        }
+
+        // ── HUD ───────────────────────────────────────────────────
+        _renderHUD() {
+            const ctx=this.ctx, {W,HUD}=this;
+            ctx.fillStyle='#0a0e27'; ctx.fillRect(0,0,W,HUD);
+            ctx.strokeStyle='#ffd700'; ctx.lineWidth=2; ctx.strokeRect(0,0,W,HUD);
+
+            // Hearts
+            for (let i=0;i<this.maxHearts;i++) this._drawHeart(ctx, 14+i*34, 9, i<this.hearts);
+
+            // Score
+            ctx.fillStyle='#ffd700'; ctx.font='bold 20px Arial'; ctx.textAlign='center';
+            ctx.fillText(`\u{1F48E} ${this.score}`, W/2, 38);
+
+            // Room label
+            ctx.fillStyle='#90a4ae'; ctx.font='14px Arial'; ctx.textAlign='right';
+            ctx.fillText(this.scene==='overworld'?'\u{1F30D} Overworld':'\u2694\uFE0F Dungeon', W-14, 38);
+
+            // Hint line
+            if (this.scene==='overworld') {
+                ctx.fillStyle='#546e7a'; ctx.font='11px Arial'; ctx.textAlign='center';
+                ctx.fillText('Find the dungeon door \u2192 (east edge, row 5)', W/2, HUD-8);
+            }
+        }
+
+        _drawHeart(ctx, x, y, filled) {
+            ctx.save(); ctx.translate(x+13, y+13);
+            const s=0.72;
+            ctx.beginPath();
+            ctx.moveTo(0,-3*s);
+            ctx.bezierCurveTo( 0,   -10*s, -13*s,-10*s, -13*s,-3*s);
+            ctx.bezierCurveTo(-13*s,  4*s,   0,   12*s,   0,   15*s);
+            ctx.bezierCurveTo( 0,    12*s,  13*s,  4*s,  13*s, -3*s);
+            ctx.bezierCurveTo(13*s, -10*s,   0,  -10*s,   0,   -3*s);
+            ctx.closePath();
+            ctx.fillStyle=filled?'#e53935':'#2d3e50'; ctx.fill();
+            if (filled) {
+                ctx.fillStyle='rgba(255,200,200,0.45)';
+                ctx.beginPath(); ctx.arc(-3*s,-2*s,3.5*s,0,Math.PI*2); ctx.fill();
+            }
+            ctx.restore();
+        }
+
+        // ── Title screen ──────────────────────────────────────────
+        _renderTitle() {
+            const ctx=this.ctx, {W,H}=this;
+            ctx.fillStyle='#0d1b2a'; ctx.fillRect(0,0,W,H);
+
+            // Stars
+            for (let i=0;i<60;i++) {
+                const sx=(i*137+5)%W, sy=(i*79+11)%(H-80);
+                const br=0.3+Math.abs(Math.sin(this.frames*0.04+i))*0.7;
+                ctx.fillStyle=`rgba(255,255,255,${br})`; ctx.fillRect(sx,sy,1.5,1.5);
+            }
+            // Ground
+            ctx.fillStyle='#1b5e20'; ctx.fillRect(0,H-80,W,80);
+            ctx.fillStyle='#2e7d32'; ctx.fillRect(0,H-80,W,12);
+            // Decorative trees
+            for (let i=0;i<5;i++) {
+                const tx=50+i*165, ty=H-145;
+                ctx.fillStyle='#5d4037'; ctx.fillRect(tx+8,ty+40,9,30);
+                ctx.fillStyle='#1b5e20'; ctx.beginPath(); ctx.arc(tx+12,ty+26,20,0,Math.PI*2); ctx.fill();
+                ctx.fillStyle='#2e7d32'; ctx.beginPath(); ctx.arc(tx+8, ty+18,15,0,Math.PI*2); ctx.fill();
+            }
+
+            // Title
+            ctx.save();
+            ctx.shadowColor='#ffd700'; ctx.shadowBlur=30;
+            ctx.fillStyle='#ffd700'; ctx.font='bold 56px Arial'; ctx.textAlign='center';
+            ctx.fillText('\u2694\uFE0F  ZELDA ADVENTURE  \u2694\uFE0F', W/2, 172);
+            ctx.restore();
+
+            ctx.fillStyle='#81c784'; ctx.font='21px Arial'; ctx.textAlign='center';
+            ctx.fillText('Top-Down Action RPG', W/2, 222);
+
+            // Instruction box
+            ctx.fillStyle='rgba(0,0,0,0.55)'; ctx.fillRect(W/2-285,250,570,148);
+            ctx.strokeStyle='#ffd700'; ctx.lineWidth=1.5; ctx.strokeRect(W/2-285,250,570,148);
+            ctx.fillStyle='#cfd8dc'; ctx.font='14.5px Arial'; ctx.textAlign='center';
+            ctx.fillText('\u{1F579}  WASD / Arrows \u2013 Move        Z / Space \u2013 Sword Attack',  W/2, 278);
+            ctx.fillText('\u{1F48E}  Collect green Rupees for score points',                             W/2, 306);
+            ctx.fillText('\u{1F5E1}  Defeat Slimes (\u{1F7E2}) & Skeletons (\u{1F480}) to earn kills', W/2, 332);
+            ctx.fillText('\u{1F6AA}  Walk to the Dungeon Door (east side) to enter',                    W/2, 358);
+            ctx.fillText('\u{1F480}  Defeat the Dungeon Boss to WIN!  (boss shoots in phase 2)',         W/2, 384);
+
+            // Pulsing start
+            const pulse=0.5+Math.sin(this.frames*0.09)*0.5;
+            ctx.fillStyle=`rgba(255,215,0,${pulse})`; ctx.font='bold 24px Arial';
+            ctx.fillText('Press  ENTER  to Begin', W/2, 433);
+        }
+
+        // ── Game Over screen ──────────────────────────────────────
+        _renderGameOver() {
+            const ctx=this.ctx, {W,H}=this;
+            ctx.fillStyle='rgba(0,0,0,0.78)'; ctx.fillRect(0,0,W,H);
+            ctx.save();
+            ctx.shadowColor='#e53935'; ctx.shadowBlur=40;
+            ctx.fillStyle='#e53935'; ctx.font='bold 68px Arial'; ctx.textAlign='center';
+            ctx.fillText('GAME  OVER', W/2, H/2-60);
+            ctx.restore();
+            ctx.fillStyle='#ffd700'; ctx.font='bold 28px Arial'; ctx.textAlign='center';
+            ctx.fillText(`Score: ${this.score}`, W/2, H/2+8);
+            const pulse=0.5+Math.sin(this.frames*0.1)*0.5;
+            ctx.fillStyle=`rgba(255,255,255,${pulse})`; ctx.font='22px Arial';
+            ctx.fillText('Press  ENTER  to Try Again', W/2, H/2+70);
+        }
+
+        // ── Win screen ────────────────────────────────────────────
+        _renderWin() {
+            const ctx=this.ctx, {W,H}=this;
+            ctx.fillStyle='rgba(0,0,0,0.78)'; ctx.fillRect(0,0,W,H);
+            ctx.save();
+            ctx.shadowColor='#ffd700'; ctx.shadowBlur=40;
+            ctx.fillStyle='#ffd700'; ctx.font='bold 54px Arial'; ctx.textAlign='center';
+            ctx.fillText('\u2694\uFE0F   VICTORY!   \u2694\uFE0F', W/2, H/2-80);
+            ctx.restore();
+            ctx.fillStyle='#a5d6a7'; ctx.font='24px Arial'; ctx.textAlign='center';
+            ctx.fillText('The Dungeon Boss has been defeated!', W/2, H/2-22);
+            ctx.fillStyle='#fff'; ctx.font='20px Arial';
+            ctx.fillText(`Final Score:  ${this.score}`, W/2, H/2+26);
+            const pulse=0.5+Math.sin(this.frames*0.1)*0.5;
+            ctx.fillStyle=`rgba(255,215,0,${pulse})`; ctx.font='bold 22px Arial';
+            ctx.fillText('Press  ENTER  to Play Again', W/2, H/2+90);
+        }
+
+        // ── Main loop ─────────────────────────────────────────────
+        gameLoop() {
+            this.frames++;
+            this.update();
+            this.render();
+            requestAnimationFrame(() => this.gameLoop());
+        }
+    }
+
+    // ── Bootstrap ─────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+        if (window.GameUI) { window.gameUI = new GameUI(); window.gameUI.init(); }
+        window.zeldaGame = new ZeldaGame('game-canvas');
+        if (window.GamepadWidget) new GamepadWidget('gamepad-status');
+    });
+    </script>
+</body>
+</html>
