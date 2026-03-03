@@ -1812,7 +1812,7 @@ class WastelandGame {
     this.keys={};this.frames=0;this.lastTime=0;
     this.state='title'; // title|playing|inventory|transition|gameover|win
     this.music=new AFCMusic();
-    this.transAlpha=0;this.transDir=1;this.transCB=null;this.transFrames=0;
+    this.transAlpha=0;this.transDir=1;this.transCB=null;this.transFrames=0;this.transCool=0;
     this.msg='';this.msgTimer=0;
     this.setupInput();
     this.initGame();
@@ -2005,20 +2005,21 @@ class WastelandGame {
           }
         }
       }
-      // Screen edge transitions
+      // Screen edge transitions (cooldown prevents immediate reverse-transition)
+      if(this.transCool>0){this.transCool--;return;}
       const margin=4;
       if(p.x<=margin&&this.sx>0){
         const nsx=this.sx-1;
-        this._startFade(()=>{this.sx=nsx;this.player.x=(this.COLS-1)*T-p.w-4;this._loadScreen();});
+        this._startFade(()=>{this.sx=nsx;this.player.x=(this.COLS-2)*T-p.w;this.transCool=30;this._loadScreen();});
       } else if(p.x+p.w>=(this.COLS*T-margin)&&this.sx<5){
         const nsx=this.sx+1;
-        this._startFade(()=>{this.sx=nsx;this.player.x=4;this._loadScreen();});
+        this._startFade(()=>{this.sx=nsx;this.player.x=T;this.transCool=30;this._loadScreen();});
       } else if(p.y<=margin&&this.sy>0){
         const nsy=this.sy-1;
-        this._startFade(()=>{this.sy=nsy;this.player.y=(this.ROWS-1)*T-p.h-4;this._loadScreen();});
+        this._startFade(()=>{this.sy=nsy;this.player.y=(this.ROWS-2)*T-p.h;this.transCool=30;this._loadScreen();});
       } else if(p.y+p.h>=(this.ROWS*T-margin)&&this.sy<3){
         const nsy=this.sy+1;
-        this._startFade(()=>{this.sy=nsy;this.player.y=4;this._loadScreen();});
+        this._startFade(()=>{this.sy=nsy;this.player.y=T;this.transCool=30;this._loadScreen();});
       }
     } else {
       // Dungeon: check exit/door tiles
