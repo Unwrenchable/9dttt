@@ -64,7 +64,10 @@
         <main id="main-content" role="main">
             <div class="game-container">
                 <canvas id="game-canvas" width="800" height="540"
-                        style="display:block;max-width:100%;border:2px solid #ffd700;border-radius:8px;"></canvas>
+                        style="display:block;max-width:100%;border:2px solid #ffd700;border-radius:8px;"
+                        aria-label="Zelda Adventure game canvas"></canvas>
+                <div id="sr-announcer" role="status" aria-live="polite" aria-atomic="true"
+                     style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;"></div>
 
                 <div class="control-hint">
                     <div>
@@ -439,14 +442,25 @@
         _hitBoss(dmg) {
             const b = this.boss;
             b.hp -= dmg; b.hitFlash = 14;
-            if (b.phase===1 && b.hp <= b.maxHp/2) { b.phase=2; b.speed=1.9; }
+            if (b.phase===1 && b.hp <= b.maxHp/2) {
+                b.phase=2; b.speed=1.9;
+                this._announce('Boss entered phase 2 – watch out for projectiles!');
+            }
             if (b.hp <= 0) {
                 b.hp = 0; b.dead = true; this.bossDefeated = true;
                 this.score += 500;
                 this._burst(b.x+b.w/2, b.y+b.h/2, '#ff5722', 24);
                 this._burst(b.x+b.w/2, b.y+b.h/2, '#ffd700', 16);
+                this._announce('Boss defeated! You win!');
                 setTimeout(() => { if (this.state==='playing') this.state='win'; }, 1500);
+            } else {
+                this._announce(`Boss HP: ${b.hp} of ${b.maxHp}`);
             }
+        }
+
+        _announce(msg) {
+            const el = document.getElementById('sr-announcer');
+            if (el) { el.textContent = ''; requestAnimationFrame(() => { el.textContent = msg; }); }
         }
 
         _updateEnemies() {
