@@ -496,6 +496,21 @@ app.get('/api/stats', async (req, res) => {
     }
 });
 
+// Version endpoint — used by the Speed Router client to detect deployments
+const _appVersion = (() => {
+    try { return require('./package.json').version; } catch (e) { return '2.0.0'; }
+})();
+const _buildTime = Date.now(); // set once at server start; changes on every (re)deploy
+
+app.get('/api/version', (req, res) => {
+    res.set('Cache-Control', 'no-store');
+    res.json({
+        version:    _appVersion,
+        build_time: _buildTime,
+        node:       process.version
+    });
+});
+
 // Client configuration (public values only)
 app.get('/api/config', (req, res) => {
     res.json({
