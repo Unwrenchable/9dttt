@@ -225,37 +225,80 @@
         /* ---------------------------------------------------------------- */
 
         _drawCharacter(ctx, p, traits, animState, frame) {
-            const t = frame / 60;
 
-            // --- Animation state ---
+            // ── Skeletal animation: use SkeletonEngine if loaded, else fall back ──
             let bodyBob = 0, bodyLean = 0, hurtTilt = 0, jumpOffsetY = 0;
-            let legSpread = 0, armSwing = 0, punchExtend = 0, blockRaise = 0;
+            let legSpread = 0, punchExtend = 0;
+            let legRotL = 0, legRotR = 0, legKneeL = 0, legKneeR = 0;
+            // Fighter arm rest: back arm ≈ −4, front arm ≈ 0 (guard baked in idle_fight clip)
+            let armBack = -4, armFront = 0;
             let hurtFlash = false;
 
-            switch (animState) {
-                case 'idle':
-                    bodyBob  = Math.sin(t * Math.PI * 2) * 2;
-                    bodyLean = Math.sin(t * Math.PI * 2) * 0.8;
-                    armSwing = Math.sin(t * Math.PI * 2) * 3;
-                    break;
-                case 'attack':
-                    punchExtend = Math.sin(Math.min(t * Math.PI, Math.PI)) * 26;
-                    bodyLean    = punchExtend * 0.3;
-                    break;
-                case 'hurt':
-                    hurtTilt  = 14;
-                    bodyLean  = -10;
-                    hurtFlash = true;
-                    break;
-                case 'jump':
-                    jumpOffsetY = -22;
-                    legSpread   = 16;
-                    break;
-                case 'block':
-                    blockRaise = 1;
-                    armSwing   = -10;
-                    bodyLean   = -5;
-                    break;
+            // Map fighter animState names to skeleton engine state names
+            const skelState = animState === 'idle'   ? 'idle_fight'
+                            : animState === 'attack' ? 'punch'
+                            : animState === 'block'  ? 'block'
+                            : animState;
+
+            // Absolute time in ms derived from frame counter (60 fps)
+            const animTimeMs = (frame / 60) * 1000;
+
+            if (window.SkeletonEngine) {
+                // ── Proper keyframe animation ─────────────────────────────────
+                const snap = window.SkeletonEngine.getSnapshot(skelState, animTimeMs);
+                bodyBob    = snap.bob;
+                bodyLean   = snap.lean;
+                hurtTilt   = snap.hurtTilt;
+                jumpOffsetY = snap.jumpOffset;
+                legSpread  = snap.legSpread;
+                legRotL    = snap.legRotL;
+                legRotR    = snap.legRotR;
+                legKneeL   = snap.legKneeL;
+                legKneeR   = snap.legKneeR;
+                punchExtend = snap.punchExt;
+                armBack    = snap.armBack;
+                // Fighters hold a tighter guard; the skeleton clips use +6 as the humanoid
+                // front-arm rest position, so subtract FIGHTER_ARM_OFFSET to rebase to 0.
+                const FIGHTER_ARM_OFFSET = 6;
+                armFront   = snap.armFront - FIGHTER_ARM_OFFSET;
+                hurtFlash  = (animState === 'hurt');
+            } else {
+                // ── Legacy fallback ──────────────────────────────────────────
+                const t = frame / 60;
+                let armSwing = 0, blockRaise = 0;
+                switch (animState) {
+                    case 'idle':
+                        bodyBob  = Math.sin(t * Math.PI * 2) * 2;
+                        bodyLean = Math.sin(t * Math.PI * 2) * 0.8;
+                        armSwing = Math.sin(t * Math.PI * 2) * 3;
+                        break;
+                    case 'attack':
+                        punchExtend = Math.sin(Math.min(t * Math.PI, Math.PI)) * 26;
+                        bodyLean    = punchExtend * 0.3;
+                        break;
+                    case 'hurt':
+                        hurtTilt  = 14;
+                        bodyLean  = -10;
+                        hurtFlash = true;
+                        break;
+                    case 'jump':
+                        jumpOffsetY = -22;
+                        legSpread   = 16;
+                        break;
+                    case 'block':
+                        blockRaise = 1;
+                        armSwing   = -10;
+                        bodyLean   = -5;
+                        break;
+                }
+                armBack  = armSwing - 4;
+                armFront = -armSwing + punchExtend;
+                legRotL  = legSpread > 0 ? -legSpread : 0;
+                legRotR  = legSpread > 0 ?  legSpread : 0;
+                // Replicate old blockRaise: rotate front arm up into guard position.
+                // BLOCK_GUARD_ANGLE_DEG = degrees to raise front arm above its swing position.
+                const BLOCK_GUARD_ANGLE_DEG = 35;
+                if (blockRaise) armFront -= BLOCK_GUARD_ANGLE_DEG;
             }
 
             const bodyY = bodyBob + jumpOffsetY;
@@ -268,12 +311,12 @@
             ctx.rotate(hurtTilt * Math.PI / 180);
 
             // --- Draw order: back-leg → torso → back-arm → head → front-arm → front-leg ---
-            this._drawLeg(ctx, p, traits,  9, legSpread,  false); // back leg
+            this._drawLeg(ctx, p, traits,  9,  legSpread, legRotL, legKneeL, false);
             this._drawTorso(ctx, p, traits, animState);
-            this._drawArm(ctx, p, traits,  1, armSwing - 4, 0, blockRaise, false); // back arm (no punch)
+            this._drawArm(ctx, p, traits,  1, armBack,  0,          0, false);
             this._drawHead(ctx, p, traits, animState, frame);
-            this._drawArm(ctx, p, traits, -1, -armSwing + punchExtend, punchExtend, blockRaise, true); // front arm + punch
-            this._drawLeg(ctx, p, traits, -9, -legSpread, true);  // front leg
+            this._drawArm(ctx, p, traits, -1, armFront, punchExtend, 0, true);
+            this._drawLeg(ctx, p, traits, -9, -legSpread, legRotR, legKneeR, true);
 
             // Hurt flash overlay
             if (hurtFlash) {
@@ -291,9 +334,11 @@
         /*  Body parts                                                       */
         /* ---------------------------------------------------------------- */
 
-        _drawLeg(ctx, p, traits, side, spread, isFront) {
+        _drawLeg(ctx, p, traits, side, spread, legRotDeg, kneeBendDeg, isFront) {
             // side: +9 = back leg, -9 = front leg
-            // Thigh: y=-65 to y=-35, Calf: y=-35 to y=0
+            // legRotDeg  : thigh rotation degrees (+ = swing forward, canvas-space)
+            // kneeBendDeg: knee bend degrees       (+ = anatomically backward bend)
+            // Thigh: y=-66 to y=-36, Calf: y=-36 to y=0
             const muscW  = traits.muscular ? 1.35 : 1;
             const thighW = 7 * muscW;
             const calfW  = 5.5 * muscW;
@@ -301,8 +346,20 @@
 
             const cx = side + spread * (isFront ? 0 : -1);
 
-            // --- Thigh ---
             const thighTop = -66, thighBot = -36;
+
+            // ── Rotate entire leg around the hip pivot (cx, thighTop) ──────
+            const legRot  = (legRotDeg  || 0) * Math.PI / 180;
+            const kneeRot = (kneeBendDeg || 0) * Math.PI / 180;
+
+            ctx.save();
+            if (legRot !== 0) {
+                ctx.translate(cx, thighTop);
+                ctx.rotate(legRot);
+                ctx.translate(-cx, -thighTop);
+            }
+
+            // --- Thigh ---
             const tg = volGrad(ctx,
                 cx - thighW, thighTop,
                 cx + thighW, thighBot,
@@ -336,8 +393,14 @@
             ctx.stroke();
             ctx.restore();
 
-            // --- Calf ---
+            // --- Calf — knee bend applied as rotation around the knee pivot ─
             const calfTop = thighBot, calfBot = -2;
+            ctx.save();
+            if (kneeRot !== 0) {
+                ctx.translate(cx, thighBot);
+                ctx.rotate(-kneeRot);            // negative = anatomically backward
+                ctx.translate(-cx, -thighBot);
+            }
             const cg = volGrad(ctx,
                 cx - calfW, calfTop,
                 cx + calfW, calfBot,
@@ -373,7 +436,9 @@
             ctx.fill();
             // Toe cap highlight
             specularDot(ctx, footX + 3, footY + 3, 3.5, 2, 'rgba(255,255,255,0.35)');
-            ctx.restore();
+            ctx.restore();  // calf knee-bend group
+
+            ctx.restore();  // whole-leg rotation
         }
 
         _drawTorso(ctx, p, traits, animState) {

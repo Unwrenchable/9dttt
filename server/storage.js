@@ -29,9 +29,12 @@ class Storage {
     async initialize() {
         if (config.REDIS_URL) {
             try {
-                this.redis = createClient({ url: config.REDIS_URL });
+                this.redis = createClient({
+                    url: config.REDIS_URL,
+                    socket: { reconnectStrategy: false }
+                });
                 this.redis.on('error', (err) => {
-                    console.error('Redis error:', err);
+                    console.error('Redis error:', err.message || err);
                     this.useRedis = false;
                 });
                 await this.redis.connect();
@@ -40,6 +43,10 @@ class Storage {
             } catch (error) {
                 console.log('⚠️ Redis not available, using in-memory storage');
                 this.useRedis = false;
+                if (this.redis) {
+                    this.redis.disconnect().catch(() => {});
+                    this.redis = null;
+                }
             }
         } else {
             console.log('📦 Using in-memory storage (set REDIS_URL for persistence)');

@@ -142,50 +142,68 @@
                 spec: 'rgba(255,255,255,0.52)',
             };
 
-            const t = animTime / 1000;
+            // ── Skeletal animation: use SkeletonEngine if loaded, else fall back ──
+            let bob = 0, lean = 0, hurtTilt = 0, jumpOffset = 0;
+            let legSpread = 0, punchExt = 0, kickAngle = 0, deadSlump = false;
+            // Per-limb rotation angles (degrees) — populated by snapshot or fallback
+            let legRotL = 0, legRotR = 0, legKneeL = 0, legKneeR = 0;
+            let armBack = -4, armFront = 6;  // rest positions
 
-            // Animation parameters
-            let bob = 0, lean = 0, hurtTilt = 0;
-            let legSpread = 0, walkPhase = 0;
-            let punchExt = 0, kickAngle = 0;
-            let armSwing = 0, jumpOffset = 0;
-            let deadSlump = false;
-
-            switch (state) {
-                case 'idle':
-                    bob = Math.sin(t * Math.PI * 1.6) * 1.8;
-                    armSwing = Math.sin(t * Math.PI * 1.6) * 2;
-                    break;
-                case 'walk': case 'run':
-                    walkPhase = t * (state === 'run' ? 6 : 4);
-                    armSwing = Math.sin(walkPhase) * (state === 'run' ? 18 : 12);
-                    bob = Math.abs(Math.sin(walkPhase)) * -2.5;
-                    break;
-                case 'attack': case 'punch':
-                    punchExt = Math.sin(Math.min(t * Math.PI * 2, Math.PI)) * 24;
-                    lean = punchExt * 0.25;
-                    break;
-                case 'kick':
-                    kickAngle = Math.sin(Math.min(t * Math.PI * 2, Math.PI)) * 60;
-                    lean = kickAngle * 0.08;
-                    break;
-                case 'hurt':
-                    hurtTilt = 13;
-                    lean = -8;
-                    break;
-                case 'jump':
-                    jumpOffset = -18;
-                    legSpread = 14;
-                    armSwing = -15;
-                    break;
-                case 'crouch':
-                    bob = 14;
-                    legSpread = 6;
-                    break;
-                case 'dead':
-                    deadSlump = true;
-                    hurtTilt = 25;
-                    break;
+            if (window.SkeletonEngine) {
+                // ── Proper keyframe animation via skeleton engine ──────────────
+                const snap = window.SkeletonEngine.getSnapshot(state, animTime);
+                bob        = snap.bob;
+                lean       = snap.lean;
+                hurtTilt   = snap.hurtTilt;
+                jumpOffset = snap.jumpOffset;
+                legSpread  = snap.legSpread;
+                legRotL    = snap.legRotL;
+                legRotR    = snap.legRotR;
+                legKneeL   = snap.legKneeL;
+                legKneeR   = snap.legKneeR;
+                kickAngle  = snap.kickAngle;
+                armBack    = snap.armBack;
+                armFront   = snap.armFront;
+                punchExt   = snap.punchExt;
+                deadSlump  = snap.deadSlump;
+            } else {
+                // ── Legacy fallback (original Math.sin behavior) ───────────────
+                const t = animTime / 1000;
+                let armSwing = 0, walkPhase = 0;
+                switch (state) {
+                    case 'idle':
+                        bob = Math.sin(t * Math.PI * 1.6) * 1.8;
+                        armSwing = Math.sin(t * Math.PI * 1.6) * 2;
+                        break;
+                    case 'walk': case 'run':
+                        walkPhase = t * (state === 'run' ? 6 : 4);
+                        armSwing  = Math.sin(walkPhase) * (state === 'run' ? 18 : 12);
+                        bob       = Math.abs(Math.sin(walkPhase)) * -2.5;
+                        break;
+                    case 'attack': case 'punch':
+                        punchExt = Math.sin(Math.min(t * Math.PI * 2, Math.PI)) * 24;
+                        lean     = punchExt * 0.25;
+                        break;
+                    case 'kick':
+                        kickAngle = Math.sin(Math.min(t * Math.PI * 2, Math.PI)) * 60;
+                        lean      = kickAngle * 0.08;
+                        break;
+                    case 'hurt':   hurtTilt = 13; lean = -8; break;
+                    case 'jump':   jumpOffset = -18; legSpread = 14; armSwing = -15; break;
+                    case 'crouch': bob = 14; legSpread = 6; break;
+                    case 'dead':   deadSlump = true; hurtTilt = 25; break;
+                }
+                // Map legacy single armSwing into separate back/front values
+                armBack  = armSwing - 4;
+                armFront = -armSwing + 6;
+                // Map walkPhase into per-leg degree rotations via the legacy sine formula.
+                // LEGACY_WALK_SWING_DEG = max thigh rotation for the sine-based walk cycle.
+                const LEGACY_WALK_SWING_DEG = 20;
+                legRotL  = legSpread > 0 ? -legSpread : Math.sin( walkPhase) * LEGACY_WALK_SWING_DEG;
+                legRotR  = legSpread > 0 ?  legSpread : Math.sin(-walkPhase) * LEGACY_WALK_SWING_DEG;
+                // Knee: half of thigh rotation (anatomically backward = negative sign applied in _drawLeg)
+                legKneeL = Math.abs(legRotL) * 0.5;
+                legKneeR = Math.abs(legRotR) * 0.5;
             }
 
             ctx.save();
@@ -201,12 +219,12 @@
 
             if (!deadSlump) {
                 // Draw order: back leg → back arm → torso → front arm → head → front leg
-                this._drawLeg(ctx, p, muscular,  7, legSpread > 0 ? -legSpread : walkPhase, false);
-                this._drawArm(ctx, p, muscular, -1, armSwing - 4,  0,         state, false);
+                this._drawLeg(ctx, p, muscular,  7, legRotL, legKneeL, false);
+                this._drawArm(ctx, p, muscular, -1, armBack,  0,         state, false);
                 this._drawTorso(ctx, p, muscular, state);
-                this._drawArm(ctx, p, muscular,  1, -armSwing + 6, punchExt,  state, true);
-                this._drawHead(ctx, p, headStyle, headColor || accent, state, t);
-                this._drawLeg(ctx, p, muscular, -7, legSpread > 0 ?  legSpread : -walkPhase, true, kickAngle);
+                this._drawArm(ctx, p, muscular,  1, armFront, punchExt,  state, true);
+                this._drawHead(ctx, p, headStyle, headColor || accent, state, animTime / 1000);
+                this._drawLeg(ctx, p, muscular, -7, legRotR, legKneeR, true, kickAngle);
             } else {
                 // Dead — draw flat
                 ctx.save();
@@ -233,7 +251,12 @@
 
         /* ---------------------------------------------------------------- */
 
-        _drawLeg(ctx, p, muscular, sideX, walkOff, isFront, kickAng = 0) {
+        /**
+         * Draw one leg.
+         * legRotDeg  : thigh rotation in degrees  (+= swing forward, canvas-space)
+         * kneeBendDeg: knee bend in degrees        (+= calf bends anatomically backward)
+         */
+        _drawLeg(ctx, p, muscular, sideX, legRotDeg, kneeBendDeg, isFront, kickAng = 0) {
             const mw = muscular ? 1.25 : 1;
             const tw = 7 * mw, cw = 5.5 * mw;
 
@@ -251,10 +274,8 @@
                 return;
             }
 
-            // Walk phase rotation
-            const rot = typeof walkOff === 'number' && Math.abs(walkOff) > 0.01
-                ? Math.sin(walkOff) * 20 * Math.PI / 180 : 0;
-
+            // Thigh rotation: direct degrees from skeleton or legacy phase
+            const rot = (legRotDeg || 0) * Math.PI / 180;
             ctx.rotate(rot);
 
             // Thigh
@@ -274,9 +295,12 @@
             ctx.ellipse(0, thighB, cw * 1.05, cw * 0.85, 0, 0, Math.PI * 2);
             ctx.fill();
 
-            // Calf — offset by second part of walk phase
+            // Calf — knee bend driven by kneeBendDeg (skeleton) or half of thigh rotation (legacy)
             ctx.save();
-            if (rot !== 0) ctx.rotate(-rot * 0.5); // knee bend
+            const kneeBendRad = (kneeBendDeg !== undefined && kneeBendDeg !== null)
+                ? -(kneeBendDeg || 0) * Math.PI / 180
+                : (rot !== 0 ? -rot * 0.5 : 0);
+            ctx.rotate(kneeBendRad);
             tl(ctx, 0, thighB, -5, cw, cw * 0.68);
             ctx.fillStyle = vg(ctx, -cw, thighB, cw, -5,
                 p.clothMid, p.clothSh, dh(p.clothSh, 8));
