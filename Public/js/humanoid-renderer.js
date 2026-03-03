@@ -196,9 +196,11 @@
                 // Map legacy single armSwing into separate back/front values
                 armBack  = armSwing - 4;
                 armFront = -armSwing + 6;
-                // Map walkPhase into per-leg degree rotations via the sine formula
-                legRotL  = legSpread > 0 ? -legSpread : Math.sin( walkPhase) * 20;
-                legRotR  = legSpread > 0 ?  legSpread : Math.sin(-walkPhase) * 20;
+                // Map walkPhase into per-leg degree rotations via the legacy sine formula.
+                // LEGACY_WALK_SWING_DEG = max thigh rotation for the sine-based walk cycle.
+                const LEGACY_WALK_SWING_DEG = 20;
+                legRotL  = legSpread > 0 ? -legSpread : Math.sin( walkPhase) * LEGACY_WALK_SWING_DEG;
+                legRotR  = legSpread > 0 ?  legSpread : Math.sin(-walkPhase) * LEGACY_WALK_SWING_DEG;
                 // Knee: half of thigh rotation (anatomically backward = negative sign applied in _drawLeg)
                 legKneeL = Math.abs(legRotL) * 0.5;
                 legKneeR = Math.abs(legRotR) * 0.5;

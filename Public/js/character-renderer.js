@@ -257,8 +257,10 @@
                 legKneeR   = snap.legKneeR;
                 punchExtend = snap.punchExt;
                 armBack    = snap.armBack;
-                // For fighters, front arm rest position is 0, not +6 (different base stance)
-                armFront   = snap.armFront - 6;  // adjust for fighter's tighter guard base
+                // Fighters hold a tighter guard; the skeleton clips use +6 as the humanoid
+                // front-arm rest position, so subtract FIGHTER_ARM_OFFSET to rebase to 0.
+                const FIGHTER_ARM_OFFSET = 6;
+                armFront   = snap.armFront - FIGHTER_ARM_OFFSET;
                 hurtFlash  = (animState === 'hurt');
             } else {
                 // ── Legacy fallback ──────────────────────────────────────────
@@ -293,8 +295,10 @@
                 armFront = -armSwing + punchExtend;
                 legRotL  = legSpread > 0 ? -legSpread : 0;
                 legRotR  = legSpread > 0 ?  legSpread : 0;
-                // Replicate old blockRaise logic: bake −35° guard into armFront
-                if (blockRaise) armFront -= 35;
+                // Replicate old blockRaise: rotate front arm up into guard position.
+                // BLOCK_GUARD_ANGLE_DEG = degrees to raise front arm above its swing position.
+                const BLOCK_GUARD_ANGLE_DEG = 35;
+                if (blockRaise) armFront -= BLOCK_GUARD_ANGLE_DEG;
             }
 
             const bodyY = bodyBob + jumpOffsetY;

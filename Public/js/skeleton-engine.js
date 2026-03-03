@@ -207,7 +207,7 @@
      *
      * Two usage patterns:
      *   (A) Delta-time driven: player.update(dt)  — typical game-loop usage
-     *   (B) Absolute-time seek: player.setAbsoluteTime(ms, clipName)
+     *   (B) Absolute-time seek: player.setAbsoluteTime(clip, ms)
      *       — drop-in for callers that pass Date.now() as animTime
      */
     class AnimationPlayer {
@@ -231,7 +231,7 @@
         /** Advance by delta-time (seconds). Call once per game-loop frame. */
         update(dt) {
             if (!this.playing || !this.clip || this.finished) return;
-            this.time += Math.min(dt, 0.1);          // cap at 100 ms to avoid jumps
+            this.time += Math.min(dt, AnimationPlayer.MAX_FRAME_DELTA);
             if (this.time >= this.clip.duration) {
                 if (this._loop) {
                     this.time %= this.clip.duration;
@@ -244,17 +244,19 @@
 
         /**
          * Seek using an absolute timestamp (ms) — for callers that pass Date.now().
-         * All clips always loop in this mode so the animation is continuous.
-         * @param {number} absMs   Absolute time in milliseconds (e.g. Date.now())
-         * @param {string} [clipName] Optionally look up a clip by name before seeking
+         * All clips loop automatically in this mode so the animation is continuous.
+         * @param {string|AnimationClip} clip   Clip name (string) or clip object
+         * @param {number}               absMs  Absolute time in milliseconds
          */
-        setAbsoluteTime(absMs, clipName) {
-            if (clipName !== undefined) {
-                const c = CLIPS[clipName];
-                if (c && c !== this.clip) { this.clip = c; this.finished = false; }
+        setAbsoluteTime(clip, absMs) {
+            // Accept either a clip object or a clip name string
+            if (typeof clip === 'string') {
+                clip = CLIPS[clip] || this.clip;
             }
-            if (!this.clip) return;
-            this.time = (absMs / 1000) % this.clip.duration;
+            if (!clip) return;
+            this.clip     = clip;
+            this.finished = false;
+            this.time     = (absMs / 1000) % clip.duration;
         }
 
         /** Read a single channel value at current time. */
@@ -304,8 +306,10 @@
         return new Track(channel, keyframes);
     }
 
+    /** @const {number} Maximum dt cap (seconds) — prevents large jumps on tab switch / pause */
+    AnimationPlayer.MAX_FRAME_DELTA = 0.1;
+
     /* ============================================================
-       BUILT-IN HUMANOID CLIPS
        arm.back  = back arm swing;  rest position baked-in at −4
        arm.front = front arm swing; rest position baked-in at +6
        leg.rotL/R = thigh rotation in degrees  (+ = swing forward in canvas)
@@ -773,10 +777,7 @@
      */
     function getSnapshot(state, animTimeMs) {
         const clip = getClipForState(state);
-        _sharedPlayer.setAbsoluteTime(animTimeMs, clip.name);
-        // Override the clip reference properly
-        _sharedPlayer.clip = clip;
-        _sharedPlayer.time = (animTimeMs / 1000) % clip.duration;
+        _sharedPlayer.setAbsoluteTime(clip, animTimeMs);
         return _sharedPlayer.getSnapshot();
     }
 
