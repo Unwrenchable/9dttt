@@ -805,49 +805,86 @@ class BeatEmUpEngine {
         
         const flash = player.invincible > 0 && Math.floor(player.invincible * 10) % 2;
         if (flash) return;
-        
-        this.ctx.save();
-        this.ctx.translate(player.x, player.y);
-        this.ctx.scale(player.facing || 1, 1);
-        
-        // Body
-        this.ctx.fillStyle = player.color;
-        this.ctx.fillRect(-20, -60, 40, 60);
-        
-        // Head
-        this.ctx.fillStyle = '#FFE4C4';
-        this.ctx.beginPath();
-        this.ctx.arc(0, -70, 15, 0, Math.PI * 2);
-        this.ctx.fill();
-        
-        // Attack animation
-        if (player.state === 'attacking') {
+
+        if (window.humanoidRenderer) {
+            // Map engine state to HumanoidRenderer state
+            let hrState = 'idle';
+            if (player.state === 'attacking') hrState = player.attackType === 'kick' ? 'kick' : 'punch';
+            else if (player.state === 'jumping') hrState = 'jump';
+            else if (player.state === 'dead') hrState = 'dead';
+            else if (player.state === 'hurt') hrState = 'hurt';
+            else if (player.state === 'walking') hrState = 'walk';
+            window.humanoidRenderer.draw(this.ctx, player.x, player.y, {
+                facing:    player.facing || 1,
+                scale:     0.85,
+                state:     hrState,
+                animTime:  Date.now(),
+                cloth:     player.color || '#3060c0',
+                accent:    '#f0c040',
+                skin:      '#e8c090',
+                hair:      '#1a1a1a',
+                boot:      '#2a1810',
+                muscular:  false,
+            });
+        } else {
+            // Fallback
+            this.ctx.save();
+            this.ctx.translate(player.x, player.y);
+            this.ctx.scale(player.facing || 1, 1);
             this.ctx.fillStyle = player.color;
-            this.ctx.fillRect(20, -40, 30, 10);
+            this.ctx.fillRect(-20, -60, 40, 60);
+            this.ctx.fillStyle = '#FFE4C4';
+            this.ctx.beginPath();
+            this.ctx.arc(0, -70, 15, 0, Math.PI * 2);
+            this.ctx.fill();
+            if (player.state === 'attacking') {
+                this.ctx.fillStyle = player.color;
+                this.ctx.fillRect(20, -40, 30, 10);
+            }
+            this.ctx.restore();
         }
-        
-        this.ctx.restore();
     }
 
     renderEnemy(enemy) {
         if (!enemy.active) return;
-        
+
+        // Health bar (always drawn above enemy)
+        const healthPct = enemy.health / enemy.maxHealth;
         this.ctx.save();
         this.ctx.translate(enemy.x, enemy.y);
-        this.ctx.scale(enemy.facing || 1, 1);
-        
-        // Body
-        this.ctx.fillStyle = enemy.color;
-        this.ctx.fillRect(-enemy.width/2, -enemy.height, enemy.width, enemy.height);
-        
-        // Health bar
-        const healthPct = enemy.health / enemy.maxHealth;
         this.ctx.fillStyle = '#333';
         this.ctx.fillRect(-25, -enemy.height - 10, 50, 6);
         this.ctx.fillStyle = healthPct > 0.3 ? '#4CAF50' : '#F44336';
         this.ctx.fillRect(-25, -enemy.height - 10, 50 * healthPct, 6);
-        
         this.ctx.restore();
+
+        if (window.humanoidRenderer) {
+            let hrState = 'idle';
+            if (enemy.state === 'attacking') hrState = 'punch';
+            else if (enemy.state === 'hurt') hrState = 'hurt';
+            else if (enemy.state === 'chasing') hrState = 'walk';
+            const bossScale = (enemy.isBoss ? 1.05 : 0.78);
+            window.humanoidRenderer.draw(this.ctx, enemy.x, enemy.y, {
+                facing:    enemy.facing || -1,
+                scale:     bossScale,
+                state:     hrState,
+                animTime:  Date.now(),
+                cloth:     enemy.color || '#c03030',
+                accent:    '#880000',
+                skin:      '#d4a070',
+                hair:      '#222',
+                boot:      '#1a1a1a',
+                muscular:  enemy.isBoss || false,
+            });
+        } else {
+            // Fallback
+            this.ctx.save();
+            this.ctx.translate(enemy.x, enemy.y);
+            this.ctx.scale(enemy.facing || 1, 1);
+            this.ctx.fillStyle = enemy.color;
+            this.ctx.fillRect(-enemy.width/2, -enemy.height, enemy.width, enemy.height);
+            this.ctx.restore();
+        }
     }
 
     renderPickup(pickup) {

@@ -521,19 +521,51 @@ class MegaHeroes {
         // Enemies
         this.enemies.forEach(enemy => {
             if (enemy.health <= 0) return;
-            this.ctx.fillStyle = '#f44';
-            this.ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+            if (window.humanoidRenderer) {
+                window.humanoidRenderer.draw(this.ctx,
+                    enemy.x + enemy.width / 2, enemy.y + enemy.height, {
+                    facing:    enemy.vx >= 0 ? 1 : -1,
+                    scale:     0.38,
+                    state:     'walk',
+                    animTime:  Date.now(),
+                    cloth:     '#c03030',
+                    accent:    '#ff4400',
+                    skin:      '#c88060',
+                    hair:      '#111',
+                    boot:      '#111',
+                    headStyle: 'helmet',
+                    headColor: '#333',
+                });
+            } else {
+                this.ctx.fillStyle = '#f44';
+                this.ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+            }
         });
         
         // Boss
         if (this.currentBoss && this.currentBoss.health > 0) {
-            this.ctx.fillStyle = '#f0f';
-            this.ctx.fillRect(
-                this.currentBoss.x, 
-                this.currentBoss.y,
-                this.currentBoss.width,
-                this.currentBoss.height
-            );
+            if (window.humanoidRenderer) {
+                window.humanoidRenderer.draw(this.ctx,
+                    this.currentBoss.x + this.currentBoss.width / 2,
+                    this.currentBoss.y + this.currentBoss.height, {
+                    facing:    1,
+                    scale:     0.75,
+                    state:     'attack',
+                    animTime:  Date.now(),
+                    cloth:     '#8800aa',
+                    accent:    '#ff00ff',
+                    skin:      '#c08060',
+                    hair:      '#220022',
+                    boot:      '#110011',
+                    muscular:  true,
+                    headStyle: 'helmet',
+                    headColor: '#550066',
+                });
+            } else {
+                this.ctx.fillStyle = '#f0f';
+                this.ctx.fillRect(this.currentBoss.x, this.currentBoss.y,
+                    this.currentBoss.width, this.currentBoss.height);
+            }
         }
         
         // Projectiles
@@ -552,8 +584,25 @@ class MegaHeroes {
         
         // Player
         if (this.player.invincible % 200 < 100) {
-            this.ctx.fillStyle = '#0ff';
-            this.ctx.fillRect(this.player.x, this.player.y, this.player.width, this.player.height);
+            if (window.humanoidRenderer) {
+                window.humanoidRenderer.draw(this.ctx,
+                    this.player.x + this.player.width / 2,
+                    this.player.y + this.player.height, {
+                    facing:    this.player.facingRight ? 1 : -1,
+                    scale:     0.42,
+                    state:     !this.player.onGround ? 'jump' : (Math.abs(this.player.vx || 0) > 0.5 ? 'walk' : 'idle'),
+                    animTime:  Date.now(),
+                    cloth:     '#0080c0',
+                    accent:    '#f0c040',
+                    skin:      '#e8c090',
+                    hair:      '#1a1a1a',
+                    boot:      '#1a2a50',
+                    weapon:    'gun',
+                });
+            } else {
+                this.ctx.fillStyle = '#0ff';
+                this.ctx.fillRect(this.player.x, this.player.y, this.player.width, this.player.height);
+            }
         }
         
         this.ctx.restore();

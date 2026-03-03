@@ -70,6 +70,7 @@
     <script src="../js/accessibility-manager.js"></script>
     <script src="../js/game-engine.js"></script>
     <script src="../js/sprite-renderer.js"></script>
+    <script src="../js/humanoid-renderer.js"></script>
 
     <!-- New Enhancement Systems -->
     <script src="../js/enhanced-combat.js"></script>
@@ -1179,101 +1180,57 @@
                 if (player.invincible > 0 && Math.floor(player.invincible * 10) % 2) {
                     return;
                 }
-                
-                this.ctx.save();
-                this.ctx.translate(screenX + player.width/2, screenY);
-                this.ctx.scale(player.facing, 1);
-                
-                // Shadow - scales smaller when jumping (higher = smaller shadow)
-                const heightFromGround = this.groundY - player.y;
-                const shadowScale = Math.max(0.3, 1 - heightFromGround / 150);
-                this.ctx.fillStyle = `rgba(0,0,0,${0.3 * shadowScale})`;
-                this.ctx.beginPath();
-                this.ctx.ellipse(0, 30 + heightFromGround, 25 * shadowScale, 8 * shadowScale, 0, 0, Math.PI * 2);
-                this.ctx.fill();
-                
-                // Legs
-                this.ctx.fillStyle = '#333';
-                if (player.state === 'jumping') {
-                    // Jumping pose - tucked legs for a more dynamic look
-                    this.ctx.save();
-                    this.ctx.rotate(-0.3);
-                    this.ctx.fillRect(-15, -10, 10, 25);
-                    this.ctx.restore();
-                    this.ctx.save();
-                    this.ctx.rotate(0.3);
-                    this.ctx.fillRect(5, -10, 10, 25);
-                    this.ctx.restore();
-                } else if (player.state === 'walking') {
-                    const legOffset = Math.sin(Date.now() / 100) * 8;
-                    this.ctx.fillRect(-12, -5, 10, 35);
-                    this.ctx.fillRect(2 + legOffset, -5, 10, 35);
-                } else if (player.state === 'attacking' && player.attackType === 'kick') {
-                    this.ctx.fillRect(-12, -5, 10, 35);
-                    // Extended kick leg
-                    this.ctx.save();
-                    this.ctx.rotate(-0.8);
-                    this.ctx.fillRect(5, -20, 10, 40);
-                    this.ctx.restore();
-                } else {
-                    this.ctx.fillRect(-12, -5, 10, 35);
-                    this.ctx.fillRect(2, -5, 10, 35);
-                }
-                
-                // Body
-                this.ctx.fillStyle = player.color;
-                this.ctx.fillRect(-15, -45, 30, 45);
-                
-                // Belt
-                this.ctx.fillStyle = '#FFD700';
-                this.ctx.fillRect(-15, -15, 30, 5);
-                
-                // Arms
-                if (player.state === 'jumping') {
-                    // Arms raised during jump for dynamic pose
-                    this.ctx.fillStyle = player.darkColor;
-                    this.ctx.save();
-                    this.ctx.rotate(-0.5);
-                    this.ctx.fillRect(-22, -55, 10, 22);
-                    this.ctx.restore();
-                    this.ctx.save();
-                    this.ctx.rotate(0.5);
-                    this.ctx.fillRect(12, -55, 10, 22);
-                    this.ctx.restore();
-                } else if (player.state === 'attacking' && player.attackType === 'punch') {
-                    // Punching arm
-                    this.ctx.fillStyle = player.darkColor;
-                    this.ctx.fillRect(-18, -40, 10, 25);
-                    this.ctx.fillRect(15, -40, 35, 12);
-                } else {
-                    this.ctx.fillStyle = player.darkColor;
-                    this.ctx.fillRect(-18, -40, 10, 25);
-                    this.ctx.fillRect(8, -40, 10, 25);
-                }
-                
-                // Head
-                this.ctx.fillStyle = '#F5CBA7';
-                this.ctx.beginPath();
-                this.ctx.arc(0, -55, 15, 0, Math.PI * 2);
-                this.ctx.fill();
-                
-                // Hair
-                this.ctx.fillStyle = '#333';
-                this.ctx.beginPath();
-                this.ctx.arc(0, -60, 12, Math.PI, 0);
-                this.ctx.fill();
-                
-                // Headband
-                this.ctx.fillStyle = player.color;
-                this.ctx.fillRect(-15, -62, 30, 5);
-                
-                this.ctx.restore();
-                
-                // Player name
-                this.ctx.fillStyle = player.color;
+
+                // Player name label
+                this.ctx.fillStyle = player.color || '#4a90e2';
                 this.ctx.font = 'bold 12px Arial';
                 this.ctx.textAlign = 'center';
-                this.ctx.fillText(player.name, screenX + player.width/2, screenY - 75);
+                this.ctx.fillText(player.name, screenX + player.width / 2, screenY - 100);
+
+                if (window.humanoidRenderer) {
+                    let hrState = 'idle';
+                    if (player.state === 'jumping') hrState = 'jump';
+                    else if (player.state === 'walking') hrState = 'walk';
+                    else if (player.state === 'attacking') hrState = player.attackType === 'kick' ? 'kick' : 'punch';
+                    else if (player.state === 'hurt') hrState = 'hurt';
+                    else if (player.state === 'dead') hrState = 'dead';
+                    window.humanoidRenderer.draw(this.ctx, screenX + player.width / 2, screenY, {
+                        facing:    player.facing,
+                        scale:     0.92,
+                        state:     hrState,
+                        animTime:  Date.now(),
+                        cloth:     player.color || '#4a90e2',
+                        accent:    '#FFD700',
+                        skin:      '#F5CBA7',
+                        hair:      '#333',
+                        boot:      '#2a1a0a',
+                        muscular:  false,
+                        headStyle: 'bandana',
+                        headColor: player.color || '#4a90e2',
+                    });
+                } else {
+                    this.ctx.save();
+                    this.ctx.translate(screenX + player.width/2, screenY);
+                    this.ctx.scale(player.facing, 1);
+                    const heightFromGround = this.groundY - player.y;
+                    const shadowScale = Math.max(0.3, 1 - heightFromGround / 150);
+                    this.ctx.fillStyle = `rgba(0,0,0,${0.3 * shadowScale})`;
+                    this.ctx.beginPath();
+                    this.ctx.ellipse(0, 30 + heightFromGround, 25 * shadowScale, 8 * shadowScale, 0, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    this.ctx.fillStyle = '#333';
+                    this.ctx.fillRect(-12, -5, 10, 35);
+                    this.ctx.fillRect(2, -5, 10, 35);
+                    this.ctx.fillStyle = player.color;
+                    this.ctx.fillRect(-15, -45, 30, 45);
+                    this.ctx.fillStyle = '#FFD700';
+                    this.ctx.fillRect(-15, -15, 30, 5);
+                    this.ctx.fillStyle = '#F5CBA7';
+                    this.ctx.beginPath();
+                    this.ctx.arc(0, -55, 15, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    this.ctx.restore();
+                }
             }
             
             renderEnemy(enemy) {
@@ -1281,210 +1238,83 @@
                 const screenY = enemy.y;
                 
                 if (screenX < -50 || screenX > this.width + 50) return;
-                
-                this.ctx.save();
-                this.ctx.translate(screenX + enemy.width/2, screenY);
-                this.ctx.scale(enemy.facing, 1);
-                
-                // Flash when hurt
-                if (enemy.state === 'hurt') {
-                    this.ctx.globalAlpha = 0.7;
-                }
-                
-                // Shadow
-                this.ctx.fillStyle = 'rgba(0,0,0,0.3)';
-                this.ctx.beginPath();
-                this.ctx.ellipse(0, 25, enemy.isBoss ? 35 : 20, 6, 0, 0, Math.PI * 2);
-                this.ctx.fill();
-                
-                const scale = enemy.isBoss ? 1.3 : 1;
-                this.ctx.scale(scale, scale);
-                
-                // Legs
-                this.ctx.fillStyle = '#222';
-                this.ctx.fillRect(-10, -5, 8, 30);
-                this.ctx.fillRect(2, -5, 8, 30);
-                
-                // Body
-                this.ctx.fillStyle = enemy.color;
-                this.ctx.fillRect(-12, -40, 24, 40);
-                
-                // Arms
-                if (enemy.state === 'attacking') {
-                    this.ctx.fillRect(10, -35, 30, 10);
-                } else {
-                    this.ctx.fillRect(-15, -35, 8, 20);
-                    this.ctx.fillRect(7, -35, 8, 20);
-                }
-                
-                // Head
-                this.ctx.fillStyle = '#D4A574';
-                this.ctx.beginPath();
-                this.ctx.arc(0, -50, 12, 0, Math.PI * 2);
-                this.ctx.fill();
-                
-                // Type-specific features
-                if (enemy.type === 'punk') {
-                    // Mohawk
-                    this.ctx.fillStyle = '#e74c3c';
-                    this.ctx.fillRect(-3, -70, 6, 20);
-                } else if (enemy.type === 'thug') {
-                    // Bandana
-                    this.ctx.fillStyle = '#27ae60';
-                    this.ctx.fillRect(-12, -58, 24, 6);
-                } else if (enemy.type === 'biker') {
-                    // Helmet
-                    this.ctx.fillStyle = '#222';
-                    this.ctx.beginPath();
-                    this.ctx.arc(0, -52, 14, Math.PI, 0);
-                    this.ctx.fill();
-                    // Visor
-                    this.ctx.fillStyle = '#444';
-                    this.ctx.fillRect(-10, -52, 20, 5);
-                } else if (enemy.type === 'ninja') {
-                    // Full face mask
-                    this.ctx.fillStyle = '#222';
-                    this.ctx.fillRect(-12, -58, 24, 15);
-                    // Eyes only
-                    this.ctx.fillStyle = '#FFF';
-                    this.ctx.fillRect(-8, -52, 5, 3);
-                    this.ctx.fillRect(3, -52, 5, 3);
-                } else if (enemy.type === 'monk') {
-                    // Bald head sheen
-                    this.ctx.fillStyle = '#F5D6A0';
-                    this.ctx.beginPath();
-                    this.ctx.arc(0, -52, 12, 0, Math.PI * 2);
-                    this.ctx.fill();
-                    // Prayer beads
-                    this.ctx.strokeStyle = '#8B4513';
-                    this.ctx.lineWidth = 3;
-                    this.ctx.beginPath();
-                    this.ctx.arc(0, -35, 15, 0.3, Math.PI - 0.3);
-                    this.ctx.stroke();
-                } else if (enemy.type === 'shadow') {
-                    // Ghostly appearance
-                    this.ctx.fillStyle = 'rgba(30, 30, 50, 0.8)';
-                    this.ctx.fillRect(-12, -40, 24, 40);
-                    // Glowing eyes
-                    this.ctx.fillStyle = '#e74c3c';
-                    this.ctx.fillRect(-7, -52, 4, 3);
-                    this.ctx.fillRect(3, -52, 4, 3);
-                } else if (enemy.type === 'elite') {
-                    // Armored
-                    this.ctx.fillStyle = '#8B0000';
-                    this.ctx.fillRect(-14, -42, 28, 44);
-                    // Shoulder pads
-                    this.ctx.fillRect(-18, -38, 8, 8);
-                    this.ctx.fillRect(10, -38, 8, 8);
-                    // Helmet
-                    this.ctx.fillStyle = '#4a4a4a';
-                    this.ctx.beginPath();
-                    this.ctx.arc(0, -52, 14, Math.PI, 0);
-                    this.ctx.fill();
-                } else if (enemy.isBoss) {
-                    // Boss-specific features based on type
-                    if (enemy.type === 'vince') {
-                        // Slicked back hair
-                        this.ctx.fillStyle = '#222';
-                        this.ctx.beginPath();
-                        this.ctx.moveTo(-12, -55);
-                        this.ctx.lineTo(0, -68);
-                        this.ctx.lineTo(12, -55);
-                        this.ctx.closePath();
-                        this.ctx.fill();
-                        // Gold chain
-                        this.ctx.strokeStyle = '#FFD700';
-                        this.ctx.lineWidth = 3;
-                        this.ctx.beginPath();
-                        this.ctx.arc(0, -30, 12, 0.5, Math.PI - 0.5);
-                        this.ctx.stroke();
-                    } else if (enemy.type === 'chain') {
-                        // Biker helmet with spikes
-                        this.ctx.fillStyle = '#222';
-                        this.ctx.beginPath();
-                        this.ctx.arc(0, -52, 15, Math.PI, 0);
-                        this.ctx.fill();
-                        // Spikes
-                        this.ctx.fillStyle = '#888';
-                        for (let i = -2; i <= 2; i++) {
-                            this.ctx.fillRect(i * 5 - 2, -70, 4, 10);
-                        }
-                    } else if (enemy.type === 'iron') {
-                        // Dock worker cap
-                        this.ctx.fillStyle = '#1a3a5a';
-                        this.ctx.fillRect(-14, -62, 28, 8);
-                        // Anchor tattoo
-                        this.ctx.strokeStyle = '#2980b9';
-                        this.ctx.lineWidth = 2;
-                        this.ctx.beginPath();
-                        this.ctx.moveTo(0, -35);
-                        this.ctx.lineTo(0, -20);
-                        this.ctx.stroke();
-                    } else if (enemy.type === 'sensei') {
-                        // Shadow hood
-                        this.ctx.fillStyle = '#0a0a0a';
-                        this.ctx.beginPath();
-                        this.ctx.moveTo(-15, -45);
-                        this.ctx.lineTo(0, -72);
-                        this.ctx.lineTo(15, -45);
-                        this.ctx.closePath();
-                        this.ctx.fill();
-                        // Red eyes
-                        this.ctx.fillStyle = '#e74c3c';
-                        this.ctx.fillRect(-6, -52, 4, 3);
-                        this.ctx.fillRect(2, -52, 4, 3);
-                    } else if (enemy.type === 'kang') {
-                        // Dragon helmet
-                        this.ctx.fillStyle = '#8B0000';
-                        this.ctx.beginPath();
-                        this.ctx.arc(0, -52, 16, Math.PI, 0);
-                        this.ctx.fill();
-                        // Dragon horns
-                        this.ctx.fillStyle = '#FFD700';
-                        this.ctx.beginPath();
-                        this.ctx.moveTo(-12, -58);
-                        this.ctx.lineTo(-18, -78);
-                        this.ctx.lineTo(-8, -62);
-                        this.ctx.closePath();
-                        this.ctx.fill();
-                        this.ctx.beginPath();
-                        this.ctx.moveTo(12, -58);
-                        this.ctx.lineTo(18, -78);
-                        this.ctx.lineTo(8, -62);
-                        this.ctx.closePath();
-                        this.ctx.fill();
-                        // Glowing eyes
-                        this.ctx.fillStyle = '#FF4500';
-                        this.ctx.fillRect(-7, -52, 5, 4);
-                        this.ctx.fillRect(2, -52, 5, 4);
-                    } else {
-                        // Default boss - sunglasses and scar
-                        this.ctx.fillStyle = '#000';
-                        this.ctx.fillRect(-10, -52, 20, 6);
-                        this.ctx.strokeStyle = '#a93226';
-                        this.ctx.lineWidth = 2;
-                        this.ctx.beginPath();
-                        this.ctx.moveTo(-8, -45);
-                        this.ctx.lineTo(8, -55);
-                        this.ctx.stroke();
-                    }
-                }
-                
-                this.ctx.restore();
-                
-                // Health bar for boss
+
+                // Boss health bar (drawn in canvas coords, not scaled)
                 if (enemy.isBoss) {
                     const barWidth = 80;
                     const healthPercent = enemy.health / enemy.maxHealth;
                     this.ctx.fillStyle = '#333';
-                    this.ctx.fillRect(screenX - barWidth/2 + enemy.width/2, screenY - 95, barWidth, 8);
+                    this.ctx.fillRect(screenX - barWidth/2 + enemy.width/2, screenY - 120, barWidth, 8);
                     this.ctx.fillStyle = '#e74c3c';
-                    this.ctx.fillRect(screenX - barWidth/2 + enemy.width/2, screenY - 95, barWidth * healthPercent, 8);
-                    
+                    this.ctx.fillRect(screenX - barWidth/2 + enemy.width/2, screenY - 120, barWidth * healthPercent, 8);
                     this.ctx.fillStyle = '#FFF';
                     this.ctx.font = 'bold 10px Arial';
                     this.ctx.textAlign = 'center';
-                    this.ctx.fillText('BOSS', screenX + enemy.width/2, screenY - 100);
+                    this.ctx.fillText('BOSS', screenX + enemy.width/2, screenY - 125);
+                }
+
+                if (window.humanoidRenderer) {
+                    // Map enemy type to head style + colors
+                    const typeMap = {
+                        punk:   { headStyle: 'mohawk',  headColor: '#e74c3c', hair: '#e74c3c' },
+                        thug:   { headStyle: 'bandana', headColor: '#27ae60', hair: '#222'   },
+                        biker:  { headStyle: 'helmet',  headColor: '#222',    hair: '#111'   },
+                        ninja:  { headStyle: 'mask',    headColor: '#222',    hair: '#000'   },
+                        monk:   { headStyle: 'bald',    headColor: '#F5D6A0', hair: '#111'   },
+                        shadow: { headStyle: 'mask',    headColor: '#1e1e32', hair: '#000'   },
+                        elite:  { headStyle: 'helmet',  headColor: '#4a4a4a', hair: '#111'   },
+                        vince:  { headStyle: 'normal',  headColor: null,      hair: '#111'   },
+                        chain:  { headStyle: 'helmet',  headColor: '#333',    hair: '#000'   },
+                        iron:   { headStyle: 'normal',  headColor: null,      hair: '#1a3a5a'},
+                        sensei: { headStyle: 'hood',    headColor: '#0a0a0a', hair: '#000'   },
+                        kang:   { headStyle: 'helmet',  headColor: '#8B0000', hair: '#000'   },
+                    };
+                    const tm = typeMap[enemy.type] || { headStyle: 'normal', headColor: null, hair: '#333' };
+
+                    let hrState = 'idle';
+                    if (enemy.state === 'attacking') hrState = 'punch';
+                    else if (enemy.state === 'hurt') hrState = 'hurt';
+                    else if (enemy.state === 'chasing') hrState = 'walk';
+
+                    window.humanoidRenderer.draw(this.ctx, screenX + enemy.width/2, screenY, {
+                        facing:    enemy.facing,
+                        scale:     enemy.isBoss ? 0.95 : 0.72,
+                        state:     hrState,
+                        animTime:  Date.now(),
+                        cloth:     enemy.color || '#c03030',
+                        accent:    '#880000',
+                        skin:      '#D4A574',
+                        hair:      tm.hair,
+                        boot:      '#1a1a1a',
+                        muscular:  enemy.isBoss || false,
+                        headStyle: tm.headStyle,
+                        headColor: tm.headColor,
+                    });
+                } else {
+                    this.ctx.save();
+                    this.ctx.translate(screenX + enemy.width/2, screenY);
+                    this.ctx.scale(enemy.facing, 1);
+                    if (enemy.state === 'hurt') this.ctx.globalAlpha = 0.7;
+                    const scale = enemy.isBoss ? 1.3 : 1;
+                    this.ctx.scale(scale, scale);
+                    this.ctx.fillStyle = '#222';
+                    this.ctx.fillRect(-10, -5, 8, 30);
+                    this.ctx.fillRect(2, -5, 8, 30);
+                    this.ctx.fillStyle = enemy.color;
+                    this.ctx.fillRect(-12, -40, 24, 40);
+                    this.ctx.fillStyle = '#D4A574';
+                    this.ctx.beginPath();
+                    this.ctx.arc(0, -50, 12, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    this.ctx.restore();
+                    if (enemy.isBoss) {
+                        const barWidth = 80;
+                        const healthPercent = enemy.health / enemy.maxHealth;
+                        this.ctx.fillStyle = '#333';
+                        this.ctx.fillRect(screenX - barWidth/2 + enemy.width/2, screenY - 95, barWidth, 8);
+                        this.ctx.fillStyle = '#e74c3c';
+                        this.ctx.fillRect(screenX - barWidth/2 + enemy.width/2, screenY - 95, barWidth * healthPercent, 8);
+                    }
                 }
             }
             
