@@ -497,8 +497,9 @@ app.get('/api/stats', async (req, res) => {
 });
 
 // Version endpoint — used by the Speed Router client to detect deployments
+const _FALLBACK_VERSION = '2.0.0'; // keep in sync with package.json if package.json is unavailable
 const _appVersion = (() => {
-    try { return require('./package.json').version; } catch (e) { return '2.0.0'; }
+    try { return require('./package.json').version; } catch (e) { return _FALLBACK_VERSION; }
 })();
 const _buildTime = Date.now(); // set once at server start; changes on every (re)deploy
 

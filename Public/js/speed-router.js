@@ -194,7 +194,7 @@
         ].join(';');
 
         var msg = document.createElement('span');
-        msg.textContent = '🚀 Speed Router detected a platform update!  Refresh to get the latest game code.';
+        msg.textContent = '🚀 Speed Router detected a platform update! Refresh to get the latest game code.';
 
         var refreshBtn = document.createElement('button');
         refreshBtn.textContent = '↻ Refresh now';
