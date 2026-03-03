@@ -40,6 +40,7 @@ class BrainAgeTraining {
         }
         
         this.currentProblem = 0;
+        this.currentGame = 'calculation';
         this.startTime = Date.now();
         this.drawCalculationProblem();
         
@@ -208,6 +209,7 @@ class BrainAgeTraining {
         }
         
         this.memorizeNumber = numberString;
+        this.currentGame = 'counting';
         this.startTime = Date.now();
         
         // Show number

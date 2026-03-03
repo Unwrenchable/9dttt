@@ -1,92 +1,108 @@
-# FizzSwap — Agent Guidance
+# 🎮 9DTTT — Agent Guidance
 
-Use this file to orient yourself before suggesting changes to FizzSwap.
+Use this file to orient yourself before suggesting changes to the 9DTTT
+gaming platform.
 
 ## Project overview
 
-FizzSwap (`fizzdex`) is a multi-chain DEX that supports atomic swaps across
-EVM-compatible chains, Solana, and XRP. It is the official DEX for the
-ATOMIC-FIZZ-CAPS-VAULT-77-WASTELAND-GPS ecosystem.
+**9DTTT** is a full-stack multiplayer gaming platform with 31 browser-based
+games, real-time multiplayer via Socket.io, multi-chain Web3 wallet integration
+(XRP / Solana / Ethereum), leaderboards, achievements, and a crypto education
+game (Crypto Quest).
+
+**Live site**: https://d9ttt.com  
+This is **NOT** a DEX, swap protocol, or naming service.
 
 ## Repository layout
 
 ```
-/                        # Root: Hardhat + TypeScript (EVM contracts & tests)
-├── contracts/           # Solidity contracts (EVM)
-├── programs/            # Anchor program workspace
-│   └── fizzdex-solana/  # Rust/Anchor Solana program (Cargo.toml here)
-├── scripts/             # Hardhat deploy scripts (deploy-evm.ts, etc.)
-├── src/                 # TypeScript utilities / chain adapters
-├── test/                # Hardhat/Mocha test files
-├── relayer/             # Standalone Node.js relayer service
-│   └── src/             # TypeScript source for relayer
-└── web/                 # Vite + React frontend
-    └── src/             # App.tsx (single-component DEX UI), styles.css
+/
+├── server.js              # Main Express + Socket.io entry point
+├── package.json           # Root package (Node.js backend, CommonJS)
+├── vercel.json            # Vercel: serves Public/, rewrites /api/*
+├── render.yaml            # Render: backend API service config
+├── server/                # Server modules (CommonJS)
+│   ├── config.js          # Environment config (PORT, JWT_SECRET, Redis, etc.)
+│   ├── auth.js            # JWT authentication helpers
+│   ├── browser-auth.js    # Browser-side auth helpers
+│   ├── gameManager.js     # Core game logic, matchmaking, game state
+│   ├── storage.js         # Data persistence (Redis + in-memory fallback)
+│   ├── moderation.js      # Chat moderation, reports, disciplinary actions
+│   ├── security.js        # Rate limiting, bot protection, input sanitization
+│   ├── monetization.js    # Cosmetics, ad rewards system
+│   ├── keepAlive.js       # Render keep-alive pings
+│   ├── firebase.js        # Firebase integration (optional)
+│   └── boot.js            # Platform boot sequence
+├── api/                   # REST API route handlers
+│   ├── health.js          # GET /api/health
+│   ├── stats.js           # GET /api/stats
+│   ├── leaderboard.js     # GET /api/leaderboard
+│   ├── auth/
+│   │   ├── login.js       # POST /api/auth/login
+│   │   └── wallet.js      # POST /api/auth/wallet (multi-chain)
+│   └── crypto-quest/
+│       └── progress.js    # GET/POST /api/crypto-quest/progress
+├── Public/                # Static frontend (Vanilla HTML/CSS/JS)
+│   ├── index.html         # Main landing / game lobby
+│   ├── 9dttt.html         # Ultimate Tic-Tac-Toe page
+│   ├── games.html         # Game browser
+│   ├── admin.html         # Admin panel
+│   ├── manifest.json      # PWA manifest
+│   ├── games/             # 31 individual game HTML pages
+│   ├── css/               # Stylesheets (styles.css, game-ui.css, etc.)
+│   └── js/                # Client-side JS (55+ files)
+└── scripts/               # Utility scripts (XRP testnet, bridge check, etc.)
 ```
 
 ## Toolchain
 
 | Layer | Tool |
 |-------|------|
-| EVM contracts | Solidity 0.8.20+, Hardhat 2.17, OpenZeppelin 5 |
-| TypeScript compilation | `tsc` (root), `tsc -p tsconfig.json` (relayer) |
-| Contract testing | Hardhat + Mocha + Chai |
-| Linting | ESLint with `@typescript-eslint` |
-| Frontend build | Vite 5 + React 18 |
-| Solana program | Rust + `cargo build-bpf` |
-| Containerisation | Docker + docker-compose |
+| Runtime | Node.js 20 LTS |
+| Backend framework | Express 4 (CommonJS — `require()` only) |
+| Real-time | Socket.io 4.7 |
+| Frontend | Vanilla HTML5 / CSS3 / JavaScript — NO React, NO TypeScript |
+| Database | Redis (via `REDIS_URL`) + in-memory fallback (`server/storage.js`) |
+| Auth | JWT (`jsonwebtoken`), bcryptjs for password hashing |
+| Blockchain | XRP (`xrpl`), Solana (`@solana/web3.js`), Ethereum (`ethers`) |
+| Security | Helmet, `express-rate-limit`, custom `server/security.js` |
+| Deployment | Vercel (frontend), Render (backend) |
 
 ## Root `package.json` scripts
 
-```
-build              tsc
-test               hardhat test
-lint               eslint . --ext .ts,.js
-compile-contracts  hardhat compile
-deploy-evm         hardhat run scripts/deploy-evm.ts
-build-solana       cargo build-bpf --manifest-path=programs/fizzdex-solana/Cargo.toml
-relayer:init-mappings  node relayer/init-mappings.js
-```
-
-## Relayer scripts (`relayer/package.json`)
-
-```
-start        ts-node src/index.ts
-build        tsc -p tsconfig.json
-start:prod   node dist/index.js
-```
-
-## Web scripts (`web/package.json`)
-
-```
-dev      vite
-build    vite build
-preview  vite preview
+```bash
+npm start        # node server.js (production)
+npm run dev      # node server.js (development)
+npm run build    # echo 'Building for production' (no compile step)
+npm run test     # echo 'Running tests...' (placeholder)
 ```
 
 ## Key conventions
 
-- **Security**: All state-changing Solidity functions use reentrancy guards;
-  Solidity 0.8.20+ for overflow protection. See `SECURITY.md`.
-- **Chain adapter pattern**: `src/chain-adapter.ts` exports an `IChainAdapter`
-  interface that every chain integration must implement.
-- **Frontend env vars**: Vite convention — prefix with `VITE_`. Declared in
-  `web/src/vite-env.d.ts`. Available vars: `VITE_SOLANA_RPC`,
-  `VITE_SOLANA_PROGRAM_ID`, `VITE_RELAYER_URL`. Template: `web/.env.example`.
-- **Browser polyfills**: `vite-plugin-node-polyfills` supplies Buffer/process/
-  crypto shims. The web UI uses the Web Crypto API (not Node's `crypto`).
-- **Single-component UI**: All state and logic lives in `web/src/App.tsx`.
-  Four tabs: swap / pool / fizzcaps / bridge.
-- **Secrets**: Never committed. Use `.env` files (git-ignored). Templates are
-  `.env.example` files.
+- **CommonJS only** — `require()` / `module.exports` in all server files.
+  No ES module `import` in backend code.
+- **Vanilla JS frontend** — No framework, no build step. Edit `Public/` files
+  and they take effect immediately on browser refresh.
+- **Socket.io for multiplayer** — All real-time game events use Socket.io.
+  REST API handles auth, leaderboards, and non-real-time data only.
+- **JWT authentication** — Valid JWT required in `Authorization: Bearer <token>`
+  or `x-auth-token` header for protected endpoints.
+- **Redis with fallback** — `server/storage.js` uses Redis when `REDIS_URL` is
+  set; falls back to in-memory store. Data is lost on restart with fallback.
+- **Multi-chain wallets** — `Public/js/multi-chain-wallet.js` handles XRP,
+  Solana, and Ethereum. Never hardcode a single chain.
+- **No secrets in code** — Use `.env` files (git-ignored). See `server/config.js`
+  for all expected environment variables.
 
 ## Things to watch out for
 
-- `minOut` is currently hardcoded to `0` in swap logic — slippage is not
-  enforced on-chain even though the UI shows fee/slippage info.
-- The web bundle will emit a large-chunk warning (>500 KB) from ethers +
-  `@solana/web3.js` — this is expected.
-- Vercel deployment is configured via `vercel.json` at the root; build command
-  is `cd web && npm install && npm run build`; output dir is `web/dist`.
-- `relayer-mappings.json` is git-ignored (generated at runtime by
-  `relayer:init-mappings`).
+- **`JWT_SECRET` env var** — The server hard-fails on startup if `NODE_ENV=production`
+  and `JWT_SECRET` is still the insecure default value. Always set this in prod.
+- **`REDIS_URL` must be `redis://` or `rediss://`** — HTTP/HTTPS URLs will be
+  rejected. Leave blank to use in-memory fallback.
+- **No build step for frontend** — `Public/` is served as static files. Do not
+  add webpack/vite without updating `vercel.json`.
+- **Socket.io rate limiting** — `server/security.js` limits connections and
+  events per socket. Don't bypass these guards.
+- **CORS allowlist** — Production allows `d9ttt.com`, `9dttt.vercel.app`,
+  and env-configured origins. Localhost is only allowed in development.
