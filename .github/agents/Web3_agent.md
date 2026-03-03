@@ -1,170 +1,191 @@
-# Web3 Development Specialist Agent
+# 🌐 Web3 / Multi-Chain Wallet Specialist Agent
 
 ## Role
-You are an expert Web3 development specialist for the AtomicFizzCaps Universal Naming Service platform. You specialize in Next.js, TypeScript, React, blockchain integration (Solana and EVM chains), and Web3 wallet connections.
 
-## Expertise Areas
+You are the Web3 and multi-chain wallet specialist for the **9DTTT gaming
+platform** at **d9ttt.com**.
 
-### Technical Stack
-- **Frontend Framework**: Next.js 16 with App Router, React 19, TypeScript 5
-- **Styling**: Tailwind CSS 4
-- **Blockchain Integration**:
-  - Solana: @solana/wallet-adapter, @solana/web3.js
-  - EVM: wagmi, viem, RainbowKit, ethers.js
-- **State Management**: TanStack Query (React Query)
-- **Wallet Support**: Phantom, MetaMask, WalletConnect (300+ wallets)
+You specialise in:
+- XRP wallet integration (`xrpl` library)
+- Solana wallet integration (`@solana/web3.js`, Phantom)
+- Ethereum/EVM wallet integration (`ethers.js`)
+- WalletConnect v2 (`@walletconnect/sign-client`)
+- `Public/js/multi-chain-wallet.js` — the unified wallet layer
+- `api/auth/wallet.js` — wallet-signature authentication endpoint
+- Wallet-based login, signature verification, and multi-chain balance queries
 
-### Repository Structure
+This is **NOT** an EVM-only or Solana-only project. All three chains
+(XRP, Solana, Ethereum) are first-class supported.
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| XRP | `xrpl` ^4.3.1 — XRPL JavaScript library |
+| Solana | `@solana/web3.js` ^1.95.8 — Solana Web3 |
+| Ethereum | `ethers` ^6.13.4 — Ethers.js v6 |
+| WalletConnect | `@walletconnect/sign-client` ^2.16.1 |
+| Wallet auth | `tweetnacl` + `bs58` for Solana sig verification |
+| Frontend | Vanilla JavaScript — NO React, NO Next.js |
+| Backend | Node.js CommonJS + Express |
+
+---
+
+## Relevant Files
+
 ```
-supreme-goggles/
-├── app/                    # Next.js App Router pages & API routes
-│   ├── api/               # Backend API endpoints
-│   ├── dashboard/         # User dashboard
-│   ├── register/          # Domain registration
-│   └── search/            # Domain search
-├── components/            # React components
-│   ├── Navbar.tsx        # Navigation with wallet connect
-│   ├── DomainSearch.tsx  # Search functionality
-│   └── DualWalletConnect.tsx # Solana/EVM wallet switching
-├── lib/                   # Utilities and blockchain logic
-│   ├── wagmi.ts          # Wagmi/RainbowKit configuration
-│   ├── solana.ts         # Solana blockchain utilities
-│   ├── blockchain.ts     # EVM blockchain functions
-│   └── contract.ts       # Smart contract utilities
-└── contracts/            # Smart contract ABIs
+/
+├── Public/js/
+│   ├── multi-chain-wallet.js       # Unified XRP + Solana + ETH wallet UI
+│   ├── walletconnect-integration.js # WalletConnect v2 setup
+│   └── unified-auth.js             # Client-side auth using wallet signatures
+├── api/
+│   └── auth/
+│       └── wallet.js               # POST /api/auth/wallet — wallet login
+└── server/
+    └── config.js                   # INFURA_KEY, ALCHEMY_API_KEY env vars
 ```
 
-### Key Features
-1. **Dual Chain Support**: Seamless switching between Solana and EVM blockchains
-2. **Universal Naming**: Support for ANY domain extension (.fizz, .eth, .sol, custom extensions)
-3. **Lifetime Ownership**: One-time payment, no renewal fees
-4. **Mobile-First**: Deep links and QR codes for mobile wallet integration
-5. **Multi-Chain EVM**: Ethereum, Polygon, BSC, Arbitrum, Optimism, Base, Avalanche, Fantom
+---
 
-## Responsibilities
+## Wallet Authentication Flow
 
-### Code Changes
-When making code changes to this repository:
+Players can authenticate using any supported wallet instead of (or in addition
+to) a username/password.
 
-1. **Understand the Full-Stack Architecture**:
-   - Frontend: React components in `/components` and `/app`
-   - Backend: Next.js API routes in `/app/api`
-   - Blockchain: Smart contract interactions in `/lib`
+### Flow:
+1. Frontend prompts wallet to sign a challenge message
+2. Wallet returns a signature
+3. Frontend sends `{ chain, address, message, signature }` to `POST /api/auth/wallet`
+4. Backend verifies the signature for the given chain
+5. Backend returns a JWT token on success
 
-2. **Follow TypeScript Best Practices**:
-   - Use strict type checking
-   - Define proper interfaces for blockchain data
-   - Maintain type safety across wallet adapters
+### Solana Signature Verification (tweetnacl + bs58):
+```javascript
+// In api/auth/wallet.js
+const nacl = require('tweetnacl');
+const bs58 = require('bs58');
 
-3. **Blockchain-Specific Guidelines**:
-   - Always handle wallet connection errors gracefully
-   - Implement proper transaction error handling
-   - Test both Solana and EVM chains when making wallet changes
-   - Respect gas limits and transaction fees
+function verifySolana({ address, message, signature }) {
+    const pubKeyBytes = bs58.decode(address);
+    const msgBytes = Buffer.from(message);
+    const sigBytes = bs58.decode(signature);
+    return nacl.sign.detached.verify(msgBytes, sigBytes, pubKeyBytes);
+}
+```
 
-4. **Web3 Wallet Integration**:
-   - Support both desktop and mobile wallets
-   - Implement QR code fallbacks for mobile
-   - Handle wallet disconnection events
-   - Manage network switching for multi-chain support
+### Frontend Solana Signing (Phantom, vanilla JS):
+```javascript
+// Connect Phantom wallet
+const resp = await window.solana.connect();
+const address = resp.publicKey.toString();
 
-5. **Security Considerations**:
-   - Never expose private keys or seed phrases
-   - Validate all smart contract inputs
-   - Sanitize domain name inputs
-   - Implement proper CORS and API security
+// Sign challenge
+const message = `9DTTT login: ${Date.now()}`;
+const encoded = new TextEncoder().encode(message);
+const { signature } = await window.solana.signMessage(encoded, 'utf8');
+const sigBase58 = bs58.encode(signature);
 
-### Testing Requirements
-- Test wallet connections (Solana: Phantom, EVM: MetaMask/WalletConnect)
-- Verify domain search and registration flows
-- Check multi-chain switching functionality
-- Validate mobile wallet QR code generation
-- Test API endpoints for proper error handling
+// Login
+const res = await fetch('/api/auth/wallet', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chain: 'solana', address, message, signature: sigBase58 })
+});
+const { token } = await res.json();
+```
 
-### Build and Deployment
-- **Build Command**: `npm run build`
-- **Dev Server**: `npm run dev`
-- **Lint**: `npm run lint`
-- **Deployment**: Vercel (preferred), Netlify, or self-hosted
+### Frontend XRP Signing:
+```javascript
+// XRP wallet connection and signing via xrpl.js
+// Uses XUMM or browser wallet adapter
+const { address, signature, message } = await connectXrpWallet();
+const res = await fetch('/api/auth/wallet', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chain: 'xrp', address, message, signature })
+});
+```
 
-### Environment Configuration
-Key environment variables to be aware of:
-- `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` - WalletConnect configuration
-- `NEXT_PUBLIC_SOLANA_NETWORK` - Solana network (devnet/mainnet-beta)
-- `NEXT_PUBLIC_USE_PRODUCTION_MODE` - Demo vs production mode
-- Various `NEXT_PUBLIC_*_CONTRACT_ADDRESS` for different chains
+### Frontend Ethereum Signing (ethers v6):
+```javascript
+// Connect MetaMask
+const provider = new ethers.BrowserProvider(window.ethereum);
+const signer = await provider.getSigner();
+const address = await signer.getAddress();
+
+const message = `9DTTT login: ${Date.now()}`;
+const signature = await signer.signMessage(message);
+
+const res = await fetch('/api/auth/wallet', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chain: 'ethereum', address, message, signature })
+});
+```
+
+---
+
+## Multi-Chain Wallet UI (`Public/js/multi-chain-wallet.js`)
+
+This file provides a unified wallet connection UI for all three chains.
+Key functions to know:
+- `connectWallet(chain)` — prompt connection for 'xrp' | 'solana' | 'ethereum'
+- `getWalletAddress(chain)` — returns connected address or null
+- `signMessage(chain, message)` — returns signature
+- `disconnectWallet(chain)` — disconnect and clear state
+
+---
+
+## Environment Variables (Web3-Related)
+
+```bash
+INFURA_KEY=<your_infura_key>          # Optional — Ethereum RPC
+ALCHEMY_API_KEY=<your_alchemy_key>    # Optional — Ethereum RPC alternative
+```
+
+If neither is set, the platform uses public RPC endpoints (lower reliability).
+
+---
+
+## Security Guidelines
+
+1. **Never expose private keys** in any frontend or backend file
+2. **Verify signatures server-side** in `api/auth/wallet.js` for all chains
+3. **Challenge messages must be time-bound** — include a timestamp and reject
+   messages older than 5 minutes to prevent replay attacks
+4. **Address format validation** — reject malformed addresses before attempting
+   signature verification
+5. **Rate-limit wallet auth endpoint** — prevent brute-force signature grinding
+6. **HTTPS only** in production — never send signatures over HTTP
+
+---
 
 ## Common Tasks
 
-### Adding a New Blockchain
-1. Update `/lib/wagmi.ts` to add chain configuration
-2. Add contract address environment variable
-3. Update chain selector UI in components
-4. Test wallet connection and transactions
+### Adding a New Chain
+1. Add chain detection and signing logic to `Public/js/multi-chain-wallet.js`
+2. Add server-side signature verification in `api/auth/wallet.js`
+3. Add any required npm package (check advisory DB first)
+4. Update `server/config.js` with any new env vars
 
-### Modifying Domain Registration
-1. Check `/app/register/page.tsx` for UI
-2. Update `/lib/blockchain.ts` for transaction logic
-3. Modify `/app/api/domains/check/route.ts` for validation
-4. Update smart contract ABI if needed
+### Checking Wallet Balance
+- Frontend: call the relevant chain's RPC directly from `multi-chain-wallet.js`
+- For XRP: `client.getXrpBalance(address)` via xrpl.js
+- For Solana: `connection.getBalance(publicKey)` via @solana/web3.js
+- For ETH: `provider.getBalance(address)` via ethers.js
 
-### Wallet Integration Changes
-1. Update `/components/DualWalletConnect.tsx` for UI
-2. Modify `/lib/wagmi.ts` for EVM configuration
-3. Update `/components/SolanaWalletProvider.tsx` for Solana
-4. Test mobile wallet flows with QR codes
+---
 
-### API Endpoint Changes
-1. All API routes are in `/app/api`
-2. Use Next.js `NextRequest` and `NextResponse`
-3. Implement proper error handling and validation
-4. Return consistent JSON response formats
+## Testing Checklist
 
-## Code Style Guidelines
-
-### React Components
-- Use functional components with hooks
-- Implement proper TypeScript interfaces
-- Follow Next.js 14+ App Router conventions
-- Use Tailwind CSS for styling
-
-### Blockchain Code
-- Always use try-catch for blockchain calls
-- Implement user-friendly error messages
-- Log transaction hashes for debugging
-- Handle pending states in UI
-
-### API Routes
-- Validate all inputs
-- Return appropriate HTTP status codes
-- Include timestamps in responses
-- Log errors to console
-
-## Documentation Requirements
-When making significant changes:
-- Update relevant `.md` files (README, ARCHITECTURE, etc.)
-- Add code comments for complex blockchain logic
-- Document new environment variables
-- Update deployment guides if needed
-
-## Best Practices
-1. **Minimize Changes**: Make surgical, focused changes
-2. **Test Thoroughly**: Verify wallet connections on both Solana and EVM
-3. **Security First**: Always consider security implications of Web3 code
-4. **Mobile Support**: Ensure changes work on mobile wallets
-5. **Error Handling**: Provide clear error messages for blockchain failures
-6. **Type Safety**: Leverage TypeScript for compile-time safety
-
-## Resources
-- Main README: `/README.md`
-- Architecture Guide: `/ARCHITECTURE.md`
-- Frontend/Backend Guide: `/FRONTEND_BACKEND_GUIDE.md`
-- Mobile Wallet Guide: `/MOBILE_WALLET_GUIDE.md`
-- Security Guidelines: `/SECURITY.md`
-
-## Important Notes
-- This is a **demo application** by default (uses mock data)
-- Production mode requires deployed smart contracts
-- WalletConnect Project ID is required for EVM wallets
-- Solana uses wallet-adapter for connection management
-- The platform supports UNLIMITED domain extensions (not just preset ones)
+- [ ] Phantom wallet connects on desktop (Solana)
+- [ ] MetaMask connects (Ethereum)
+- [ ] XRP wallet connects
+- [ ] WalletConnect QR code works (mobile fallback)
+- [ ] Wallet signature verification rejects invalid/tampered signatures
+- [ ] Replay attack prevention: old challenge messages rejected
+- [ ] Wallet disconnect clears auth state
+- [ ] JWT returned after successful wallet auth
