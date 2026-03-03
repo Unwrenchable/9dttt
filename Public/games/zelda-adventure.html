@@ -722,8 +722,11 @@
                     // Glow
                     const gld=0.2+Math.sin(f*0.08)*0.15;
                     ctx.fillStyle=`rgba(255,220,0,${gld})`; ctx.beginPath(); ctx.arc(tx+T/2,ty+T/2,13,0,Math.PI*2); ctx.fill();
-                    // "77" text
-                    ctx.fillStyle='#000'; ctx.font='bold 11px Arial'; ctx.textAlign='center';
+                    // "77" text – white with dark stroke for contrast on dark door
+                    ctx.strokeStyle='#000'; ctx.lineWidth=2.5;
+                    ctx.font='bold 11px Arial'; ctx.textAlign='center';
+                    ctx.strokeText('77', tx+T/2, ty+T/2+4);
+                    ctx.fillStyle='#fff';
                     ctx.fillText('77', tx+T/2, ty+T/2+4);
                     break;
                 }
@@ -756,8 +759,11 @@
                 ctx.beginPath(); ctx.arc(cx,cy,s,0,Math.PI*2); ctx.stroke();
                 // Cap body
                 ctx.fillStyle='#c8b400'; ctx.beginPath(); ctx.arc(cx,cy,s-2,0,Math.PI*2); ctx.fill();
-                // FIZZ text on cap
-                ctx.fillStyle='#000'; ctx.font=`bold ${Math.max(5,s*0.6)}px Arial`; ctx.textAlign='center';
+                // FIZZ text on cap – dark text with outline for contrast on golden body
+                ctx.font=`bold ${Math.max(5,s*0.6)}px Arial`; ctx.textAlign='center';
+                ctx.strokeStyle='rgba(255,255,255,0.6)'; ctx.lineWidth=1;
+                ctx.strokeText('F', cx, cy+2);
+                ctx.fillStyle='#1a1000';
                 ctx.fillText('F', cx, cy+2);
                 // Glow
                 ctx.fillStyle=`rgba(57,255,20,${0.15+pulse*0.08})`; ctx.beginPath(); ctx.arc(cx,cy,s+3,0,Math.PI*2); ctx.fill();
