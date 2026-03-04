@@ -30,6 +30,16 @@ class ContraCommando {
         
         this.keys = {};
         this.lastTime = 0;
+        this.running = false;
+
+        // Konami Code sequence: ↑↑↓↓←→←→BA (KeyboardEvent.code values)
+        this.konamiCode = [
+            'ArrowUp','ArrowUp','ArrowDown','ArrowDown',
+            'ArrowLeft','ArrowRight','ArrowLeft','ArrowRight',
+            'KeyB','KeyA'
+        ];
+        this.konamiProgress = 0;
+        this.konamiBannerTimer = 0;  // counts down in frames; 240 ≈ 4 s at 60 fps
         
         this.weaponTypes = {
             rifle: { name: 'RIFLE', icon: '🔫', damage: 10, speed: 15, spread: 0, cooldown: 100 },
@@ -54,16 +64,35 @@ class ContraCommando {
             } else if (e.code === 'KeyP' && this.state === 'paused') {
                 this.state = 'playing';
             }
+
+            // Konami Code: ↑↑↓↓←→←→BA
+            if (e.code === this.konamiCode[this.konamiProgress]) {
+                this.konamiProgress++;
+                if (this.konamiProgress === this.konamiCode.length) {
+                    this.konamiProgress = 0;
+                    this.activateKonamiCode();
+                }
+            } else {
+                this.konamiProgress = e.code === this.konamiCode[0] ? 1 : 0;
+            }
         });
         
         window.addEventListener('keyup', (e) => {
             this.keys[e.code] = false;
         });
     }
+
+    activateKonamiCode() {
+        this.lives += 30;
+        this.konamiBannerTimer = 240;
+        this.updateHUD();
+    }
     
     start(coop = false) {
         this.coopMode = coop;
         this.state = 'playing';
+        this.running = true;
+        this.lastTime = 0;
         document.getElementById('startScreen').classList.add('hidden');
         
         this.initLevel();
@@ -71,6 +100,13 @@ class ContraCommando {
     }
     
     initLevel() {
+        // Clear game objects from previous level
+        this.bullets = [];
+        this.powerups = [];
+        this.particles = [];
+        this.explosions = [];
+        this.camera = { x: 0, y: 0 };
+
         // Create player(s)
         this.players = [{
             x: 100,
@@ -638,14 +674,20 @@ class ContraCommando {
     
     nextLevel() {
         this.level++;
-        this.players.forEach(p => {
-            p.health = Math.min(p.health + 30, p.maxHealth);
-        });
+        // Save player state before re-initializing the level
+        const savedWeapons = this.players.map(p => p.weapon);
+        const savedHealth = this.players.map(p => Math.min(p.health + 30, p.maxHealth));
         this.initLevel();
+        // Restore player state
+        this.players.forEach((p, i) => {
+            if (savedWeapons[i]) p.weapon = savedWeapons[i];
+            if (savedHealth[i] !== undefined) p.health = savedHealth[i];
+        });
     }
     
     gameOver() {
         this.state = 'gameover';
+        this.running = false;
         document.getElementById('gameOverScreen').classList.remove('hidden');
         document.getElementById('finalScore').innerHTML = 
             `<h3>Final Score: ${this.score}</h3><p>Level Reached: ${this.level}</p>`;
@@ -830,6 +872,25 @@ class ContraCommando {
             this.ctx.fillText('PAUSED', this.canvas.width / 2, this.canvas.height / 2);
             this.ctx.textAlign = 'left';
         }
+
+        // Draw Konami Code banner
+        if (this.konamiBannerTimer > 0) {
+            this.konamiBannerTimer--;
+            const alpha = Math.min(1, this.konamiBannerTimer / 30);
+            this.ctx.globalAlpha = alpha;
+            this.ctx.fillStyle = '#000';
+            this.ctx.fillRect(0, this.canvas.height / 2 - 60, this.canvas.width, 120);
+            this.ctx.globalAlpha = alpha;
+            this.ctx.fillStyle = '#ffd700';
+            this.ctx.font = 'bold 28px Arial';
+            this.ctx.textAlign = 'center';
+            this.ctx.fillText('↑↑↓↓←→←→BA', this.canvas.width / 2, this.canvas.height / 2 - 15);
+            this.ctx.fillStyle = '#fff';
+            this.ctx.font = 'bold 20px Arial';
+            this.ctx.fillText('+30 LIVES!  CHEAT ACTIVATED 🎮', this.canvas.width / 2, this.canvas.height / 2 + 20);
+            this.ctx.globalAlpha = 1;
+            this.ctx.textAlign = 'left';
+        }
     }
     
     updateHUD() {
@@ -846,7 +907,8 @@ class ContraCommando {
     }
     
     gameLoop(timestamp) {
-        const deltaTime = timestamp - this.lastTime;
+        if (!this.running) return;
+        const deltaTime = this.lastTime === 0 ? 16 : timestamp - this.lastTime; // 16 ms ≈ one frame at 60 fps
         this.lastTime = timestamp;
         
         this.update(deltaTime);
