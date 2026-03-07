@@ -413,7 +413,7 @@ class SpriteRenderer {
         const eyePulse = 0.8 + Math.sin(frame * 0.15) * 0.2;
         if (this.enableShadows) {
             ctx.shadowColor = '#FFD700';
-            ctx.shadowBlur = 15;
+            ctx.shadowBlur = 8;
         }
         ctx.fillStyle = `rgba(255, 215, 0, ${eyePulse})`;
         this.drawPixelCircle(ctx, 6*unit, 5*unit + breathe, unit * 1.2);
@@ -866,7 +866,7 @@ class SpriteRenderer {
                 
                 if (this.enableShadows) {
                     ctx.shadowColor = 'rgba(0, 200, 255, 0.8)';
-                    ctx.shadowBlur = 12;
+                    ctx.shadowBlur = 8;
                 }
                 
                 if (this.enableGradients) {

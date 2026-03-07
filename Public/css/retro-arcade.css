@@ -73,12 +73,8 @@
 }
 
 @keyframes insertCoinPulse {
-    0%, 100% { 
-        text-shadow: 0 0 10px var(--retro-amber), 0 0 20px var(--retro-amber);
-    }
-    50% { 
-        text-shadow: 0 0 20px var(--retro-amber), 0 0 40px var(--retro-amber), 0 0 60px var(--retro-amber);
-    }
+    0%, 100% { text-shadow: 0 0 6px var(--retro-amber); }
+    50% { text-shadow: 0 0 10px var(--retro-amber); }
 }
 
 .insert-coin {
@@ -123,7 +119,7 @@
     text-align: center;
     font-size: clamp(0.7rem, 2vw, 1rem);
     margin-bottom: 15px;
-    text-shadow: 0 0 10px var(--retro-cyan);
+    text-shadow: 0 0 5px rgba(0,255,255,0.5);
 }
 
 .high-score-list {
@@ -225,11 +221,7 @@
 
 /* Neon Text Glow Effects */
 .neon-text {
-    text-shadow: 
-        0 0 5px currentColor,
-        0 0 10px currentColor,
-        0 0 20px currentColor,
-        0 0 40px currentColor;
+    text-shadow: 0 0 6px currentColor, 0 0 12px currentColor;
 }
 
 .neon-cyan { color: var(--retro-cyan); }

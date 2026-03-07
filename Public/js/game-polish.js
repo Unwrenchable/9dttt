@@ -157,7 +157,7 @@ class ParticleSystem {
             
             // Glow effect
             if (p.glow) {
-                ctx.shadowBlur = 15;
+                ctx.shadowBlur = 8;
                 ctx.shadowColor = p.color;
             }
             

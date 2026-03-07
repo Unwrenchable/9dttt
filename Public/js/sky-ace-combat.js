@@ -9,7 +9,12 @@ class SkyAceCombat {
         this.canvas.height = window.innerHeight;
         
         this.radarCanvas = document.getElementById('radar');
-        this.radarCtx = this.radarCanvas.getContext('2d');
+        if (!this.radarCanvas) {
+            console.warn('[sky-ace-combat] Radar canvas not found; radar disabled.');
+            this.radarCtx = null;
+        } else {
+            this.radarCtx = this.radarCanvas.getContext('2d');
+        }
         
         this.state = 'menu';
         this.player = null;
@@ -285,8 +290,7 @@ class SkyAceCombat {
         // Check game over
         if (this.player.health <= 0) {
             this.state = 'gameover';
-            alert(`Game Over! Final Score: ${this.score}`);
-            location.reload();
+            this._showGameOver();
         }
         
         this.updateHUD();
@@ -409,8 +413,8 @@ class SkyAceCombat {
     }
     
     drawRadar() {
+        if (!this.radarCtx) return;
         const radar = this.radarCanvas;
-        this.radarCtx.fillStyle = 'rgba(0, 0, 0, 0.7)';
         this.radarCtx.fillRect(0, 0, radar.width, radar.height);
         
         // Grid
@@ -457,9 +461,26 @@ class SkyAceCombat {
     }
     
     gameLoop() {
+        if (this.state === 'gameover') return;
         this.update();
         this.draw();
-        requestAnimationFrame(() => this.gameLoop());
+        this._rafId = requestAnimationFrame(() => this.gameLoop());
+    }
+
+    _showGameOver() {
+        const existing = document.getElementById('gameOverOverlay');
+        if (existing) existing.remove();
+        const overlay = document.createElement('div');
+        overlay.id = 'gameOverOverlay';
+        overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;font-family:"Press Start 2P",cursive;color:#FFD700;text-align:center;';
+        overlay.innerHTML = `<div style="font-size:28px;margin-bottom:16px;">✈ SHOT DOWN ✈</div>
+            <div style="font-size:16px;margin-bottom:8px;">Final Score: ${this.score}</div>
+            <div style="font-size:12px;color:#aaa;margin-bottom:28px;">Wave ${this.wave}</div>
+            <button style="padding:14px 28px;font-size:12px;font-family:inherit;background:#1e3a8a;color:#FFD700;border:2px solid #FFD700;border-radius:8px;cursor:pointer;"
+                onclick="document.getElementById('gameOverOverlay').remove();location.reload();">
+                FLY AGAIN
+            </button>`;
+        document.body.appendChild(overlay);
     }
 }
 

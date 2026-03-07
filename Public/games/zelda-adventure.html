@@ -2788,7 +2788,7 @@ class WastelandGame {
     ctx.fillStyle='rgba(57,255,20,0.4)';
     for(const pt of this._titlePts){pt.y-=pt.spd;if(pt.y<0)pt.y=540;ctx.beginPath();ctx.arc(pt.x,pt.y,pt.size,0,Math.PI*2);ctx.fill();}
     // Title
-    ctx.shadowColor='#39ff14';ctx.shadowBlur=20;
+    ctx.shadowColor='#39ff14';ctx.shadowBlur=10;
     ctx.fillStyle='#39ff14';ctx.font='bold 42px monospace';ctx.textAlign='center';
     ctx.fillText('☢ ATOMIC FIZZ CAPS ☢',400,110);
     ctx.shadowBlur=0;
@@ -2824,7 +2824,7 @@ class WastelandGame {
     ctx.fillStyle='#0a0000';ctx.fillRect(0,0,800,540);
     for(let y=0;y<540;y+=4){ctx.fillStyle='rgba(80,0,0,0.15)';ctx.fillRect(0,y,800,2);}
     ctx.fillStyle='#ff0000';ctx.font='bold 64px monospace';ctx.textAlign='center';
-    ctx.shadowColor='#ff0000';ctx.shadowBlur=30;
+    ctx.shadowColor='#ff0000';ctx.shadowBlur=12;
     ctx.fillText('☢ YOU DIED ☢',400,200);
     ctx.shadowBlur=0;
     ctx.fillStyle='#cc8888';ctx.font='18px monospace';
@@ -2844,7 +2844,7 @@ class WastelandGame {
     ctx.fillStyle='#000a00';ctx.fillRect(0,0,800,540);
     for(let y=0;y<540;y+=4){ctx.fillStyle='rgba(0,80,0,0.12)';ctx.fillRect(0,y,800,2);}
     ctx.fillStyle='#39ff14';ctx.font='bold 36px monospace';ctx.textAlign='center';
-    ctx.shadowColor='#39ff14';ctx.shadowBlur=25;
+    ctx.shadowColor='#39ff14';ctx.shadowBlur=10;
     ctx.fillText('☢ THE WASTELAND IS SAVED ☢',400,80);
     ctx.shadowBlur=0;
     ctx.fillStyle='#ffd700';ctx.font='16px monospace';

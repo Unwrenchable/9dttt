@@ -128,6 +128,7 @@ class TournamentFighters {
     }
     
     startFight() {
+        if (this._rafId) cancelAnimationFrame(this._rafId);
         this.state = 'fighting';
         document.getElementById('menu').classList.add('hidden');
         
@@ -454,8 +455,8 @@ class TournamentFighters {
                 if (winner === 0) {
                     this.tournamentRound++;
                     if (this.tournamentRound >= this.tournamentOpponents.length) {
-                        alert('TOURNAMENT CHAMPION! 🏆');
-                        location.reload();
+                        this.state = 'gameover';
+                        this._showResult('TOURNAMENT CHAMPION! 🏆');
                     } else {
                         // Next opponent
                         this.selectedFighters[1] = this.tournamentOpponents[this.tournamentRound];
@@ -463,12 +464,12 @@ class TournamentFighters {
                         this.startFight();
                     }
                 } else {
-                    alert('TOURNAMENT OVER! Try again!');
-                    location.reload();
+                    this.state = 'gameover';
+                    this._showResult('TOURNAMENT OVER! Try again!');
                 }
             } else {
-                alert(`PLAYER ${winner + 1} WINS!`);
-                location.reload();
+                this.state = 'gameover';
+                this._showResult(`PLAYER ${winner + 1} WINS!`);
             }
         } else {
             // Next round
@@ -696,11 +697,47 @@ class TournamentFighters {
     
     gameLoop() {
         if (this.state !== 'fighting') return;
-        
+
         this.update();
         this.draw();
-        
-        requestAnimationFrame(() => this.gameLoop());
+
+        this._rafId = requestAnimationFrame(() => this.gameLoop());
+    }
+
+    _showResult(msg) {
+        const existing = document.getElementById('resultOverlay');
+        if (existing) existing.remove();
+        const overlay = document.createElement('div');
+        overlay.id = 'resultOverlay';
+        overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.88);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;font-family:"Press Start 2P",cursive;color:#FFD700;text-align:center;';
+
+        const msgDiv = document.createElement('div');
+        msgDiv.style.cssText = 'font-size:26px;margin-bottom:28px;';
+        msgDiv.textContent = msg;
+
+        const btn = document.createElement('button');
+        btn.style.cssText = 'padding:14px 28px;font-size:13px;font-family:inherit;background:#6d28d9;color:#fff;border:none;border-radius:8px;cursor:pointer;';
+        btn.textContent = 'RETURN TO MENU';
+        btn.onclick = () => {
+            overlay.remove();
+            // Reset core game state before returning to menu
+            this.state = 'menu';
+            this.selectedFighters = [null, null];
+            this.players = [];
+            this.projectiles = [];
+            this.particles = [];
+            this.round = 1;
+            this.timer = 99;
+            this.wins = [0, 0];
+            this.tournamentRound = 0;
+            this.tournamentOpponents = [];
+            if (this._rafId) { cancelAnimationFrame(this._rafId); this._rafId = null; }
+            document.getElementById('menu').classList.remove('hidden');
+        };
+
+        overlay.appendChild(msgDiv);
+        overlay.appendChild(btn);
+        document.body.appendChild(overlay);
     }
 }
 

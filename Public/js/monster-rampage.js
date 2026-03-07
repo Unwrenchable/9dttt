@@ -307,7 +307,7 @@
             spines.forEach(s => {
                 ctx.save();
                 ctx.globalAlpha = 0.35;
-                ctx.shadowColor = ATOM; ctx.shadowBlur = 18;
+                ctx.shadowColor = ATOM; ctx.shadowBlur = 8;
                 ctx.beginPath();
                 ctx.moveTo(s.x - s.w - 3, s.y + s.w);
                 ctx.lineTo(s.x, s.y - 14 - s.w);
@@ -1354,12 +1354,13 @@
         }
 
         _gameLoop() {
+            if (this.state === 'gameover') return;
             const now = performance.now();
             const dt  = now - this.lastTime;
             this.lastTime = now;
             this.update(dt);
             this.draw();
-            requestAnimationFrame(() => this._gameLoop());
+            this._rafId = requestAnimationFrame(() => this._gameLoop());
         }
     }
 

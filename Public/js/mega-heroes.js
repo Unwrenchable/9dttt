@@ -29,6 +29,8 @@ class MegaHeroes {
             spread: { name: 'SPREAD', damage: 8, cooldown: 250, color: '#ff0', speed: 10 },
             wave: { name: 'WAVE', damage: 12, cooldown: 300, color: '#0f0', speed: 8 }
         };
+
+        this.state = 'playing';
         
         this.setupInput();
         this.init();
@@ -474,8 +476,8 @@ class MegaHeroes {
                 this.player.x = 100;
                 this.player.y = 100;
             } else {
-                alert('Game Over! Score: ' + this.score);
-                location.reload();
+                this.state = 'gameover';
+                this._showGameOver();
             }
         }
     }
@@ -617,9 +619,25 @@ class MegaHeroes {
     }
     
     gameLoop() {
+        if (this.state === 'gameover') return;
         this.update();
         this.draw();
-        requestAnimationFrame(() => this.gameLoop());
+        this._rafId = requestAnimationFrame(() => this.gameLoop());
+    }
+
+    _showGameOver() {
+        const existing = document.getElementById('megaHeroesGameOver');
+        if (existing) existing.remove();
+        const overlay = document.createElement('div');
+        overlay.id = 'megaHeroesGameOver';
+        overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;font-family:"Press Start 2P",cursive;color:#FFD700;text-align:center;';
+        overlay.innerHTML = `<div style="font-size:28px;margin-bottom:16px;">GAME OVER</div>
+            <div style="font-size:16px;margin-bottom:28px;">Score: ${this.score}</div>
+            <button style="padding:14px 28px;font-size:12px;font-family:inherit;background:#7c3aed;color:#fff;border:none;border-radius:8px;cursor:pointer;"
+                onclick="document.getElementById('megaHeroesGameOver').remove();location.reload();">
+                PLAY AGAIN
+            </button>`;
+        document.body.appendChild(overlay);
     }
 }
 

@@ -153,9 +153,10 @@
             }
             
             gameLoop() {
+                if (this.state === 'gameover') return;
                 this.update();
                 this.render();
-                requestAnimationFrame(() => this.gameLoop());
+                this._rafId = requestAnimationFrame(() => this.gameLoop());
             }
             
             update() {
@@ -174,7 +175,11 @@
             setupInput() {
                 if (this._inputSetup) return;
                 this._inputSetup = true;
-                window.addEventListener('keydown', (e) => { this.keys[e.code] = true; });
+                window.addEventListener('keydown', (e) => {
+                    this.keys[e.code] = true;
+                    if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))
+                        e.preventDefault();
+                });
                 window.addEventListener('keyup', (e) => { this.keys[e.code] = false; });
             }
             
