@@ -406,9 +406,15 @@ function loadGame(gameType) {
         case 'memory-match':
             academy.memoryMatch();
             break;
-        default:
-            console.log('[brain-academy] Game coming soon:', gameType);
+        default: {
+            // Show a brief "coming soon" toast instead of a silent log
+            const toast = document.createElement('div');
+            toast.textContent = 'Coming soon! 🚀';
+            toast.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.85);color:#FFD700;font-family:"Press Start 2P",cursive;font-size:14px;padding:20px 32px;border-radius:10px;z-index:9999;pointer-events:none;';
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2000);
             backToMenu();
+        }
     }
 }
 

@@ -720,6 +720,18 @@ class TournamentFighters {
         btn.textContent = 'RETURN TO MENU';
         btn.onclick = () => {
             overlay.remove();
+            // Reset core game state before returning to menu
+            this.state = 'menu';
+            this.selectedFighters = [null, null];
+            this.players = [];
+            this.projectiles = [];
+            this.particles = [];
+            this.round = 1;
+            this.timer = 99;
+            this.wins = [0, 0];
+            this.tournamentRound = 0;
+            this.tournamentOpponents = [];
+            if (this._rafId) { cancelAnimationFrame(this._rafId); this._rafId = null; }
             document.getElementById('menu').classList.remove('hidden');
         };
 
