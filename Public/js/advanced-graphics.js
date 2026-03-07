@@ -590,12 +590,7 @@ class AdvancedGraphics {
         
         // Glow effect
         this.ctx.shadowColor = glowColor;
-        this.ctx.shadowBlur = 20;
-        this.ctx.fillStyle = glowColor;
-        this.ctx.fillText(text, x, y);
-        
-        // Main text
-        this.ctx.shadowBlur = 0;
+        this.ctx.shadowBlur = 8;
         this.ctx.fillStyle = textColor;
         this.ctx.fillText(text, x, y);
         

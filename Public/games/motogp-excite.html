@@ -401,9 +401,10 @@
             }
             
             gameLoop() {
+                if (this.state === 'finished') return;
                 this.update();
                 this.render();
-                requestAnimationFrame(() => this.gameLoop());
+                this._rafId = requestAnimationFrame(() => this.gameLoop());
             }
             
             update() {

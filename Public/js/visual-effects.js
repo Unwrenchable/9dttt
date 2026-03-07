@@ -87,7 +87,7 @@ class VisualEffects {
         
         ctx.save();
         ctx.shadowColor = color;
-        ctx.shadowBlur = size * intensity;
+        ctx.shadowBlur = Math.min(size * intensity, 12);
         ctx.fillStyle = color;
         ctx.globalAlpha = 0.5 * intensity;
         ctx.beginPath();

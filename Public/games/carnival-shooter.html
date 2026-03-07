@@ -286,9 +286,10 @@
             }
             
             gameLoop() {
+                if (this.state === 'win' || this.state === 'lose') return;
                 this.update();
                 this.render();
-                requestAnimationFrame(() => this.gameLoop());
+                this._rafId = requestAnimationFrame(() => this.gameLoop());
             }
             
             update() {

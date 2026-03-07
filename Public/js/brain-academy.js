@@ -51,7 +51,7 @@ class BrainAcademy {
         };
         
         // Spawn asteroids with problems
-        setInterval(() => {
+        this._spawnInterval = setInterval(() => {
             if (asteroids.length < 5) {
                 asteroids.push(generateProblem());
             }
@@ -59,8 +59,17 @@ class BrainAcademy {
         
         const gameLoop = () => {
             if (lives <= 0) {
-                alert(`Game Over! Final Score: ${score}`);
-                backToMenu();
+                clearInterval(this._spawnInterval);
+                this.ctx.fillStyle = 'rgba(0,0,0,0.8)';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                this.ctx.fillStyle = '#FFD700';
+                this.ctx.font = 'bold 36px sans-serif';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText('GAME OVER', this.canvas.width / 2, this.canvas.height / 2 - 20);
+                this.ctx.font = '22px sans-serif';
+                this.ctx.fillText(`Final Score: ${score}`, this.canvas.width / 2, this.canvas.height / 2 + 20);
+                this.ctx.textAlign = 'left';
+                setTimeout(() => backToMenu(), 2500);
                 return;
             }
             
@@ -169,13 +178,23 @@ class BrainAcademy {
             }
         };
         
-        setInterval(spawnWord, 2000);
+        this._wordInterval = setInterval(spawnWord, 2000);
         
         const gameLoop = () => {
             if (lives <= 0) {
+                clearInterval(this._wordInterval);
                 const wpm = Math.floor(score * 1.5);
-                alert(`Game Over! Score: ${score}\nEstimated WPM: ${wpm}`);
-                backToMenu();
+                this.ctx.fillStyle = 'rgba(0,0,0,0.8)';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                this.ctx.fillStyle = '#FFD700';
+                this.ctx.font = 'bold 36px sans-serif';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText('GAME OVER', this.canvas.width / 2, this.canvas.height / 2 - 30);
+                this.ctx.font = '22px sans-serif';
+                this.ctx.fillText(`Score: ${score}`, this.canvas.width / 2, this.canvas.height / 2 + 10);
+                this.ctx.fillText(`Est. WPM: ${wpm}`, this.canvas.width / 2, this.canvas.height / 2 + 44);
+                this.ctx.textAlign = 'left';
+                setTimeout(() => backToMenu(), 2500);
                 return;
             }
             
@@ -388,11 +407,18 @@ function loadGame(gameType) {
             academy.memoryMatch();
             break;
         default:
-            alert('Game coming soon!');
+            console.log('[brain-academy] Game coming soon:', gameType);
             backToMenu();
     }
 }
 
 function backToMenu() {
-    location.reload();
+    document.getElementById('gamesMenu').style.removeProperty('display');
+    const gameArea = document.getElementById('gameArea');
+    if (gameArea) gameArea.classList.remove('active');
+    const canvas = document.getElementById('gameCanvas');
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
 }

@@ -17,6 +17,7 @@ class ConnectFour {
     }
 
     initGame() {
+        if (this._aiTimer) clearTimeout(this._aiTimer);
         this.board = Array(this.rows).fill(null).map(() => Array(this.cols).fill(0));
         this.currentPlayer = 1;
         this.gameOver = false;
@@ -138,7 +139,7 @@ class ConnectFour {
         // AI move
         if (this.gameMode === 'ai' && this.currentPlayer === 2 && !this.gameOver) {
             this.disableBoard();
-            setTimeout(() => this.aiMove(), 500);
+            this._aiTimer = setTimeout(() => this.aiMove(), 500);
         }
     }
 

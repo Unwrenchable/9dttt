@@ -18,8 +18,8 @@ class BrainAgeTraining {
     startCalculation20() {
         this.problems = [];
         for (let i = 0; i < 20; i++) {
-            const a = Math.floor(Math.random() * 20) + 1;
-            const b = Math.floor(Math.random() * 20) + 1;
+            let a = Math.floor(Math.random() * 20) + 1;
+            let b = Math.floor(Math.random() * 20) + 1;
             const ops = ['+', '-', '×'];
             const op = ops[Math.floor(Math.random() * ops.length)];
             
