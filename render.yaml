@@ -20,12 +20,12 @@ services:
       - key: PORT
         value: 10000
       
-      # Frontend URL for CORS
+      # Frontend URL for CORS (canonical production domain)
       - key: FRONTEND_URL
-        value: https://9dttt.vercel.app
+        value: https://www.d9ttt.com
       
       - key: VERCEL_URL
-        value: https://your-vercel-app.vercel.app
+        value: https://9dttt.vercel.app
       
       # JWT Secret - auto-generated secure random string
       - key: JWT_SECRET

@@ -48,6 +48,10 @@
     {
       "source": "/socket.io/:path*",
       "destination": "https://ninedttt.onrender.com/socket.io/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
