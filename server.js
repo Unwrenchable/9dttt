@@ -32,6 +32,7 @@ const allowedOrigins = [
     'https://d9ttt.com',
     'https://www.d9ttt.com',
     'https://9dttt.vercel.app',
+    'https://ninedttt.onrender.com', // allow self-origin (Socket.io direct connect from Vercel frontend)
     process.env.VERCEL_URL,
     process.env.FRONTEND_URL
 ].filter(Boolean);
@@ -82,6 +83,38 @@ app.use(security.securityHeadersMiddleware());
 
 // Middleware
 app.use(express.json({ limit: '10kb' })); // Limit body size
+
+// When this server is deployed as an API-only backend (Render), redirect direct browser
+// navigation to the canonical frontend URL so users always land on the Vercel-served
+// version of the site. API, Socket.io, and keep-alive routes are still handled here.
+const FRONTEND_CANONICAL = process.env.FRONTEND_URL || 'https://www.d9ttt.com';
+const isApiOnlyMode = !!process.env.RENDER_EXTERNAL_URL;
+
+if (isApiOnlyMode) {
+    app.use((req, res, next) => {
+        // Pass through API calls, Socket.io, ping/health, and static assets
+        if (req.path.startsWith('/api/') ||
+            req.path.startsWith('/socket.io/') ||
+            req.path === '/ping' ||
+            req.path.startsWith('/css/') ||
+            req.path.startsWith('/js/') ||
+            req.path.startsWith('/images/') ||
+            req.path === '/favicon.ico' ||
+            req.path === '/icon.jpg') {
+            return next();
+        }
+
+        // Redirect HTML document requests to the canonical frontend (Vercel)
+        const accept = req.headers.accept || '';
+        if (accept.includes('text/html')) {
+            const qs = req.url.slice(req.path.length); // preserves ?query&string
+            const destination = FRONTEND_CANONICAL + req.path + qs;
+            return res.redirect(301, destination);
+        }
+
+        next();
+    });
+}
 
 // Maintenance mode middleware (before static files)
 app.use((req, res, next) => {

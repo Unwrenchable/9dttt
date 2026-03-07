@@ -411,6 +411,9 @@
         });
     </script>
 
+    <!-- API config must load before socket.io so wsUrl is available -->
+    <script src="../js/api-config.js"></script>
+
     <!-- Socket.io client (served by backend) -->
     <script src="/socket.io/socket.io.js"></script>
 
@@ -466,9 +469,10 @@
                 return;
             }
             try {
-                // Connect without forcing a specific path so it uses the
-                // server's default /socket.io namespace
-                socket = io({ transports: ['websocket', 'polling'] });
+                // Use the configured backend URL from api-config.js so Socket.io
+                // connects directly to the Render backend, bypassing Vercel's WebSocket proxy.
+                const socketUrl = (window.API_CONFIG && window.API_CONFIG.wsUrl) || '';
+                socket = io(socketUrl, { transports: ['websocket', 'polling'] });
                 bindSocketEvents();
             } catch (err) {
                 console.warn('[rampage-coop] Socket.io not available:', err.message);
