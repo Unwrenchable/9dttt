@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#0a0e27">
     <meta name="description" content="Dragon Fist - Classic beat-em-up arcade action inspired by Double Dragon">
     <title>Dragon Fist - Beat 'Em Up</title>
@@ -24,7 +24,7 @@
 
         <main id="main-content" role="main">
             <div class="game-container">
-                <canvas id="game-canvas" width="800" height="400"></canvas>
+                <canvas id="game-canvas" width="800" height="400" data-mobile-controls="dpad"></canvas>
                 
                 <div class="controls">
                     <button onclick="game.startGame(1)">1 Player</button>
@@ -63,6 +63,7 @@
     </div>
 
     <!-- Core Systems -->
+        <script src="../js/mobile-game-adapter.js"></script>
     <script src="../js/gamepad-manager.js"></script>
     <script src="../js/controller-guide.js"></script>
     <script src="../js/advanced-graphics.js"></script>

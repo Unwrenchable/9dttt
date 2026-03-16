@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Monster Rampage — 9DTTT Arcade</title>
     <link rel="stylesheet" href="../css/styles.css">
     <link rel="stylesheet" href="../css/game-ui.css">
@@ -291,7 +291,7 @@
             </div>
         </div>
 
-        <canvas id="gameCanvas" width="1000" height="600"></canvas>
+        <canvas id="gameCanvas" width="1000" height="600" data-mobile-controls="dpad"></canvas>
 
         <div id="hud">
             <!-- Player 1: FANG the Werewolf -->
@@ -383,6 +383,7 @@
     </div>
 
     <!-- Core Enhancement Systems -->
+        <script src="../js/mobile-game-adapter.js"></script>
     <script src="../js/gamepad-manager.js"></script>
     <script src="../js/controller-guide.js"></script>
     <script src="../js/advanced-graphics.js"></script>

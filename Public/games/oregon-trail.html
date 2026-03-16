@@ -20,6 +20,7 @@
     <!-- Stylesheets -->
     <link rel="stylesheet" href="../css/styles.css">
     <link rel="stylesheet" href="../css/game-ui.css">
+    <link rel="stylesheet" href="../css/responsive.css">
 
     <style>
         /* ── 9D Oregon Trail — Retro Frontier meets Neon Dimension ── */
@@ -283,7 +284,7 @@
                     role="application"
                     aria-label="9D Oregon Trail game canvas — use mouse to click buttons and shoot during hunting"
                     tabindex="0"
-                ></canvas>
+                 data-mobile-controls="tap"></canvas>
             </div>
 
             <!-- Controls -->
@@ -324,6 +325,7 @@
     <!-- ═══════════════════════════════════════════════════════════ -->
 
     <!-- 1. Core Systems -->
+        <script src="../js/mobile-game-adapter.js"></script>
     <script src="../js/api-config.js"></script>
     <script src="../js/multi-chain-wallet.js"></script>
     <script src="../js/unified-auth.js"></script>

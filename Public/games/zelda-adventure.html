@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
     <!-- Primary Meta Tags -->
     <title>ATOMIC FIZZ CAPS: Wasteland Quest | 9DTTT</title>
@@ -33,6 +33,7 @@
     <link rel="icon" type="image/jpeg" href="../icon.jpg">
 
     <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/responsive.css">
 
     <!-- Structured Data -->
     <script type="application/ld+json">
@@ -65,7 +66,7 @@
             <div class="game-container">
                 <canvas id="game-canvas" width="800" height="540"
                         style="display:block;max-width:100%;border:2px solid #39ff14;border-radius:8px;"
-                        aria-label="Atomic Fizz Caps Wasteland Quest game canvas"></canvas>
+                        aria-label="Atomic Fizz Caps Wasteland Quest game canvas" data-mobile-controls="dpad"></canvas>
                 <div id="sr-announcer" role="status" aria-live="polite" aria-atomic="true"
                      style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;"></div>
 
@@ -95,6 +96,7 @@
         </footer>
     </div>
 
+        <script src="../js/mobile-game-adapter.js"></script>
     <script src="../js/gamepad-manager.js"></script>
     <script src="../js/controller-guide.js"></script>
     <script src="../js/advanced-graphics.js"></script>
