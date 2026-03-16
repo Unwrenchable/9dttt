@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <!-- Primary Meta Tags -->
+    <title>9D Oregon Trail - 9DTTT</title>
+    <meta name="description" content="9-Dimensional Oregon Trail — Survive the Dimensional Frontier across 9 bizarre dimensions. Classic Oregon Trail reimagined with quantum twists!">
+    <meta name="keywords" content="oregon trail, dimensional, pioneer, survival, wagon, canvas game, 9dttt">
+
+    <!-- Mobile App -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0a0e27">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/jpeg" href="../icon.jpg">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/game-ui.css">
+
+    <style>
+        /* ── 9D Oregon Trail — Retro Frontier meets Neon Dimension ── */
+
+        :root {
+            --sepia:        #c8a878;
+            --sepia-dark:   #7a5c30;
+            --frontier-bg:  #0d0a18;
+            --neon-purple:  #9040ff;
+            --neon-cyan:    #00e5ff;
+            --neon-gold:    #ffd700;
+            --trail-brown:  #6b4226;
+        }
+
+        body {
+            background-color: var(--frontier-bg);
+            background-image:
+                radial-gradient(ellipse at 20% 20%, rgba(144, 64, 255, 0.08) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 80%, rgba(0, 229, 255, 0.06) 0%, transparent 60%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 0 10px 20px;
+        }
+
+        /* ── Header ── */
+        header {
+            text-align: center;
+            padding: 20px 0 8px;
+            border-bottom: 2px solid var(--neon-purple);
+            margin-bottom: 14px;
+            position: relative;
+        }
+
+        header h1 {
+            font-family: "Courier New", monospace;
+            font-size: clamp(1.6rem, 5vw, 2.6rem);
+            font-weight: 900;
+            color: var(--neon-gold);
+            text-shadow:
+                0 0 10px rgba(255, 215, 0, 0.8),
+                0 0 25px rgba(144, 64, 255, 0.6);
+            letter-spacing: 0.05em;
+            margin: 0 0 4px;
+        }
+
+        header h1 .wagon-emoji {
+            display: inline-block;
+            animation: wagRock 2s ease-in-out infinite;
+            transform-origin: bottom center;
+        }
+
+        @keyframes wagRock {
+            0%, 100% { transform: rotate(-3deg); }
+            50%       { transform: rotate(3deg);  }
+        }
+
+        .subtitle {
+            font-family: "Courier New", monospace;
+            font-size: clamp(0.75rem, 2vw, 1rem);
+            color: var(--neon-cyan);
+            text-shadow: 0 0 8px rgba(0, 229, 255, 0.5);
+            margin: 0;
+            letter-spacing: 0.12em;
+        }
+
+        /* ── Canvas wrapper ── */
+        #game-area {
+            position: relative;
+            text-align: center;
+            margin: 10px auto;
+        }
+
+        #gameCanvas {
+            display: block;
+            margin: 0 auto;
+            border: 3px solid var(--neon-purple);
+            border-radius: 8px;
+            box-shadow:
+                0 0 20px rgba(144, 64, 255, 0.5),
+                0 0 40px rgba(0, 229, 255, 0.2);
+            background: #000;
+            cursor: crosshair;
+            /* width/height set by JS for responsive scaling */
+            width: 800px;
+            height: 500px;
+            max-width: 100%;
+        }
+
+        /* ── Controls bar ── */
+        .controls {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            margin: 12px 0;
+        }
+
+        .controls button,
+        .controls a {
+            font-family: "Courier New", monospace;
+            font-size: 0.9rem;
+            font-weight: 700;
+            padding: 10px 22px;
+            border-radius: 6px;
+            border: 2px solid var(--neon-gold);
+            background: linear-gradient(135deg, #2a1a00 0%, #1a0a00 100%);
+            color: var(--neon-gold);
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            letter-spacing: 0.05em;
+        }
+
+        .controls button:hover,
+        .controls a:hover {
+            background: linear-gradient(135deg, #3a2a00 0%, #2a1500 100%);
+            box-shadow: 0 0 14px rgba(255, 215, 0, 0.6);
+            transform: translateY(-2px);
+        }
+
+        .controls a.secondary {
+            border-color: var(--neon-cyan);
+            color: var(--neon-cyan);
+            background: linear-gradient(135deg, #001a20 0%, #000a10 100%);
+        }
+
+        .controls a.secondary:hover {
+            box-shadow: 0 0 14px rgba(0, 229, 255, 0.6);
+        }
+
+        /* ── Quick reference strip ── */
+        .quick-ref {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 6px 0 12px;
+        }
+
+        .quick-ref .badge {
+            font-family: "Courier New", monospace;
+            font-size: 0.7rem;
+            padding: 3px 10px;
+            border-radius: 20px;
+            border: 1px solid;
+            letter-spacing: 0.05em;
+        }
+
+        .badge-purple { border-color: var(--neon-purple); color: var(--neon-purple); background: rgba(144,64,255,0.1); }
+        .badge-cyan   { border-color: var(--neon-cyan);   color: var(--neon-cyan);   background: rgba(0,229,255,0.1); }
+        .badge-gold   { border-color: var(--neon-gold);   color: var(--neon-gold);   background: rgba(255,215,0,0.1); }
+        .badge-brown  { border-color: var(--sepia);       color: var(--sepia);       background: rgba(200,168,120,0.1); }
+
+        /* ── Instructions panel ── */
+        #instructions-panel {
+            display: none;
+            background: rgba(13, 10, 24, 0.96);
+            border: 2px solid var(--neon-purple);
+            border-radius: 10px;
+            padding: 18px 24px;
+            margin: 10px auto;
+            max-width: 800px;
+            text-align: left;
+        }
+
+        #instructions-panel h2 {
+            font-family: "Courier New", monospace;
+            color: var(--neon-gold);
+            margin: 0 0 10px;
+            font-size: 1.1rem;
+        }
+
+        #instructions-panel ul {
+            list-style: none;
+            padding: 0; margin: 0;
+        }
+
+        #instructions-panel li {
+            font-family: "Courier New", monospace;
+            font-size: 0.82rem;
+            color: #ccccdd;
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(144,64,255,0.15);
+        }
+
+        #instructions-panel li:last-child { border-bottom: none; }
+
+        #instructions-panel li strong {
+            color: var(--neon-cyan);
+        }
+
+        /* ── Footer ── */
+        footer {
+            text-align: center;
+            font-family: "Courier New", monospace;
+            font-size: 0.72rem;
+            color: #555566;
+            padding: 12px 0 4px;
+            border-top: 1px solid #221133;
+            margin-top: 14px;
+        }
+
+        footer a { color: #7744bb; text-decoration: none; }
+        footer a:hover { color: var(--neon-cyan); }
+
+        /* ── Accessibility ── */
+        .skip-link {
+            position: absolute;
+            left: -9999px;
+            top: 4px;
+            z-index: 999;
+            background: var(--neon-gold);
+            color: #000;
+            padding: 6px 14px;
+            border-radius: 4px;
+            font-family: "Courier New", monospace;
+            font-size: 0.85rem;
+            text-decoration: none;
+        }
+        .skip-link:focus { left: 8px; }
+
+        /* Mobile tweaks */
+        @media (max-width: 600px) {
+            header h1 { font-size: 1.4rem; }
+            .controls { gap: 8px; }
+            .controls button, .controls a { padding: 8px 14px; font-size: 0.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Skip link for accessibility -->
+    <a href="#main-content" class="skip-link">Skip to game</a>
+
+    <div class="container">
+        <!-- Header -->
+        <header role="banner">
+            <h1><span class="wagon-emoji">🛖</span> 9D Oregon Trail</h1>
+            <p class="subtitle">⬡ Survive the Dimensional Frontier ⬡</p>
+        </header>
+
+        <!-- Quick reference badges -->
+        <div class="quick-ref" aria-label="Game information">
+            <span class="badge badge-brown">🏕️ Adventure</span>
+            <span class="badge badge-gold">⭐ Hard</span>
+            <span class="badge badge-purple">💎 9 Dimensions</span>
+            <span class="badge badge-cyan">🎮 Solo</span>
+        </div>
+
+        <!-- Main Game Area -->
+        <main id="main-content" role="main">
+            <div id="game-area">
+                <canvas
+                    id="gameCanvas"
+                    width="800"
+                    height="500"
+                    role="application"
+                    aria-label="9D Oregon Trail game canvas — use mouse to click buttons and shoot during hunting"
+                    tabindex="0"
+                ></canvas>
+            </div>
+
+            <!-- Controls -->
+            <div class="controls" role="navigation" aria-label="Game controls">
+                <button id="new-game-btn" aria-label="Start a new game">🔄 New Game</button>
+                <button id="toggle-instructions-btn" aria-label="Show or hide game instructions">📖 How to Play</button>
+                <a href="../index.html" class="secondary" aria-label="Return to game library">← Back to Games</a>
+            </div>
+
+            <!-- Instructions panel -->
+            <div id="instructions-panel" role="region" aria-label="Game instructions" aria-hidden="true">
+                <h2>📜 How to Play — 9D Oregon Trail</h2>
+                <ul>
+                    <li><strong>Goal:</strong> Survive all 9 Dimensions (30 days each) and reach Dimension Zero.</li>
+                    <li><strong>Travel:</strong> Click <em>▶ Travel</em> in-game or press <kbd>SPACE</kbd> to advance days.</li>
+                    <li><strong>Events:</strong> Random events occur daily — disease, bandits, weather, rifts and more!</li>
+                    <li><strong>Resources:</strong> Monitor Food, Water, Health, Oxen, Ammo, Medicine &amp; Morale in the HUD.</li>
+                    <li><strong>Hunting:</strong> Click 🦌 Hunt to open the hunting screen. Click animals to shoot them for food.</li>
+                    <li><strong>Store:</strong> Click 🏪 Store to buy supplies at dimension transitions.</li>
+                    <li><strong>River Crossings:</strong> Choose Ford, Caulk &amp; Float, Ferry, or Wait at river events.</li>
+                    <li><strong>Dimension Crystals 💎:</strong> Collect crystals via rifts, crystal beasts &amp; dimension clears for bonus score.</li>
+                    <li><strong>Danger:</strong> Running out of Food, Water, or Oxen (below 2) ends the journey!</li>
+                    <li><strong>Score:</strong> Survivors × 1000 + Crystals × 500 + remaining resources + speed bonus.</li>
+                </ul>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer role="contentinfo">
+            <p>&copy; 2026 9DTTT Game Library &nbsp;|&nbsp;
+               <a href="../index.html">← Back to Game Library</a>
+            </p>
+        </footer>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- UNIFIED SCRIPT LOADING — DO NOT MODIFY ORDER              -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+
+    <!-- 1. Core Systems -->
+    <script src="../js/api-config.js"></script>
+    <script src="../js/multi-chain-wallet.js"></script>
+    <script src="../js/unified-auth.js"></script>
+    <script src="../js/auth-ui.js"></script>
+
+    <!-- 2. Game Features -->
+    <script src="../js/multiplayer-client.js"></script>
+    <script src="../js/game-ui.js"></script>
+    <script src="../js/achievements.js"></script>
+    <script src="../js/leaderboard-ui.js"></script>
+
+    <!-- 3. Optional Features -->
+    <script src="../js/game-error-handler.js"></script>
+    <script src="../js/accessibility-manager.js"></script>
+    <script src="../js/fullscreen-manager.js"></script>
+
+    <!-- 4. Game Init System -->
+    <script src="../js/game-init.js"></script>
+
+    <!-- 5. Game-Specific Code -->
+    <script src="../js/oregon-trail.js"></script>
+
+    <!-- 6. Initialization -->
+    <script>
+        'use strict';
+
+        // ── Wait for all platform systems to be ready ──
+        window.addEventListener('gameReady', () => {
+            console.log('[oregon-trail] ✅ Platform ready — launching 9D Oregon Trail');
+            startOregonTrail();
+        });
+
+        // ── Fallback: start directly if gameReady never fires ──
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize shared UI systems
+            if (window.GameUI) {
+                window.gameUI = new GameUI();
+                window.gameUI.init();
+            }
+
+            // Wire up DOM buttons
+            const newGameBtn = document.getElementById('new-game-btn');
+            if (newGameBtn) {
+                newGameBtn.addEventListener('click', () => {
+                    if (window._oregonTrailGame) {
+                        window._oregonTrailGame._resetGame();
+                        window._oregonTrailGame.gameState = 'title';
+                    }
+                });
+            }
+
+            const howToBtn = document.getElementById('toggle-instructions-btn');
+            const panel    = document.getElementById('instructions-panel');
+            if (howToBtn && panel) {
+                howToBtn.addEventListener('click', () => {
+                    const visible = panel.style.display === 'block';
+                    panel.style.display   = visible ? 'none' : 'block';
+                    panel.setAttribute('aria-hidden', visible ? 'true' : 'false');
+                    howToBtn.textContent  = visible ? '📖 How to Play' : '✖ Close Instructions';
+                });
+            }
+
+            // Fallback timer — start game even if gameReady doesn't fire
+            setTimeout(() => {
+                if (!window._oregonTrailGame) {
+                    console.warn('[oregon-trail] gameReady timeout — starting directly');
+                    startOregonTrail();
+                }
+            }, 3000);
+        });
+
+        function startOregonTrail() {
+            if (window._oregonTrailGame) return; // already started
+            if (typeof window.initOregonTrail === 'function') {
+                window.initOregonTrail();
+            } else {
+                console.error('[oregon-trail] initOregonTrail not found');
+            }
+        }
+    </script>
+</body>
+</html>
