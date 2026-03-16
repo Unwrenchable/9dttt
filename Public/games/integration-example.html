@@ -2,10 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Game Integration Example - Contra Commando</title>
     <link rel="stylesheet" href="../css/styles.css">
     <link rel="stylesheet" href="../css/arcade-games.css">
+    <link rel="stylesheet" href="../css/responsive.css">
 </head>
 <body>
     <div class="container">
@@ -16,7 +17,7 @@
 
         <main>
             <div class="game-container" id="gameContainer">
-                <canvas id="game-canvas" width="800" height="600"></canvas>
+                <canvas id="game-canvas" width="800" height="600" data-mobile-controls="tap"></canvas>
                 
                 <div class="controls">
                     <button id="startBtn">Start Game</button>
@@ -54,6 +55,7 @@
     </div>
 
     <!-- Core Game Scripts -->
+        <script src="../js/mobile-game-adapter.js"></script>
     <script src="../js/gamepad-manager.js"></script>
     <script src="../js/controller-guide.js"></script>
     <script src="../js/advanced-graphics.js"></script>

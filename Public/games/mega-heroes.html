@@ -2,9 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mega Heroes - 9DTTT Arcade</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/responsive.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -55,7 +56,7 @@
     </style>
 </head>
 <body>
-    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <canvas id="gameCanvas" width="800" height="600" data-mobile-controls="dpad"></canvas>
     <div id="hud">
         <div>STAGE: <span id="stage">1</span></div>
         <div>LIVES: <span id="lives">3</span> ❤️</div>
@@ -72,6 +73,7 @@
         </div>
     </div>
     <!-- Core Enhancement Systems -->
+        <script src="../js/mobile-game-adapter.js"></script>
     <script src="../js/gamepad-manager.js"></script>
     <script src="../js/controller-guide.js"></script>
     <script src="../js/advanced-graphics.js"></script>

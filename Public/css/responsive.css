@@ -273,3 +273,46 @@ html, body {
         padding-bottom: max(var(--spacing-sm), env(safe-area-inset-bottom));
     }
 }
+
+/* =====================================================
+   Mobile Game Adapter Support Styles
+   ===================================================== */
+
+/* Canvas scaling wrapper */
+.game-canvas-wrapper,
+#game-container {
+    width: 100%;
+    overflow: hidden;
+}
+
+/* When mobile-game-adapter.js has scaled a canvas, ensure no overflow */
+@media (max-width: 768px) {
+    canvas[style*="width"] {
+        max-width: 100% !important;
+    }
+
+    /* Extra bottom padding so D-pad overlay doesn't cover canvas.
+       .mga-dpad-active is added to <body> by mobile-game-adapter.js
+       instead of relying on :has() which has limited browser support. */
+    body.mga-dpad-active .container,
+    body.mga-dpad-active main,
+    body.mga-dpad-active #game-container {
+        padding-bottom: 180px;
+    }
+
+    /* Landscape: give more horizontal room */
+    @media (orientation: landscape) {
+        canvas {
+            max-height: 55vh !important;
+        }
+
+        body.mga-dpad-active .container {
+            padding-bottom: 120px;
+        }
+    }
+}
+
+/* Smooth canvas resize — scoped to canvases managed by the adapter */
+canvas.mga-scaled {
+    transition: width 0.2s ease, height 0.2s ease;
+}

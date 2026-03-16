@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Brain Academy - Educational Games Collection</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -93,6 +93,7 @@
             font-weight: bold;
         }
     </style>
+    <link rel="stylesheet" href="../css/responsive.css">
 </head>
 <body>
     <div class="container">
@@ -141,12 +142,13 @@
             <button class="btn" onclick="backToMenu()">← Back to Menu</button>
             <h2 id="gameTitle" style="text-align: center; margin: 20px 0;"></h2>
             <div id="score-display"></div>
-            <canvas id="gameCanvas" width="800" height="500"></canvas>
+            <canvas id="gameCanvas" width="800" height="500" data-mobile-controls="tap"></canvas>
             <div id="gameControls" style="text-align: center;"></div>
         </div>
     </div>
     
     <!-- Core Enhancement Systems -->
+        <script src="../js/mobile-game-adapter.js"></script>
     <script src="../js/gamepad-manager.js"></script>
     <script src="../js/controller-guide.js"></script>
     <script src="../js/advanced-graphics.js"></script>
