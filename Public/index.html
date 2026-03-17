@@ -115,7 +115,8 @@
         }
 
         .game-card:hover,
-        .game-card:focus {
+        .game-card:focus,
+        .game-card.controller-focused {
             transform: translateY(-8px) scale(1.02);
             border-color: var(--accent-color);
             box-shadow: 
@@ -1166,81 +1167,63 @@
                 });
             });
             
-            // Controller Navigation
+            // Controller Navigation for game library
             let currentFocus = 0;
-            let focusMode = 'games'; // 'games' or 'filters'
-            
+
             function getVisibleGameCards() {
-                return Array.from(document.querySelectorAll('.game-card:not(.hidden)'));
+                // .locked cards are non-interactive divs (premium/sign-in-required games); exclude them
+                return Array.from(document.querySelectorAll('.game-card:not(.hidden):not(.locked)'));
             }
-            
-            function updateFocus() {
-                if (focusMode === 'games') {
-                    // Category filtering functionality and game visibility by auth
-                    document.addEventListener('DOMContentLoaded', function() {
-                        const filterButtons = document.querySelectorAll('.filter-btn');
-                        const gameCards = document.querySelectorAll('.game-card');
-                        const lockedGames = document.querySelectorAll('#addon-games-locked .game-card');
 
-                        // Initialize gamepad widget
-                        if (window.GamepadWidget) {
-                            new GamepadWidget('gamepad-status');
-                        }
+            function updateControllerFocus() {
+                const visibleCards = getVisibleGameCards();
+                visibleCards.forEach((card, idx) => {
+                    if (idx === currentFocus) {
+                        card.classList.add('controller-focused');
+                        card.setAttribute('tabindex', '0');
+                        card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    } else {
+                        card.classList.remove('controller-focused');
+                        card.setAttribute('tabindex', '-1');
+                    }
+                });
+            }
 
-                        // Initialize auth UI for shared login across all pages
-                        if (window.GameUI) {
-                            window.gameUI = new GameUI();
-                            window.gameUI.init();
-                        }
-
-                        // Hide locked games by default
-                        lockedGames.forEach(card => card.classList.add('hidden'));
-
-                        // Listen for auth state changes
-                        if (window.unifiedAuth && window.unifiedAuth.addListener) {
-                            window.unifiedAuth.addListener(function(user) {
-                                if (user) {
-                                    // User is signed in, show locked games
-                                    lockedGames.forEach(card => card.classList.remove('hidden'));
-                                } else {
-                                    // User is signed out, hide locked games
-                                    lockedGames.forEach(card => card.classList.add('hidden'));
-                                }
-                            });
-                        }
-
-                        filterButtons.forEach(button => {
-                            button.addEventListener('click', function() {
-                                const category = this.dataset.category;
-                                // Update active button
-                                filterButtons.forEach(btn => {
-                                    btn.classList.remove('active');
-                                    btn.setAttribute('aria-selected', 'false');
-                                });
-                                this.classList.add('active');
-                                this.setAttribute('aria-selected', 'true');
-                                // Filter games
-                                gameCards.forEach(card => {
-                                    const cardCategories = card.dataset.categories ? card.dataset.categories.split(',') : [];
-                                    if (category === 'all' || cardCategories.includes(category)) {
-                                        card.classList.remove('hidden');
-                                    } else {
-                                        card.classList.add('hidden');
-                                    }
-                                });
-                                // Announce to screen readers
-                                const visibleCount = document.querySelectorAll('.game-card:not(.hidden)').length;
-                                const announcement = document.createElement('div');
-                                announcement.setAttribute('aria-live', 'polite');
-                                announcement.setAttribute('aria-atomic', 'true');
-                                announcement.className = 'sr-only';
-                                announcement.textContent = `Showing ${visibleCount} games in ${category === 'all' ? 'all categories' : category}`;
-                                document.body.appendChild(announcement);
-                                setTimeout(() => announcement.remove(), 1000);
-                            });
-                        });
-
-                        // ...existing code for controller navigation and keyboard navigation...
-                        // (No changes needed below this for game visibility)
-                    });
+            if (window.gamepadManager) {
                 window.gamepadManager.on('buttondown', (data) => {
+                    const visibleCards = getVisibleGameCards();
+                    if (!visibleCards.length) return;
+
+                    if (data.button === 'down' || data.button === 's') {
+                        currentFocus = (currentFocus + 1) % visibleCards.length;
+                        updateControllerFocus();
+                    } else if (data.button === 'up' || data.button === 'w') {
+                        currentFocus = (currentFocus - 1 + visibleCards.length) % visibleCards.length;
+                        updateControllerFocus();
+                    } else if (data.button === 'right') {
+                        currentFocus = Math.min(currentFocus + 3, visibleCards.length - 1);
+                        updateControllerFocus();
+                    } else if (data.button === 'left') {
+                        currentFocus = Math.max(currentFocus - 3, 0);
+                        updateControllerFocus();
+                    } else if (data.button === 'a') {
+                        // Launch focused game
+                        const card = visibleCards[currentFocus];
+                        if (card) card.click();
+                    } else if (data.button === 'start') {
+                        // Toggle between filter buttons and game cards
+                        const firstFilter = document.querySelector('.filter-btn');
+                        if (firstFilter) firstFilter.focus();
+                    }
+                });
+
+                // Highlight the first card when a controller connects
+                window.gamepadManager.on('connected', () => {
+                    currentFocus = 0;
+                    updateControllerFocus();
+                });
+            }
+        });
+    </script>
+</body>
+</html>
