@@ -1084,17 +1084,19 @@
                 lockedCards.forEach(card => {
                     const gameId = card.dataset.gameId;
                     const overlay = card.querySelector('.lock-overlay');
+                    if (!overlay) return;
                     const addBtn = overlay.querySelector('.add-game-btn');
+                    const labelSpan = overlay.querySelector('span:last-of-type');
                     if (isSignedIn) {
-                        overlay.querySelector('span:last-child').textContent = unlocked.includes(gameId) ? 'Added!' : 'Click to add';
+                        if (labelSpan) labelSpan.textContent = unlocked.includes(gameId) ? 'Added!' : 'Click to add';
                         card.style.pointerEvents = 'auto';
                         card.style.opacity = unlocked.includes(gameId) ? '1' : '0.6';
-                        addBtn.style.display = unlocked.includes(gameId) ? 'none' : 'inline-block';
+                        if (addBtn) addBtn.style.display = unlocked.includes(gameId) ? 'none' : 'inline-block';
                     } else {
-                        overlay.querySelector('span:last-child').textContent = 'Sign in to unlock';
+                        if (labelSpan) labelSpan.textContent = 'Sign in to unlock';
                         card.style.pointerEvents = 'none';
                         card.style.opacity = '0.6';
-                        addBtn.style.display = 'none';
+                        if (addBtn) addBtn.style.display = 'none';
                     }
                 });
             }
