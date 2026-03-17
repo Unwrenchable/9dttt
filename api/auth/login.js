@@ -3,8 +3,42 @@
  * Vercel Serverless Function
  */
 
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+
+const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production';
+
 // Simple in-memory user store (use MongoDB in production)
 const users = new Map();
+
+// Rate limiting: track failed attempts per username
+// Map<username, { count: number, resetAt: number }>
+const loginAttempts = new Map();
+const RATE_LIMIT_MAX = 5;
+const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+
+function isRateLimited(username) {
+    const now = Date.now();
+    const entry = loginAttempts.get(username);
+    if (!entry || now > entry.resetAt) {
+        return false;
+    }
+    return entry.count >= RATE_LIMIT_MAX;
+}
+
+function recordFailedAttempt(username) {
+    const now = Date.now();
+    const entry = loginAttempts.get(username);
+    if (!entry || now > entry.resetAt) {
+        loginAttempts.set(username, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    } else {
+        entry.count += 1;
+    }
+}
+
+function clearAttempts(username) {
+    loginAttempts.delete(username);
+}
 
 module.exports = async (req, res) => {
     res.setHeader('Content-Type', 'application/json');
@@ -23,7 +57,7 @@ module.exports = async (req, res) => {
     try {
         const { username, password, guestMode } = req.body;
         
-        // Guest mode
+        // Guest mode — no credentials needed, no rate limit
         if (guestMode) {
             const guestId = `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
             const guestUser = {
@@ -44,31 +78,38 @@ module.exports = async (req, res) => {
         if (!username || !password) {
             return res.status(400).json({ error: 'Username and password required' });
         }
-        
-        // Check if user exists
-        let user = users.get(username);
-        
-        if (!user) {
-            // Auto-register new user
-            user = {
-                id: `user_${Date.now()}`,
-                username,
-                password, // In production, hash this!
-                type: 'registered',
-                createdAt: new Date().toISOString()
-            };
-            users.set(username, user);
-        } else {
-            // Verify password (in production, use bcrypt)
-            if (user.password !== password) {
-                return res.status(401).json({ error: 'Invalid credentials' });
-            }
+
+        // Enforce rate limit before any DB lookup to prevent enumeration timing
+        if (isRateLimited(username)) {
+            return res.status(429).json({ error: 'Too many login attempts. Please try again later.' });
         }
         
-        // Generate token (in production, use JWT)
-        const token = `${user.id}_${Date.now()}`;
+        // Look up existing user — do NOT auto-register unknown usernames
+        const user = users.get(username);
         
-        // Remove password from response
+        if (!user) {
+            recordFailedAttempt(username);
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+
+        // Verify password with bcrypt
+        const passwordMatch = await bcrypt.compare(password, user.password);
+        if (!passwordMatch) {
+            recordFailedAttempt(username);
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+
+        // Successful login — clear rate-limit counter
+        clearAttempts(username);
+
+        // Issue a real signed JWT (7-day expiry)
+        const token = jwt.sign(
+            { id: user.id, username: user.username },
+            JWT_SECRET,
+            { expiresIn: '7d' }
+        );
+        
+        // Remove password hash from response
         const { password: _, ...userResponse } = user;
         
         return res.status(200).json({

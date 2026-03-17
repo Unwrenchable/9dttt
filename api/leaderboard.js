@@ -3,11 +3,33 @@
  * Vercel Serverless Function
  */
 
+const jwt = require('jsonwebtoken');
+
+const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production';
+
+const SCORE_MIN = 0;
+const SCORE_MAX = 10_000_000;
+
 // In-memory store (use Redis/MongoDB in production)
 let leaderboardData = {
     global: [],
     byGame: {}
 };
+
+/**
+ * Extract and verify a Bearer JWT from the Authorization header.
+ * Returns the decoded payload on success, or null on failure.
+ */
+function verifyToken(req) {
+    const authHeader = req.headers.authorization || '';
+    if (!authHeader.startsWith('Bearer ')) return null;
+    const token = authHeader.slice(7);
+    try {
+        return jwt.verify(token, JWT_SECRET);
+    } catch (_) {
+        return null;
+    }
+}
 
 module.exports = async (req, res) => {
     res.setHeader('Content-Type', 'application/json');
@@ -24,7 +46,7 @@ module.exports = async (req, res) => {
     
     try {
         if (method === 'GET') {
-            // Get leaderboard
+            // Public — no auth required
             if (game) {
                 const gameScores = leaderboardData.byGame[game] || [];
                 return res.status(200).json({
@@ -40,17 +62,33 @@ module.exports = async (req, res) => {
         }
         
         if (method === 'POST') {
-            // Submit score
-            const { gameId, userId, username, score, metadata } = req.body;
+            // Authentication required for score submission
+            const decoded = verifyToken(req);
+            if (!decoded) {
+                return res.status(401).json({ error: 'Authentication required' });
+            }
+
+            const { gameId, username, score, metadata } = req.body;
+
+            // Use the authenticated user's id from the JWT — ignore any client-supplied userId
+            const userId = decoded.id;
             
-            if (!gameId || !userId || !score) {
+            if (!gameId || score === undefined || score === null) {
                 return res.status(400).json({ error: 'Missing required fields' });
+            }
+
+            // Validate score: must be a finite number within bounds
+            const numericScore = Number(score);
+            if (!Number.isFinite(numericScore) || numericScore < SCORE_MIN || numericScore > SCORE_MAX) {
+                return res.status(400).json({
+                    error: `Score must be a number between ${SCORE_MIN} and ${SCORE_MAX}`
+                });
             }
             
             const entry = {
                 userId,
-                username: username || 'Anonymous',
-                score: parseInt(score),
+                username: username || decoded.username || 'Anonymous',
+                score: Math.floor(numericScore),
                 gameId,
                 metadata: metadata || {},
                 timestamp: new Date().toISOString()
