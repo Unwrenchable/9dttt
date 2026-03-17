@@ -6,6 +6,9 @@
 const jwt = require('jsonwebtoken');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production';
+if (!process.env.JWT_SECRET) {
+    console.warn('[leaderboard] WARNING: JWT_SECRET env var is not set — using insecure default. Set JWT_SECRET in production.');
+}
 
 const SCORE_MIN = 0;
 const SCORE_MAX = 10_000_000;

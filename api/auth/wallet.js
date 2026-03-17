@@ -135,9 +135,12 @@ module.exports = async (req, res) => {
         if (unixMsMatch) {
             messageTimestamp = parseInt(unixMsMatch[1], 10);
         } else if (isoMatch) {
-            messageTimestamp = new Date(isoMatch[1]).getTime();
+            const parsed = new Date(isoMatch[1]);
+            if (!Number.isNaN(parsed.getTime())) {
+                messageTimestamp = parsed.getTime();
+            }
         }
-        if (messageTimestamp !== null && !Number.isNaN(messageTimestamp)) {
+        if (messageTimestamp !== null) {
             if (Date.now() - messageTimestamp > MAX_MESSAGE_AGE_MS) {
                 return res.status(400).json({
                     success: false,

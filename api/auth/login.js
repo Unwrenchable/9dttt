@@ -7,6 +7,9 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production';
+if (!process.env.JWT_SECRET) {
+    console.warn('[login] WARNING: JWT_SECRET env var is not set — using insecure default. Set JWT_SECRET in production.');
+}
 
 // Simple in-memory user store (use MongoDB in production)
 const users = new Map();
