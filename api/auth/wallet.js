@@ -140,16 +140,18 @@ module.exports = async (req, res) => {
                 messageTimestamp = parsed.getTime();
             }
         }
-        if (messageTimestamp !== null) {
-            if (Date.now() - messageTimestamp > MAX_MESSAGE_AGE_MS) {
-                return res.status(400).json({
-                    success: false,
-                    error: 'Challenge message expired. Please sign a fresh message.'
-                });
-            }
+        if (messageTimestamp === null) {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid challenge message: must contain a timestamp. Please sign a fresh message.'
+            });
         }
-        // If no timestamp is found in the message we allow it through so that
-        // existing client flows are not broken.
+        if (Date.now() - messageTimestamp > MAX_MESSAGE_AGE_MS) {
+            return res.status(400).json({
+                success: false,
+                error: 'Challenge message expired. Please sign a fresh message.'
+            });
+        }
 
         // Verify signature
         const verification = await verifyWalletSignature(chain, address, message, signature);

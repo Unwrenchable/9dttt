@@ -229,6 +229,7 @@ class OregonTrailGame {
     this.render(this.ctx);
     // Stop scheduling new frames once the game has reached a terminal state
     if (this.gameState === 'gameover' || this.gameState === 'victory') {
+      cancelAnimationFrame(this.frameId);
       this.frameId = null;
       return;
     }

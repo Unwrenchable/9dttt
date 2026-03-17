@@ -75,8 +75,21 @@ module.exports = async (req, res) => {
             const userId = auth.decoded.id;
             const body = req.body;
 
-            // Strip sensitive fields that must never be persisted server-side
-            const { privateKey, ...safeBody } = body;
+            // Allowlist approach: only persist known-safe game-progress fields.
+            // Any unknown or sensitive field (privateKey, mnemonic, seed, secretKey, etc.)
+            // is silently dropped before storage.
+            const ALLOWED_FIELDS = ['coins', 'knowledge', 'achievements', 'completedLevels', 'currentLevel', 'wallet', 'mining', 'settings'];
+            const safeBody = {};
+            for (const field of ALLOWED_FIELDS) {
+                if (Object.prototype.hasOwnProperty.call(body, field)) {
+                    safeBody[field] = body[field];
+                }
+            }
+            // Strip any sensitive sub-fields from the wallet object (educational game artifact)
+            if (safeBody.wallet && typeof safeBody.wallet === 'object') {
+                const { privateKey: _pk, mnemonic: _mn, seed: _sd, secretKey: _sk, ...safeWallet } = safeBody.wallet;
+                safeBody.wallet = safeWallet;
+            }
 
             const progress = {
                 ...safeBody,
