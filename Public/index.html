@@ -1171,6 +1171,7 @@
             let currentFocus = 0;
 
             function getVisibleGameCards() {
+                // .locked cards are non-interactive divs (premium/sign-in-required games); exclude them
                 return Array.from(document.querySelectorAll('.game-card:not(.hidden):not(.locked)'));
             }
 

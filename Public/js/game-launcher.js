@@ -45,13 +45,13 @@
 
             if (gameWin) {
                 this._openWindows.set(absUrl, gameWin);
-                // Clean up map entry when game window closes
+                // Clean up map entry when game window closes (check every 3 s)
                 const cleanup = setInterval(() => {
                     if (gameWin.closed) {
                         this._openWindows.delete(absUrl);
                         clearInterval(cleanup);
                     }
-                }, 1000);
+                }, 3000);
             } else {
                 // Popup was blocked — fall back to same-tab navigation
                 window.location.href = absUrl;
