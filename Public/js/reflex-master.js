@@ -14,6 +14,7 @@ class ReflexMaster {
         this.targets = [];
         this.particles = [];
         this.gameActive = false;
+        this._rafId = null;
         this._clickHandler = (e) => this.handleClick(e);
     }
     
@@ -39,6 +40,7 @@ class ReflexMaster {
         this.setupGame();
         this.canvas.removeEventListener('click', this._clickHandler);
         this.canvas.addEventListener('click', this._clickHandler);
+        if (this._rafId) { cancelAnimationFrame(this._rafId); this._rafId = null; }
         this.gameLoop();
     }
     
@@ -384,7 +386,7 @@ class ReflexMaster {
         this.update();
         this.draw();
         
-        requestAnimationFrame(() => this.gameLoop());
+        this._rafId = requestAnimationFrame(() => this.gameLoop());
     }
 }
 
