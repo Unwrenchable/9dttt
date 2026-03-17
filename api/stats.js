@@ -3,6 +3,31 @@
  * Track and retrieve platform statistics
  */
 
+const jwt = require('jsonwebtoken');
+
+const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production';
+
+/**
+ * Verify a Bearer JWT from the Authorization header.
+ * Returns { valid: true, decoded } on success, or { valid: false } on failure.
+ */
+function verifyBearer(req) {
+    const authHeader = req.headers.authorization || '';
+    if (!authHeader.startsWith('Bearer ')) {
+        return { valid: false };
+    }
+    const token = authHeader.slice(7).trim();
+    if (!token) {
+        return { valid: false };
+    }
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        return { valid: true, decoded };
+    } catch (err) {
+        return { valid: false };
+    }
+}
+
 // In-memory stats (use Redis/MongoDB in production)
 let stats = {
     totalPlayers: 0,
@@ -17,7 +42,7 @@ module.exports = async (req, res) => {
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     
     if (req.method === 'OPTIONS') {
         return res.status(200).end();
@@ -38,6 +63,12 @@ module.exports = async (req, res) => {
         }
         
         if (req.method === 'POST') {
+            // Require a valid JWT to prevent unauthenticated stat inflation
+            const auth = verifyBearer(req);
+            if (!auth.valid) {
+                return res.status(401).json({ error: 'Unauthorized: valid Bearer token required' });
+            }
+
             // Track event
             const { event, userId, gameId, metadata } = req.body;
             

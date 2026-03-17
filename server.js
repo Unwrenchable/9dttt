@@ -925,6 +925,8 @@ io.on('connection', (socket) => {
 
     // Lobby chat
     socket.on('join_lobby', () => {
+        const user = connectedUsers.get(socket.id);
+        if (!user) { socket.emit('error', { error: 'Not authenticated' }); return; }
         socket.join('lobby');
         socket.emit('joined_lobby');
     });
@@ -1032,6 +1034,8 @@ io.on('connection', (socket) => {
 
     // Create a new co-op session (host)
     socket.on('rampage_create', (data) => {
+        const user = connectedUsers.get(socket.id);
+        if (!user) { socket.emit('error', { error: 'Not authenticated' }); return; }
         // Use crypto for a collision-resistant, URL-safe session ID
         const sessionId = crypto.randomBytes(3).toString('hex').toUpperCase(); // e.g. "A3F7B2"
         rampageSessions.set(sessionId, {
@@ -1046,6 +1050,8 @@ io.on('connection', (socket) => {
 
     // Join an existing co-op session
     socket.on('rampage_join', (data) => {
+        const user = connectedUsers.get(socket.id);
+        if (!user) { socket.emit('error', { error: 'Not authenticated' }); return; }
         if (!data || !data.sessionId) return;
         const session = rampageSessions.get(data.sessionId);
         if (!session) {

@@ -41,14 +41,37 @@ function verifySolanaSignature(message, signature, publicKey) {
 }
 
 /**
- * Verify XRP signature (simplified - XUMM/Crossmark handle verification)
+ * Verify XRP signature (format validation + TODO: full cryptographic check)
+ *
+ * Full cryptographic verification of an XRPL signature requires the signer's
+ * *public key* (not just the address). XUMM/Crossmark wallets handle the actual
+ * signing client-side. Until clients are updated to supply the public key, we
+ * perform strict format validation to reject trivially-forged signatures.
+ *
+ * TODO: Update the client to send `publicKey` alongside the signature, then
+ * use ripple-keypairs: keypairs.verify(messageHex, signature, publicKey)
  */
 function verifyXRPSignature(message, signature, address) {
     try {
-        // XRP wallets (XUMM/Crossmark) pre-verify on client side
-        // Additional server-side verification can be added with xrpl library
-        // For now, we trust the client-side verification
-        return signature && address && signature.length > 0;
+        // Validate XRP address format: starts with 'r', 25–35 Base58 characters
+        if (!address || !/^r[1-9A-HJ-NP-Za-km-z]{24,34}$/.test(address)) {
+            console.warn('XRP verification: invalid address format');
+            return false;
+        }
+
+        // XRPL DER-encoded signatures are 128 or 130 hex characters (64/65 bytes).
+        // Reject anything that is not a valid hex string of the expected length.
+        if (!signature || !/^[0-9a-fA-F]{128,130}$/.test(signature)) {
+            console.warn('XRP verification: invalid signature format');
+            return false;
+        }
+
+        // Message must be non-empty
+        if (!message || message.length === 0) {
+            return false;
+        }
+
+        return true;
     } catch (error) {
         console.error('XRP verification error:', error);
         return false;
@@ -98,6 +121,35 @@ module.exports = async (req, res) => {
             return res.status(400).json({ 
                 success: false, 
                 error: 'Missing required fields: chain, address, signature, message' 
+            });
+        }
+
+        // --- Replay-attack guard (BUG-8) ---
+        // Extract a timestamp from the signed message so stale signatures cannot
+        // be replayed. We look for either a 13-digit unix-ms integer or an ISO
+        // date string embedded anywhere in the message text.
+        const MAX_MESSAGE_AGE_MS = 5 * 60 * 1000; // 5 minutes
+        const unixMsMatch = message.match(/\b(\d{13})\b/);
+        const isoMatch = message.match(/(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z)/);
+        let messageTimestamp = null;
+        if (unixMsMatch) {
+            messageTimestamp = parseInt(unixMsMatch[1], 10);
+        } else if (isoMatch) {
+            const parsed = new Date(isoMatch[1]);
+            if (!Number.isNaN(parsed.getTime())) {
+                messageTimestamp = parsed.getTime();
+            }
+        }
+        if (messageTimestamp === null) {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid challenge message: must contain a timestamp. Please sign a fresh message.'
+            });
+        }
+        if (Date.now() - messageTimestamp > MAX_MESSAGE_AGE_MS) {
+            return res.status(400).json({
+                success: false,
+                error: 'Challenge message expired. Please sign a fresh message.'
             });
         }
 

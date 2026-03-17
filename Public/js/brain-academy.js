@@ -180,6 +180,12 @@ class BrainAcademy {
         
         this._wordInterval = setInterval(spawnWord, 2000);
         
+        // Remove any previous typing listener before adding a new one
+        if (this._handleTyping) {
+            document.removeEventListener('keydown', this._handleTyping);
+            this._handleTyping = null;
+        }
+        
         const gameLoop = () => {
             if (lives <= 0) {
                 clearInterval(this._wordInterval);
@@ -246,10 +252,8 @@ class BrainAcademy {
             requestAnimationFrame(gameLoop);
         };
         
-        // Keyboard input
-        document.addEventListener('keydown', handleTyping);
-        
-        function handleTyping(e) {
+        // Keyboard input – stored on `this` so backToMenu() can remove it
+        this._handleTyping = (e) => {
             if (e.key === 'Backspace') {
                 currentInput = currentInput.slice(0, -1);
             } else if (e.key.length === 1 && /[a-z]/.test(e.key)) {
@@ -268,7 +272,8 @@ class BrainAcademy {
                     }
                 });
             }
-        }
+        };
+        document.addEventListener('keydown', this._handleTyping);
         
         document.getElementById('gameControls').innerHTML = '<p style="text-align: center; font-size: 18px;">Type the falling words!</p>';
         
@@ -419,6 +424,11 @@ function loadGame(gameType) {
 }
 
 function backToMenu() {
+    // Clean up the Typing Master keydown listener if it is still attached
+    if (academy && academy._handleTyping) {
+        document.removeEventListener('keydown', academy._handleTyping);
+        academy._handleTyping = null;
+    }
     document.getElementById('gamesMenu').style.removeProperty('display');
     const gameArea = document.getElementById('gameArea');
     if (gameArea) gameArea.classList.remove('active');

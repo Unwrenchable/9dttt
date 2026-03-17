@@ -54,6 +54,9 @@ class BeatEmUpEngine {
         this.score = 0;
         this.combo = 0;
         this.comboTimer = 0;
+
+        // RAF tracking (cancellable loop)
+        this._rafId = null;
         
         this.init();
     }
@@ -109,13 +112,19 @@ class BeatEmUpEngine {
     // ==================== GAME LOOP ====================
 
     gameLoop(timestamp) {
+        // Stop the loop permanently when the game has ended
+        if (this.state === 'gameover' || this.state === 'victory') {
+            this._rafId = null;
+            return;
+        }
+
         this.deltaTime = Math.min((timestamp - this.lastTime) / 1000, 0.1);
         this.lastTime = timestamp;
         
         this.update();
         this.render();
         
-        requestAnimationFrame((t) => this.gameLoop(t));
+        this._rafId = requestAnimationFrame((t) => this.gameLoop(t));
     }
 
     update() {
@@ -755,6 +764,13 @@ class BeatEmUpEngine {
                     });
                 }
             });
+        }
+    }
+
+    stop() {
+        if (this._rafId !== null) {
+            cancelAnimationFrame(this._rafId);
+            this._rafId = null;
         }
     }
 
