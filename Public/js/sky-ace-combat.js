@@ -468,6 +468,7 @@ class SkyAceCombat {
     }
 
     _showGameOver() {
+        if (this._rafId) { cancelAnimationFrame(this._rafId); this._rafId = null; }
         const existing = document.getElementById('gameOverOverlay');
         if (existing) existing.remove();
         const overlay = document.createElement('div');

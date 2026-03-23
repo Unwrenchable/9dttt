@@ -4,11 +4,14 @@
 class MegaHeroes {
     constructor() {
         this.canvas = document.getElementById('gameCanvas');
+        if (!this.canvas) { console.error('[MegaHeroes] gameCanvas not found'); return; }
         this.ctx = this.canvas.getContext('2d');
+        if (!this.ctx) { console.error('[MegaHeroes] 2D context unavailable'); return; }
         this.canvas.width = 800;
         this.canvas.height = 600;
         
         this.keys = {};
+        this._inputSetup = false;
         this.player = null;
         this.enemies = [];
         this.projectiles = [];
@@ -38,6 +41,8 @@ class MegaHeroes {
     }
     
     setupInput() {
+        if (this._inputSetup) return;
+        this._inputSetup = true;
         window.addEventListener('keydown', (e) => {
             this.keys[e.code] = true;
             if (e.code === 'Space' && this.player) this.jump();
@@ -626,6 +631,7 @@ class MegaHeroes {
     }
 
     _showGameOver() {
+        if (this._rafId) { cancelAnimationFrame(this._rafId); this._rafId = null; }
         const existing = document.getElementById('megaHeroesGameOver');
         if (existing) existing.remove();
         const overlay = document.createElement('div');

@@ -31,6 +31,10 @@ class CryptoQuestGame {
         
         // Keyboard input
         this.keys = {};
+
+        // Render loop lifecycle
+        this._rafId = null;
+        this._running = false;
         
         // Educational levels
         this.levels = [
@@ -748,12 +752,27 @@ class CryptoQuestGame {
     }
     
     startGame() {
-        this.render();
+        if (this._running) return;
+        this._running = true;
+        this._renderLoop();
     }
     
+    _renderLoop() {
+        if (!this._running) return;
+        this.render();
+        this._rafId = requestAnimationFrame(() => this._renderLoop());
+    }
+
+    stop() {
+        this._running = false;
+        if (this._rafId) {
+            cancelAnimationFrame(this._rafId);
+            this._rafId = null;
+        }
+    }
+
     render() {
-        // Main render loop
-        requestAnimationFrame(() => this.render());
+        // Main render loop body (drawing handled by renderLevelMap and other methods)
     }
     
     togglePause() {

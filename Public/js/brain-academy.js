@@ -123,7 +123,7 @@ class BrainAcademy {
             this.ctx.fillText(`Score: ${score}`, 20, 30);
             this.ctx.fillText(`Lives: ${'❤️'.repeat(lives)}`, 20, 60);
             
-            requestAnimationFrame(gameLoop);
+            academy._rafId = requestAnimationFrame(gameLoop);
         };
         
         // Input for answers
@@ -249,7 +249,7 @@ class BrainAcademy {
             this.ctx.fillText(`Lives: ${lives}`, 20, 60);
             this.ctx.fillText(`WPM: ${Math.floor(score * 1.5)}`, 20, 90);
             
-            requestAnimationFrame(gameLoop);
+            academy._rafId = requestAnimationFrame(gameLoop);
         };
         
         // Keyboard input – stored on `this` so backToMenu() can remove it
@@ -424,6 +424,10 @@ function loadGame(gameType) {
 }
 
 function backToMenu() {
+    // Clean up RAF loop and intervals from any running mini-game
+    if (academy && academy._rafId) { cancelAnimationFrame(academy._rafId); academy._rafId = null; }
+    if (academy && academy._spawnInterval) { clearInterval(academy._spawnInterval); academy._spawnInterval = null; }
+    if (academy && academy._wordInterval) { clearInterval(academy._wordInterval); academy._wordInterval = null; }
     // Clean up the Typing Master keydown listener if it is still attached
     if (academy && academy._handleTyping) {
         document.removeEventListener('keydown', academy._handleTyping);

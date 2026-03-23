@@ -164,7 +164,12 @@
                 this.loadProgress();
                 
                 this.keys = {};
+                this._rafId = null;
                 this.setupInput();
+                // Clean up loop on page navigation
+                window.addEventListener('beforeunload', () => {
+                    if (this._rafId) { cancelAnimationFrame(this._rafId); this._rafId = null; }
+                });
                 this.gameLoop();
             }
             
