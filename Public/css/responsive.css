@@ -13,22 +13,33 @@
         --spacing-xl: 24px;
         --spacing-xxl: 32px;
     }
-    
+
     body {
         padding: var(--spacing-xs);
-        font-size: 14px;
+        font-size: 16px;
+        overflow-x: hidden;
     }
-    
-    /* Ensure games fit on mobile */
+
+    /* Ensure games fit on mobile - improved scaling */
     canvas {
         max-width: 100vw !important;
-        max-height: 70vh !important;
+        max-height: calc(100vh - 200px) !important;
         height: auto !important;
-        width: 100% !important;
+        width: auto !important;
+        object-fit: contain !important;
         touch-action: none;
         -webkit-touch-callout: none;
         -webkit-user-select: none;
         user-select: none;
+    }
+
+    /* Make game containers responsive */
+    .game-container, .game-canvas-wrapper, .game-area {
+        width: 100% !important;
+        max-width: 100vw !important;
+        padding: var(--spacing-sm) !important;
+        box-sizing: border-box !important;
+        overflow: visible !important;
     }
     
     /* Mobile-optimized buttons */
@@ -88,15 +99,64 @@
 /* Desktop optimization */
 @media (min-width: 1025px) {
     canvas {
-        max-width: 1200px;
+        max-width: 1400px;
+        max-height: 85vh;
         image-rendering: crisp-edges;
         image-rendering: pixelated;
     }
-    
+
     /* Hover effects only on devices that support hover */
     button:hover, .btn:hover {
         transform: translateY(-2px);
         box-shadow: 0 8px 20px rgba(74, 144, 226, 0.4);
+    }
+}
+
+/* Large Desktop / TV optimization (1440p and above) */
+@media (min-width: 1920px) {
+    canvas {
+        max-width: 1600px;
+        max-height: 90vh;
+    }
+
+    body {
+        font-size: 18px;
+    }
+
+    button, .btn {
+        font-size: 18px;
+        padding: 14px 28px;
+    }
+
+    header h1 {
+        font-size: 3rem;
+    }
+}
+
+/* 4K / UHD TV optimization */
+@media (min-width: 2560px) {
+    canvas {
+        max-width: 2200px;
+        max-height: 92vh;
+    }
+
+    body {
+        font-size: 20px;
+    }
+
+    button, .btn {
+        font-size: 22px;
+        padding: 18px 36px;
+        min-height: 60px;
+    }
+
+    header h1 {
+        font-size: 4rem;
+    }
+
+    .game-container, .game-canvas-wrapper {
+        max-width: 2400px;
+        margin: 0 auto;
     }
 }
 

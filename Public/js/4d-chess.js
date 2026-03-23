@@ -211,6 +211,8 @@ class FourDChess {
         // Must play on current timeline (unless timeline jumping)
         if (timeline !== this.currentTimeline) {
             this.showNotification('Play on the active timeline!');
+            // Switch to the clicked timeline to help the player
+            this.switchTimeline(timeline);
             return;
         }
 
@@ -219,7 +221,7 @@ class FourDChess {
 
         // If a piece is already selected
         if (this.selectedSquare) {
-            const { row: fromRow, col: fromCol } = this.selectedSquare;
+            const { row: fromRow, col: fromCol, timeline: fromTimeline } = this.selectedSquare;
 
             // Check if clicking on a valid move
             const isValidMove = this.validMoves.some(

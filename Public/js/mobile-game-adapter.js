@@ -62,25 +62,42 @@
             const vh = window.innerHeight;
 
             // On mobile, limit height to leave room for mobile controls
-            const controlsHeight = this.isTouch ? 160 : 0;
-            const maxH = vh - controlsHeight - 80; // 80px for header/nav
-            const maxW = vw - 16; // small margin
+            const controlsHeight = this.isTouch ? 180 : 0;
+            const headerHeight = 100; // Space for header/nav
+            const maxH = vh - controlsHeight - headerHeight;
+            const maxW = vw - 32; // margins on both sides
 
             let displayW = maxW;
             let displayH = displayW / aspectRatio;
 
+            // If height exceeds available space, scale down based on height
             if (displayH > maxH) {
                 displayH = maxH;
                 displayW = displayH * aspectRatio;
             }
 
+            // Ensure minimum playable size on very small screens
+            const minSize = 300;
+            if (displayW < minSize && displayH < minSize) {
+                if (aspectRatio > 1) {
+                    displayW = minSize;
+                    displayH = minSize / aspectRatio;
+                } else {
+                    displayH = minSize;
+                    displayW = minSize * aspectRatio;
+                }
+            }
+
             // Apply CSS scaling (preserves internal canvas resolution)
-            this.canvas.style.width = displayW + 'px';
-            this.canvas.style.height = displayH + 'px';
+            this.canvas.style.width = Math.floor(displayW) + 'px';
+            this.canvas.style.height = Math.floor(displayH) + 'px';
             this.canvas.style.display = 'block';
-            this.canvas.style.margin = '0 auto';
+            this.canvas.style.margin = '10px auto';
             this.canvas.style.maxWidth = '100%';
+            this.canvas.style.objectFit = 'contain';
             this.canvas.classList.add('mga-scaled');
+
+            console.log(`📐 Canvas scaled: ${nativeW}x${nativeH} → ${Math.floor(displayW)}x${Math.floor(displayH)}px (viewport: ${vw}x${vh})`);
         },
 
         setupTouchControls() {

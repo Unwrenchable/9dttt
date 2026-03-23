@@ -15,20 +15,21 @@ class GameUI {
      * Initialize UI components
      */
     async init() {
-        this.createAuthModal();
+        // DO NOT create auth modal - unified-auth.js and auth-ui.js handle all authentication
+        // This prevents duplicate login popups
         this.createProfileModal();
         this.createMultiplayerModal();
         this.createHeaderUI();
-        
-        // Initialize auth client (unified auth provides compatibility layer)
-        if (window.authClient) {
-            await window.authClient.init();
+
+        // Use unified auth system instead of legacy authClient
+        if (window.unifiedAuth) {
+            await window.unifiedAuth.init();
             this.updateAuthUI();
             // Listen for auth state changes
-            window.authClient.addListener(() => this.updateAuthUI());
+            window.unifiedAuth.onAuthStateChanged(() => this.updateAuthUI());
         }
-        
-        // Check URL params for auth callbacks (legacy)
+
+        // Check URL params for auth callbacks (legacy support)
         this.handleAuthCallback();
     }
 
@@ -92,101 +93,14 @@ class GameUI {
     }
 
     /**
-     * Create auth modal
+     * Create auth modal - REMOVED
+     * Auth modal is now handled by auth-ui.js to prevent duplicate login popups
+     * All authentication is managed by unified-auth.js and auth-ui.js
      */
     createAuthModal() {
-        const modal = document.createElement('div');
-        modal.id = 'auth-modal';
-        modal.className = 'modal';
-        modal.setAttribute('role', 'dialog');
-        modal.setAttribute('aria-labelledby', 'auth-modal-title');
-        modal.setAttribute('aria-modal', 'true');
-        
-        modal.innerHTML = `
-            <div class="modal-content auth-modal-content">
-                <button class="modal-close" id="auth-modal-close" aria-label="Close">&times;</button>
-                <h2 id="auth-modal-title">Login</h2>
-                
-                <div class="auth-tabs">
-                    <button class="auth-tab active" data-tab="login">Login</button>
-                    <button class="auth-tab" data-tab="register">Register</button>
-                </div>
-                
-                <div class="auth-form-container">
-                    <!-- Login Form -->
-                    <form id="login-form" class="auth-form">
-                        <div class="form-group">
-                            <label for="login-username">Username or Email</label>
-                            <input type="text" id="login-username" required autocomplete="username">
-                        </div>
-                        <div class="form-group">
-                            <label for="login-password">Password</label>
-                            <input type="password" id="login-password" required autocomplete="current-password">
-                        </div>
-                        <div class="form-error" id="login-error"></div>
-                        <button type="submit" class="auth-submit">Login</button>
-                    </form>
-                    
-                    <!-- Register Form -->
-                    <form id="register-form" class="auth-form" style="display: none;">
-                        <div class="form-group">
-                            <label for="register-username">Username</label>
-                            <input type="text" id="register-username" required minlength="3" maxlength="20" pattern="[a-zA-Z0-9_]+" autocomplete="username">
-                            <small>3-20 characters, letters, numbers, and underscores only</small>
-                        </div>
-                        <div class="form-group">
-                            <label for="register-email">Email</label>
-                            <input type="email" id="register-email" required autocomplete="email">
-                        </div>
-                        <div class="form-group">
-                            <label for="register-password">Password</label>
-                            <input type="password" id="register-password" required minlength="6" autocomplete="new-password">
-                            <small>At least 6 characters</small>
-                        </div>
-                        <div class="form-group">
-                            <label for="register-confirm">Confirm Password</label>
-                            <input type="password" id="register-confirm" required autocomplete="new-password">
-                        </div>
-                        <div class="form-error" id="register-error"></div>
-                        <button type="submit" class="auth-submit">Create Account</button>
-                    </form>
-                </div>
-                
-                <div class="auth-divider">
-                    <span>or continue with</span>
-                </div>
-                
-                <div class="oauth-buttons" id="oauth-buttons">
-                    <button class="oauth-btn browser-credential-btn" data-provider="browser" title="Use saved password from your browser">
-                        <span class="oauth-icon">🔐</span> Saved Password
-                    </button>
-                </div>
-                <p class="oauth-note" style="font-size: 0.8rem; color: var(--text-secondary); text-align: center; margin-top: 8px;">
-                    Use your browser's saved passwords for quick sign-in
-                </p>
-            </div>
-        `;
-        
-        document.body.appendChild(modal);
-        this.authModal = modal;
-        
-        // Event listeners
-        modal.querySelector('#auth-modal-close').addEventListener('click', () => this.hideAuthModal());
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) this.hideAuthModal();
-        });
-        
-        // Tab switching
-        modal.querySelectorAll('.auth-tab').forEach(tab => {
-            tab.addEventListener('click', () => this.switchAuthTab(tab.dataset.tab));
-        });
-        
-        // Form submissions
-        modal.querySelector('#login-form').addEventListener('submit', (e) => this.handleLogin(e));
-        modal.querySelector('#register-form').addEventListener('submit', (e) => this.handleRegister(e));
-        
-        // Browser credential button
-        modal.querySelector('.browser-credential-btn')?.addEventListener('click', () => this.handleBrowserCredentialAuth());
+        // This function intentionally left empty
+        // Do not recreate - see auth-ui.js for the unified auth modal
+        console.log('ℹ️ Auth modal handled by auth-ui.js');
     }
 
     /**
