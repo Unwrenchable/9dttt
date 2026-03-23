@@ -628,6 +628,7 @@
 
             this.keys = {};
             this.remoteInputs = {}; // slot→{left,right,up,down,act} injected by online co-op
+            this._inputSetup = false;
             this._setupInput();
             this._init();
 
@@ -645,6 +646,8 @@
         }
 
         _setupInput() {
+            if (this._inputSetup) return;
+            this._inputSetup = true;
             window.addEventListener('keydown', e => { this.keys[e.code] = true;  e.preventDefault(); });
             window.addEventListener('keyup',   e => { this.keys[e.code] = false; });
         }

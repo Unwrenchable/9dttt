@@ -688,6 +688,7 @@ class ContraCommando {
     gameOver() {
         this.state = 'gameover';
         this.running = false;
+        if (this._rafId) { cancelAnimationFrame(this._rafId); this._rafId = null; }
         document.getElementById('gameOverScreen').classList.remove('hidden');
         document.getElementById('finalScore').innerHTML = 
             `<h3>Final Score: ${this.score}</h3><p>Level Reached: ${this.level}</p>`;
@@ -914,7 +915,7 @@ class ContraCommando {
         this.update(deltaTime);
         this.draw();
         
-        requestAnimationFrame((ts) => this.gameLoop(ts));
+        this._rafId = requestAnimationFrame((ts) => this.gameLoop(ts));
     }
 }
 

@@ -19,6 +19,11 @@ class QuantumSudoku {
         this.gameOver = false;
         this.hintsUsed = 0;
         this.maxHints = 3;
+
+        // Clean up timer on page navigation
+        window.addEventListener('beforeunload', () => {
+            if (this.timerInterval) clearInterval(this.timerInterval);
+        });
     }
 
     /**

@@ -98,6 +98,10 @@
             this.errorCount = 0;
             this.maxErrors = 10;
             this.lastError = null;
+
+            // Lifecycle
+            this._rafId = null;
+            this._inputSetup = false;
             
             // Initialize
             this._setupInput();
@@ -122,6 +126,10 @@
          */
         stop() {
             this.running = false;
+            if (this._rafId) {
+                cancelAnimationFrame(this._rafId);
+                this._rafId = null;
+            }
         }
 
         /**
@@ -202,7 +210,7 @@
             }
             
             // Continue the loop
-            requestAnimationFrame((t) => this._gameLoop(t));
+            this._rafId = requestAnimationFrame((t) => this._gameLoop(t));
         }
 
         /**
@@ -225,6 +233,8 @@
          * Setup keyboard and mouse input handlers
          */
         _setupInput() {
+            if (this._inputSetup) return;
+            this._inputSetup = true;
             // Keyboard
             window.addEventListener('keydown', (e) => {
                 if (!this.keys[e.code]) {

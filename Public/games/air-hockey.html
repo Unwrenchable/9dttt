@@ -140,7 +140,7 @@
             }
             
             gameLoop() {
-                if (this.state === 'gameover') return;
+                if (this.state === 'gameover') { cancelAnimationFrame(this._rafId); this._rafId = null; return; }
                 this.update();
                 this.render();
                 this._rafId = requestAnimationFrame(() => this.gameLoop());

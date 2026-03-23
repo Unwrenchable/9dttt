@@ -35,6 +35,7 @@ class TournamentFighters {
         this.projectiles = [];
         this.particles = [];
         this.keys = {};
+        this._inputSetup = false;
         
         this.round = 1;
         this.timer = 99;
@@ -47,6 +48,8 @@ class TournamentFighters {
     }
     
     setupInput() {
+        if (this._inputSetup) return;
+        this._inputSetup = true;
         window.addEventListener('keydown', (e) => {
             this.keys[e.code] = true;
             e.preventDefault();
