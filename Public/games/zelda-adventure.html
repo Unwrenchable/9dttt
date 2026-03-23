@@ -1836,7 +1836,13 @@ class WastelandGame {
   }
   _onEnter(){
     if(this.state==='title'){this.state='playing';this.music.play('overworld');}
-    else if(this.state==='gameover'||this.state==='win'){this.initGame();this.state='playing';this.music.play('overworld');this._running=true;this._rafId=requestAnimationFrame(t=>this.gameLoop(t));}
+    else if(this.state==='gameover'||this.state==='win'){
+      this.initGame();
+      this.state='playing';
+      this.music.play('overworld');
+      this._running=true;
+      this._rafId=requestAnimationFrame(t=>this.gameLoop(t));
+    }
     else if(this.state==='inventory')this.state='playing';
   }
   _toggleInv(){

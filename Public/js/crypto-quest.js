@@ -752,6 +752,8 @@ class CryptoQuestGame {
     }
     
     startGame() {
+        // Cancel any pending frame before starting a fresh loop
+        if (this._rafId) { cancelAnimationFrame(this._rafId); this._rafId = null; }
         if (this._running) return;
         this._running = true;
         this._renderLoop();
