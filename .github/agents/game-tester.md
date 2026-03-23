@@ -226,6 +226,39 @@ Simulate malicious or careless players:
 5. **JWT not verified on protected Socket.io events** — always Critical
 6. **Score submittable via direct POST without auth** — always Critical
 7. **`currentGame` not set before dispatching to handler** — always High
+8. **`setupInput()` has no `_inputSetup` guard** — always High (listener stacking)
+9. **`addEventListener` without matching `removeEventListener` in `destroy()`** — always High
+10. **`innerHTML` set with unsanitised user/error content** — always Critical (XSS)
+
+---
+
+## Known Fixed Issues (2026-03-23)
+
+The following bugs were identified and fixed in the platform-wide QA pass:
+- ✅ XSS in `game-error-handler.js` — `e.message` now HTML-escaped via `_escapeHtml()`
+- ✅ `crypto-quest.js` zombie render loop — added `_running` flag + `cancelAnimationFrame`
+- ✅ `brain-academy.js` multiple RAF loops — tracked `_rafId`, `_spawnInterval` cleared in `backToMenu()`
+- ✅ `game-engine.js` `stop()` — RAF ID stored, `cancelAnimationFrame` added, `_inputSetup` guard added
+- ✅ `zelda-adventure.html` unconditional loop — `_running` flag + RAF cancel on gameover/win
+- ✅ `mega-heroes.js` — canvas/ctx null-check, `_inputSetup` guard, `_rafId` cancelled in `_showGameOver()`
+- ✅ `sky-ace-combat.js` — `_rafId` cancelled in `_showGameOver()`
+- ✅ `contra-commando.js` — RAF ID stored, cancelled in `gameOver()`
+- ✅ `monster-rampage.js` — `_inputSetup` guard added
+- ✅ `tournament-fighters.js` — `_inputSetup` guard added
+- ✅ `quantum-sudoku.js` — `beforeunload` cleanup for `timerInterval`
+- ✅ `air-hockey.html`, `beach-games.html`, `dragon-fist.html`, `fps-arena.html`, `space-debris.html`, `motogp-excite.html` — `cancelAnimationFrame` on gameover
+
+## Current Platform Health (Post-Fix)
+
+| Metric | Status |
+|--------|--------|
+| XSS vulnerabilities | ✅ Fixed |
+| Zombie RAF loops | ✅ Fixed (all 4 critical cases) |
+| Missing setupInput() guards | ✅ Fixed (3 games) |
+| Missing cancelAnimationFrame | ✅ Fixed (11 games) |
+| setInterval leaks on nav | ✅ Fixed (quantum-sudoku + 6 inline games) |
+| Games missing pause (30/35) | ⚠️ Medium priority — pending |
+| Canvas resize handling (2/35) | ⚠️ Low priority — pending |
 
 ---
 
@@ -234,8 +267,13 @@ Simulate malicious or careless players:
 | Agent | When to Invoke |
 |-------|---------------|
 | `fullstack-dev.md` | After identifying a bug — hand off for fix implementation |
+| `gameplay-programmer.agent.md` | For game mechanic implementation following design specs |
+| `game-technical-director.agent.md` | For architecture decisions about game loop patterns |
+| `game-creative-director.agent.md` | For UX and player experience improvement decisions |
+| `game-designer.agent.md` | For game balance and systems design questions |
+| `cybersecurity-expert.agent.md` | For security vulnerabilities found during QA |
 | `games-master.yml` | For game logic and multiplayer mechanics questions |
-| `web3-specialist.md` | For wallet auth and multi-chain exploit findings |
+| `Web3_agent.md` | For wallet auth and multi-chain exploit findings |
 | `my-agent.agent.md` | For platform-wide questions about game systems |
 
 Use `tasks.md` to claim files before starting testing sessions on shared

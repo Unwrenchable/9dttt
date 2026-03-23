@@ -1133,5 +1133,139 @@
     ],
     "preferred_profile": "safe",
     "risk_level": "low"
+  },
+  {
+    "id": "9dttt-game-creative-director",
+    "role": "9DTTT Game Creative Director",
+    "description": "Guards the creative vision for 9DTTT games using MDA framework and player psychology. Resolves cross-discipline conflicts, presents strategic options with trade-offs, and supports the user's final creative decisions.",
+    "tags": [
+      "9dttt",
+      "game-design",
+      "creative-direction",
+      "mda-framework",
+      "player-experience"
+    ],
+    "capabilities": [
+      "creative-decision",
+      "vision-guardianship",
+      "scope-arbitration",
+      "conflict-resolution"
+    ],
+    "required_tools": [
+      "read_file",
+      "list_dir",
+      "grep_search"
+    ],
+    "preferred_profile": "balanced",
+    "risk_level": "low"
+  },
+  {
+    "id": "9dttt-game-technical-director",
+    "role": "9DTTT Game Technical Director",
+    "description": "Owns all high-level technical decisions for the 9DTTT platform \u2014 architecture, performance budgets, and technical risk management. Produces ADRs, enforces critical invariants (RAF cancel, input guards, ctx null-checks), and presents options with trade-offs.",
+    "tags": [
+      "9dttt",
+      "javascript",
+      "canvas",
+      "game-engine",
+      "performance",
+      "architecture"
+    ],
+    "capabilities": [
+      "architecture-review",
+      "adr-authoring",
+      "performance-analysis",
+      "technical-risk-management"
+    ],
+    "required_tools": [
+      "read_file",
+      "list_dir",
+      "grep_search",
+      "apply_patch"
+    ],
+    "preferred_profile": "balanced",
+    "risk_level": "medium"
+  },
+  {
+    "id": "9dttt-game-designer",
+    "role": "9DTTT Game Designer",
+    "description": "Designs game rules, systems, and mechanics for the 9DTTT platform using MDA framework, Self-Determination Theory, and Flow State Design. Authors GDDs and documents edge cases.",
+    "tags": [
+      "9dttt",
+      "game-design",
+      "balancing",
+      "gdd",
+      "systems-design"
+    ],
+    "capabilities": [
+      "gdd-authoring",
+      "balancing",
+      "economy-design",
+      "edge-case-analysis"
+    ],
+    "required_tools": [
+      "read_file",
+      "list_dir",
+      "grep_search",
+      "create_file",
+      "apply_patch"
+    ],
+    "preferred_profile": "balanced",
+    "risk_level": "low"
+  },
+  {
+    "id": "9dttt-gameplay-programmer",
+    "role": "9DTTT Gameplay Programmer",
+    "description": "Translates game design documents into clean, performant, data-driven code for the 9DTTT platform. Enforces critical invariants: RAF lifecycle, input guard, canvas null-checks, removeEventListener cleanup.",
+    "tags": [
+      "9dttt",
+      "javascript",
+      "canvas",
+      "game-loop",
+      "input-handling",
+      "implementation"
+    ],
+    "capabilities": [
+      "code-changes",
+      "refactoring",
+      "test-validation",
+      "game-mechanics"
+    ],
+    "required_tools": [
+      "read_file",
+      "apply_patch",
+      "create_file",
+      "run_in_terminal"
+    ],
+    "preferred_profile": "balanced",
+    "risk_level": "medium"
+  },
+  {
+    "id": "9dttt-cybersecurity-expert",
+    "role": "9DTTT Cybersecurity Expert",
+    "description": "White-hat security specialist for the 9DTTT platform. Finds XSS, JWT bypass, score injection, and Socket.io auth gaps. Applies targeted remediations. Specializes in browser game security and web3 wallet auth.",
+    "tags": [
+      "9dttt",
+      "security",
+      "xss",
+      "jwt",
+      "websocket",
+      "web3",
+      "pen-testing"
+    ],
+    "capabilities": [
+      "vulnerability-scanning",
+      "secure-code-review",
+      "penetration-testing",
+      "remediation"
+    ],
+    "required_tools": [
+      "read_file",
+      "list_dir",
+      "grep_search",
+      "apply_patch"
+    ],
+    "preferred_profile": "balanced",
+    "risk_level": "medium"
   }
 ]
