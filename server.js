@@ -217,7 +217,12 @@ app.post('/api/auth/login', security.rateLimitMiddleware('api_auth'), async (req
     }
 });
 
-app.get('/api/auth/verify', async (req, res) => {
+// Session verification — accepts both GET and POST so the client-side
+// fetch({ method: 'POST' }) call in unified-auth.js is correctly handled.
+// Previously only GET was registered; a POST from the client would fall
+// through to a 404, causing JSON.parse to throw, and clearSession() to
+// fire on every page reload (perpetual logout bug).
+async function handleVerifyToken(req, res) {
     try {
         const token = req.headers.authorization?.replace('Bearer ', '');
         if (!token) {
@@ -234,7 +239,9 @@ app.get('/api/auth/verify', async (req, res) => {
     } catch (error) {
         res.json({ valid: false });
     }
-});
+}
+app.get('/api/auth/verify', handleVerifyToken);
+app.post('/api/auth/verify', handleVerifyToken);
 
 // ============================================
 // Web3 Wallet Authentication
@@ -530,13 +537,13 @@ app.get('/api/stats', async (req, res) => {
 });
 
 // Client configuration (public values only)
+// SECURITY: Never expose API keys or secrets here. infuraKey / alchemyKey are
+// server-side keys and must NOT be returned to unauthenticated clients.
 app.get('/api/config', (req, res) => {
     res.json({
         success: true,
         config: {
-            // Only expose safe, public configuration
-            infuraKey: config.INFURA_KEY,
-            alchemyKey: config.ALCHEMY_API_KEY,
+            // Only expose safe, non-secret public configuration
             environment: config.NODE_ENV,
             maintenanceMode: config.MAINTENANCE_MODE
         }
@@ -1090,6 +1097,11 @@ io.on('connection', (socket) => {
 
     // Relay remote player input to the host for authoritative simulation
     socket.on('rampage_input', (data) => {
+        // Require an authenticated user before relaying any input.
+        // Without this check, any connected socket knowing a session ID
+        // could flood the host with arbitrary inputs (DoS vector).
+        const user = connectedUsers.get(socket.id);
+        if (!user) return;
         if (!data || !data.sessionId) return;
         const session = rampageSessions.get(data.sessionId);
         if (!session) return;

@@ -42,8 +42,8 @@ class Auth {
             return { success: false, error: 'Invalid email address - reserved domain' };
         }
 
-        if (password.length < 6) {
-            return { success: false, error: 'Password must be at least 6 characters' };
+        if (password.length < 8) {
+            return { success: false, error: 'Password must be at least 8 characters' };
         }
 
         const existingUser = await storage.getUser(username);
@@ -147,7 +147,9 @@ class Auth {
     // Verify JWT token
     verifyToken(token) {
         try {
-            const decoded = jwt.verify(token, config.JWT_SECRET);
+            // Explicitly restrict to HS256 to prevent algorithm-confusion attacks
+            // (e.g. alg:"none" bypass or RS256/HS256 confusion).
+            const decoded = jwt.verify(token, config.JWT_SECRET, { algorithms: ['HS256'] });
             return { valid: true, user: decoded };
         } catch (error) {
             return { valid: false, error: 'Invalid or expired token' };
@@ -159,7 +161,7 @@ class Auth {
         return jwt.sign(
             { id: user.id, username: user.username, email: user.email },
             config.JWT_SECRET,
-            { expiresIn: config.JWT_EXPIRES_IN }
+            { expiresIn: config.JWT_EXPIRES_IN, algorithm: 'HS256' }
         );
     }
 

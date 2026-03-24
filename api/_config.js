@@ -3,9 +3,37 @@
  * Shared utilities for all API endpoints
  */
 
-// CORS configuration
+// Allowed origins for CORS — mirrors the list in server.js.
+// Wildcard (*) is intentionally NOT used to prevent credential leakage
+// from cross-origin pages that send a Bearer token.
+const ALLOWED_ORIGINS = [
+    'https://d9ttt.com',
+    'https://www.d9ttt.com',
+    'https://9dttt.vercel.app',
+    'https://ninedttt.onrender.com'
+];
+
+/**
+ * Return the CORS headers appropriate for the incoming request origin.
+ * Only allowed origins are reflected; unknown origins get no ACAO header.
+ */
+function getCorsHeaders(req) {
+    const origin = (req && req.headers && req.headers.origin) || '';
+    const allowedOrigin = ALLOWED_ORIGINS.includes(origin)
+        ? origin
+        : (process.env.NODE_ENV === 'development' ? origin || 'http://localhost:3000' : '');
+    return {
+        'Access-Control-Allow-Origin': allowedOrigin || 'https://d9ttt.com',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Access-Control-Allow-Credentials': 'true',
+        'Content-Type': 'application/json'
+    };
+}
+
+// Legacy constant kept for backwards compat — prefer getCorsHeaders(req) for new code.
 const CORS_HEADERS = {
-    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Origin': 'https://d9ttt.com',
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     'Content-Type': 'application/json'
@@ -84,6 +112,7 @@ function validateFields(body, requiredFields) {
 
 module.exports = {
     CORS_HEADERS,
+    getCorsHeaders,
     checkRateLimit,
     errorResponse,
     successResponse,
