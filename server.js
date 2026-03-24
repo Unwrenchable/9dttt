@@ -240,8 +240,8 @@ async function handleVerifyToken(req, res) {
         res.json({ valid: false });
     }
 }
-app.get('/api/auth/verify', handleVerifyToken);
-app.post('/api/auth/verify', handleVerifyToken);
+app.get('/api/auth/verify', security.rateLimitMiddleware('api_auth'), handleVerifyToken);
+app.post('/api/auth/verify', security.rateLimitMiddleware('api_auth'), handleVerifyToken);
 
 // ============================================
 // Web3 Wallet Authentication
