@@ -207,6 +207,7 @@
             }
             
             startGame(numPlayers) {
+                if (this._rafId) { cancelAnimationFrame(this._rafId); this._rafId = null; }
                 this.numPlayers = numPlayers;
                 this.state = 'playing';
                 this.worldX = 0;
@@ -230,6 +231,7 @@
                 }
                 
                 this.spawnWave();
+                this.gameLoop();
             }
             
             createPlayer(x, y, color, darkColor, name) {
@@ -320,8 +322,10 @@
                 // Boss on final wave of each stage
                 if (this.wave >= this.maxWavesPerStage && !this.bossSpawned) {
                     setTimeout(() => {
-                        this.spawnBoss();
-                        this.bossSpawned = true;
+                        if (this.state === 'playing') {
+                            this.spawnBoss();
+                            this.bossSpawned = true;
+                        }
                     }, count * 600 + 1000);
                 }
             }

@@ -456,6 +456,8 @@ class LeaderboardUI {
                 </tbody>
             </table>
         `;
+    }
+
     /**
      * Escape HTML special characters to prevent XSS when rendering
      * server-supplied strings into innerHTML.

@@ -158,11 +158,13 @@
             }
             
             startGame() {
+                if (this._rafId) { cancelAnimationFrame(this._rafId); this._rafId = null; }
                 this.state = 'playing';
                 this.ammo = this.totalAmmo;
                 this.holes = [];
                 this.plays++;
                 this.drawStar();
+                this.gameLoop();
             }
             
             drawStar() {

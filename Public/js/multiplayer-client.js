@@ -372,7 +372,11 @@ class MultiplayerClient {
             };
             
             this.socket.onmessage = (event) => {
-                this.handleSignalingMessage(JSON.parse(event.data));
+                try {
+                    this.handleSignalingMessage(JSON.parse(event.data));
+                } catch (e) {
+                    console.error('[multiplayer] Invalid signaling message:', e.message);
+                }
             };
             
             this.socket.onclose = () => {
@@ -469,7 +473,11 @@ class MultiplayerClient {
         };
         
         channel.onmessage = (event) => {
-            this.handlePeerMessage(JSON.parse(event.data), remotePlayerId);
+            try {
+                this.handlePeerMessage(JSON.parse(event.data), remotePlayerId);
+            } catch (e) {
+                console.error('[multiplayer] Invalid peer message:', e.message);
+            }
         };
     }
     

@@ -679,6 +679,7 @@ io.on('connection', (socket) => {
 
     // Authenticate socket connection
     socket.on('authenticate', async (token) => {
+        try {
         const result = auth.verifyToken(token);
         if (!result.valid) {
             socket.emit('auth_error', { error: 'Invalid token' });
@@ -719,6 +720,10 @@ io.on('connection', (socket) => {
 
         socket.emit('authenticated', { user, restrictions });
         console.log(`User authenticated: ${user.username}`);
+        } catch (error) {
+            console.error('[socket] authenticate error:', error);
+            socket.emit('auth_error', { error: 'Authentication failed. Please try again.' });
+        }
     });
 
     // Matchmaking
@@ -862,8 +867,14 @@ io.on('connection', (socket) => {
 
     // Game moves
     socket.on('make_move', async (data) => {
+        try {
         const user = connectedUsers.get(socket.id);
         if (!user) return;
+
+        if (!data || typeof data.gameId !== 'string' || data.move === undefined) {
+            socket.emit('move_error', { error: 'Invalid move data' });
+            return;
+        }
 
         const result = await gameManager.makeMove(data.gameId, user.username, data.move);
         
@@ -878,6 +889,10 @@ io.on('connection', (socket) => {
             }
         } else {
             socket.emit('move_error', { error: result.error });
+        }
+        } catch (error) {
+            console.error('[socket] make_move error:', error);
+            socket.emit('move_error', { error: 'Internal error processing move' });
         }
     });
 
