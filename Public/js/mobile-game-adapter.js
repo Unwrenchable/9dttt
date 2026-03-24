@@ -62,9 +62,14 @@
             const vh = window.innerHeight;
 
             // On mobile, limit height to leave room for mobile controls
-            const controlsHeight = this.isTouch ? 160 : 0;
-            const maxH = vh - controlsHeight - 80; // 80px for header/nav
-            const maxW = vw - 16; // small margin
+            // Only reserve dpad space when the control type is not tap/none
+            const controlType = this.canvas.dataset.mobileControls ||
+                                 (this.container && this.container.dataset.mobileControls) ||
+                                 this.autoDetectControlType();
+            const needsDpad = this.isTouch && controlType !== 'tap' && controlType !== 'none';
+            const controlsHeight = needsDpad ? 140 : 0;
+            const maxH = vh - controlsHeight - 56; // 56px for minimal header
+            const maxW = vw - 12; // small margin (avoids edge on notched devices)
 
             let displayW = maxW;
             let displayH = displayW / aspectRatio;
