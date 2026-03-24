@@ -30,6 +30,10 @@
 
             this.applyCanvasScaling();
 
+            // Lock page scrolling on game pages so arrow keys / touch / wheel
+            // don't pull the viewport away from the game.
+            this.lockPageScroll();
+
             window.addEventListener('resize', () => {
                 clearTimeout(this.resizeTimeout);
                 this.resizeTimeout = setTimeout(() => this.applyCanvasScaling(), 150);
@@ -42,6 +46,44 @@
             if (this.isTouch) {
                 this.setupTouchControls();
             }
+        },
+
+        /**
+         * Lock the page so it cannot be scrolled while playing.
+         * Prevents arrow keys / Space / Page keys from scrolling the browser chrome,
+         * and stops touch-based page scroll (swipe-to-scroll) from pulling the
+         * viewport away from the canvas.
+         * Safe to call multiple times – listeners are registered only once.
+         */
+        lockPageScroll() {
+            if (this._scrollLocked) return;
+            this._scrollLocked = true;
+
+            // CSS overflow lock – stops wheel and programmatic scroll
+            document.documentElement.style.overflow = 'hidden';
+            document.body.style.overflow = 'hidden';
+
+            // Keys that normally scroll the page
+            const SCROLL_KEYS = new Set([
+                'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
+                'Space', 'PageUp', 'PageDown', 'Home', 'End'
+            ]);
+
+            window.addEventListener('keydown', function (e) {
+                if (!SCROLL_KEYS.has(e.code)) return;
+                // Don't interfere with text inputs / selects
+                const el = document.activeElement;
+                if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT')) return;
+                e.preventDefault();
+            }, { passive: false });
+
+            // Prevent touch-based page scroll on the document body.
+            // Individual game elements (canvas, d-pad overlay) handle their own touch.
+            document.addEventListener('touchmove', function (e) {
+                // Allow scrolling inside explicitly marked scrollable containers
+                if (e.target.closest && e.target.closest('[data-scrollable]')) return;
+                e.preventDefault();
+            }, { passive: false });
         },
 
         applyCanvasScaling() {

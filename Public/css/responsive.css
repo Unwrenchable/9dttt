@@ -264,6 +264,35 @@ html, body {
     overscroll-behavior: none;
 }
 
+/* =====================================================
+   Game Page Scroll Lock
+   Applied automatically by mobile-game-adapter.js and
+   game-engine.js when a game canvas is detected.
+   The :has(canvas) rule provides a CSS-only fallback
+   (Chrome 105+, Safari 15.4+, Firefox 121+).
+   ===================================================== */
+@supports selector(:has(canvas)) {
+    /* Lock page scroll whenever a canvas is present in body –
+       i.e. on every game page. The main index page has no canvas. */
+    html:has(body > div canvas),
+    html:has(body canvas) {
+        overflow: hidden;
+        overscroll-behavior: none;
+    }
+
+    body:has(canvas) {
+        overflow: hidden;
+        overscroll-behavior: none;
+        /* Prevent iOS rubber-band scroll */
+        touch-action: pan-x pan-y;
+    }
+
+    /* Canvas itself must not trigger page scroll on touch */
+    body:has(canvas) canvas {
+        touch-action: none;
+    }
+}
+
 /* Safe area for notched devices */
 @supports (padding: max(0px)) {
     body {
