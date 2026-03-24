@@ -385,7 +385,7 @@ class AuthUI {
      * user-supplied strings into innerHTML.
      */
     _escapeHtml(str) {
-        return String(str)
+        return String(str == null ? '' : str)
             .replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;')
