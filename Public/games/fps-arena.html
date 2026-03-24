@@ -130,6 +130,7 @@
             }
             
             startGame(difficulty) {
+                if (this._rafId) { cancelAnimationFrame(this._rafId); this._rafId = null; }
                 this.difficulty = difficulty;
                 this.state = 'playing';
                 this.score = 0;
@@ -156,6 +157,7 @@
                 this.pickups = [];
                 
                 this.spawnWave();
+                this.gameLoop();
             }
             
             spawnWave() {

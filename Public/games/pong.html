@@ -148,10 +148,12 @@
             }
             
             startGame(mode) {
+                if (this._rafId) { cancelAnimationFrame(this._rafId); this._rafId = null; }
                 this.mode = mode;
                 this.scores = [0, 0];
                 this.state = 'playing';
                 this.reset();
+                this.gameLoop();
             }
             
             gameLoop() {

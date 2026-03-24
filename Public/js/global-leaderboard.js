@@ -112,9 +112,13 @@ class GlobalLeaderboard {
     
     async syncScoreToBackend(scoreEntry) {
         try {
+            const token = window.authClient?.token || localStorage.getItem('auth_token') || '';
             await fetch(`${this.apiEndpoint}/scores/submit`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                },
                 body: JSON.stringify(scoreEntry)
             });
         } catch (error) {
@@ -134,9 +138,13 @@ class GlobalLeaderboard {
             }
             
             // Sync with blockchain
+            const token = window.authClient?.token || localStorage.getItem('auth_token') || '';
             await fetch(`${this.apiEndpoint}/tokens/award`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                },
                 body: JSON.stringify({
                     userId,
                     amount,

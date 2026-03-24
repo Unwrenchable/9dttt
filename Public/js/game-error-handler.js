@@ -289,7 +289,7 @@ class GameErrorHandler {
         
         // Provide context-specific suggestions
         const suggestions = this.getSuggestions(errorInfo);
-        suggestionsEl.innerHTML = suggestions.map(s => `<li>${s}</li>`).join('');
+        suggestionsEl.innerHTML = suggestions.map(s => `<li>${this._escapeHtml(s)}</li>`).join('');
         
         // Show error history if multiple errors
         const historyEl = document.getElementById('errorHistory');

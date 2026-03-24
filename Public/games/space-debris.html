@@ -97,6 +97,7 @@
             }
             
             startGame() {
+                if (this._rafId) { cancelAnimationFrame(this._rafId); this._rafId = null; }
                 this.state = 'playing';
                 this.score = 0;
                 this.lives = 3;
@@ -116,6 +117,7 @@
                 };
                 
                 this.spawnAsteroids(4 + this.level);
+                this.gameLoop();
             }
             
             spawnAsteroids(count) {

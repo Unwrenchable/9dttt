@@ -107,6 +107,7 @@
             }
             
             startGame(mode) {
+                if (this._rafId) { cancelAnimationFrame(this._rafId); this._rafId = null; }
                 this.gameMode = mode;
                 this.state = 'playing';
                 this.score = 0;
@@ -114,6 +115,7 @@
                 if (mode === 'surf') this.initSurf();
                 else if (mode === 'skate') this.initSkate();
                 else if (mode === 'hacky') this.initHacky();
+                this.gameLoop();
             }
             
             // ============ SURFING GAME ============

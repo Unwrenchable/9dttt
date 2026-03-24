@@ -1053,11 +1053,13 @@
             const icons = { wolf:'🐺', godzilla:'🦎', kong:'🦍' };
             const sorted = [...this.players].sort((a, b) => b.score - a.score);
             scores.innerHTML = '<h3>💀 FINAL SCORES 💀</h3>' +
-                sorted.map((p, i) =>
-                    `<div style="margin:8px 0;font-size:${i===0?'18px':'14px'};color:${p.color}">
-                        ${i===0?'👑':(i+1)+'.'} ${icons[p.type]||''} ${p.name}: ${p.score} pts
-                    </div>`
-                ).join('');
+                sorted.map((p, i) => {
+                    const safeName  = String(p.name  || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+                    const safeColor = String(p.color || '#fff').replace(/[^a-zA-Z0-9#,.()\s%]/g,'');
+                    return `<div style="margin:8px 0;font-size:${i===0?'18px':'14px'};color:${safeColor}">
+                        ${i===0?'👑':(i+1)+'.'} ${icons[p.type]||''} ${safeName}: ${Number(p.score)} pts
+                    </div>`;
+                }).join('');
             screen.classList.add('show');
         }
 

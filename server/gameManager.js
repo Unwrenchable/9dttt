@@ -503,13 +503,14 @@ class GameManager {
 
         // Auto-expire challenge (longer for daily challenges)
         const expireTime = tc.isDaily ? 24 * 60 * 60 * 1000 : 60000;
-        setTimeout(() => {
+        const challengeTimeout = setTimeout(() => {
             const c = this.activeChallenges.get(challengeId);
             if (c && c.status === 'pending') {
                 c.status = 'expired';
                 this.activeChallenges.delete(challengeId);
             }
         }, expireTime);
+        challenge.timeoutId = challengeTimeout;
 
         return { success: true, challenge };
     }
@@ -535,6 +536,7 @@ class GameManager {
         const game = await this.createGame(challenge.challenger, challenge.gameType, true, challenge.timeControl);
         const joinResult = await this.joinGame(game.id, username);
 
+        if (challenge.timeoutId) clearTimeout(challenge.timeoutId);
         this.activeChallenges.delete(challengeId);
 
         if (joinResult.success) {
@@ -551,6 +553,7 @@ class GameManager {
         }
 
         challenge.status = 'declined';
+        if (challenge.timeoutId) clearTimeout(challenge.timeoutId);
         this.activeChallenges.delete(challengeId);
         return { success: true };
     }

@@ -242,8 +242,8 @@ class RetroArcade {
         list.innerHTML = this.highScores.slice(0, 5).map((score, i) => `
             <li class="high-score-item">
                 <span class="high-score-rank">${ranks[i]}</span>
-                <span class="high-score-name">${score.name}</span>
-                <span class="high-score-score">${score.score.toLocaleString()}</span>
+                <span class="high-score-name">${this._escapeHtml(score.name)}</span>
+                <span class="high-score-score">${Number(score.score).toLocaleString()}</span>
             </li>
         `).join('');
     }
@@ -472,6 +472,19 @@ class RetroArcade {
         }
         
         return stats;
+    }
+
+    /**
+     * Escape HTML special characters to prevent XSS when rendering
+     * localStorage-sourced strings into innerHTML.
+     */
+    _escapeHtml(str) {
+        return String(str == null ? '' : str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
     }
 }
 

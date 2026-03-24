@@ -944,6 +944,8 @@ class GameUI {
      * Setup multiplayer event listeners
      */
     setupMultiplayerListeners() {
+        if (this._multiplayerListenersAttached) return;
+        this._multiplayerListenersAttached = true;
         const mp = window.multiplayerClient;
         
         mp.on('matchmaking_queued', (data) => {
@@ -1101,14 +1103,17 @@ class GameUI {
             
             // Update avatar
             const avatarEl = document.getElementById('user-avatar');
-            if (user.profile.avatar.type === 'custom') {
-                avatarEl.innerHTML = `<img src="${this.escapeHtml(user.profile.avatar.data)}" alt="Avatar">`;
-            } else {
-                avatarEl.innerHTML = `<div class="avatar-initial" style="background: ${this.safeCssColor(user.profile.avatar.color)}">${this.escapeHtml(user.profile.avatar.initial)}</div>`;
+            if (avatarEl && user.profile?.avatar) {
+                if (user.profile.avatar.type === 'custom') {
+                    avatarEl.innerHTML = `<img src="${this.escapeHtml(user.profile.avatar.data)}" alt="Avatar">`;
+                } else {
+                    avatarEl.innerHTML = `<div class="avatar-initial" style="background: ${this.safeCssColor(user.profile.avatar.color)}">${this.escapeHtml(user.profile.avatar.initial)}</div>`;
+                }
             }
             
             // Update name
-            document.getElementById('user-name').textContent = user.displayName || user.username;
+            const userNameEl = document.getElementById('user-name');
+            if (userNameEl) userNameEl.textContent = user.displayName || user.username;
         } else {
             authButtons.style.display = 'flex';
             userInfo.style.display = 'none';
