@@ -10,7 +10,10 @@ const ALLOWED_ORIGINS = [
     'https://d9ttt.com',
     'https://www.d9ttt.com',
     'https://9dttt.vercel.app',
-    'https://ninedttt.onrender.com'
+    'https://ninedttt.onrender.com',
+    'http://localhost:3000',
+    'http://localhost:5000',
+    'http://127.0.0.1:3000'
 ];
 
 /**
@@ -19,9 +22,7 @@ const ALLOWED_ORIGINS = [
  */
 function getCorsHeaders(req) {
     const origin = (req && req.headers && req.headers.origin) || '';
-    const allowedOrigin = ALLOWED_ORIGINS.includes(origin)
-        ? origin
-        : (process.env.NODE_ENV === 'development' ? origin || 'http://localhost:3000' : '');
+    const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : '';
     return {
         'Access-Control-Allow-Origin': allowedOrigin || 'https://d9ttt.com',
         'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',

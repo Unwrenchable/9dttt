@@ -30,6 +30,7 @@
         container: null,
         dpadActive: {},
         resizeTimeout: null,
+        _rafSnapped: false,
 
         init() {
             document.addEventListener('DOMContentLoaded', () => this.setup());
@@ -430,7 +431,7 @@
             return {
                 isMobile: isMobile && !isTablet,
                 isTablet,
-                isDesktop: !isMobile,
+                isDesktop: !isMobile && !isTablet,
                 isIOS,
                 isAndroid,
                 isSafari,
@@ -448,6 +449,7 @@
         snapToViewport() {
             // Apply game-active class to body (hides footer, locks layout)
             document.body.classList.add('game-active');
+            this._rafSnapped = true;
 
             // Force canvas scaling update
             this.applyCanvasScaling();
@@ -465,6 +467,7 @@
 
         exitGameMode() {
             document.body.classList.remove('game-active');
+            this._rafSnapped = false;
         },
 
         // Legacy alias kept for external callers
@@ -476,4 +479,17 @@
     window.snapGameToViewport = () => MobileGameAdapter.snapToViewport();
     window.exitGameViewport = () => MobileGameAdapter.exitGameMode();
     window.detectGameDevice = () => MobileGameAdapter.detectDevice();
+
+    // Auto-snap to viewport when game starts its RAF loop
+    (function patchGameStart() {
+        const origRAF = window.requestAnimationFrame;
+        window.requestAnimationFrame = function(cb) {
+            if (!MobileGameAdapter._rafSnapped) {
+                MobileGameAdapter._rafSnapped = true;
+                // Tiny delay so game can initialize before we resize
+                setTimeout(function() { MobileGameAdapter.snapToViewport(); }, 80);
+            }
+            return origRAF.call(window, cb);
+        };
+    })();
 })();

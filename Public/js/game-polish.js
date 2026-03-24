@@ -681,7 +681,36 @@ class PerformanceMonitor {
     }
 }
 
+// ==================== GAME POLISH UTILITY ====================
+
+/**
+ * GamePolish — lightweight utility namespace for one-off polish helpers.
+ * Separate from GamePolishSystem so it can be used without instantiating
+ * the full per-game system.
+ */
+const GamePolish = {
+    /**
+     * Finds all start-game buttons on the page and wires up a click handler
+     * that immediately snaps the canvas to the full viewport via
+     * MobileGameAdapter.snapToViewport() (exposed as window.snapGameToViewport).
+     * This supplements the RAF-patch approach for instant visual feedback.
+     */
+    enhanceStartButtons() {
+        const selector = '.controls button, button[onclick*="startGame"], button[onclick*="start("]';
+        const buttons = document.querySelectorAll(selector);
+        buttons.forEach(btn => {
+            btn.addEventListener('click', function onStartClick() {
+                if (typeof window.snapGameToViewport === 'function') {
+                    window.snapGameToViewport();
+                }
+            }, { passive: true });
+        });
+        return buttons.length; // Return count for debugging
+    }
+};
+
 // Export
+window.GamePolish = GamePolish;
 window.GamePolishSystem = GamePolishSystem;
 window.ParticleSystem = ParticleSystem;
 window.ScreenEffectsSystem = ScreenEffectsSystem;

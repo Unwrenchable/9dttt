@@ -46,9 +46,10 @@ module.exports = async (req, res) => {
     const origin = req.headers.origin || '';
     const allowedOrigins = [
         'https://d9ttt.com', 'https://www.d9ttt.com',
-        'https://9dttt.vercel.app', 'https://ninedttt.onrender.com'
+        'https://9dttt.vercel.app', 'https://ninedttt.onrender.com',
+        'http://localhost:3000', 'http://localhost:5000', 'http://127.0.0.1:3000'
     ];
-    if (allowedOrigins.includes(origin) || process.env.NODE_ENV === 'development') {
+    if (allowedOrigins.includes(origin)) {
         res.setHeader('Access-Control-Allow-Origin', origin);
         res.setHeader('Access-Control-Allow-Credentials', 'true');
     }
