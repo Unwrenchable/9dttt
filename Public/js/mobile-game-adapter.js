@@ -413,11 +413,13 @@
 
         detectDevice() {
             const ua = navigator.userAgent;
-            const isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+            // iPad is a tablet, not a mobile phone — exclude it from isMobile
+            const isMobile = /iPhone|iPod|Android.*Mobile|webOS|BlackBerry|IEMobile|Opera Mini/i.test(ua);
             const isTablet = /iPad|Android(?!.*Mobile)/i.test(ua);
             const isIOS = /iPhone|iPad|iPod/i.test(ua);
             const isAndroid = /Android/i.test(ua);
-            const isSafari = /^((?!chrome|android).)*safari/i.test(ua);
+            // Safari: has Version/x.x and Safari in UA, but not Chrome/Chromium
+            const isSafari = /Version\/[\d.]+.*Safari/i.test(ua) && !/Chrome|Chromium/i.test(ua);
             const isChrome = /Chrome/i.test(ua) && !/Edge/i.test(ua);
             const isFirefox = /Firefox/i.test(ua);
             const isEdge = /Edge|Edg\//i.test(ua);
@@ -454,9 +456,9 @@
             const device = this.detectDevice();
             if (device.isMobile || device.isTablet) {
                 const el = document.documentElement;
-                const reqFS = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen;
-                if (reqFS) {
-                    reqFS.call(el).catch(() => {}); // Silently fail if not permitted
+                const requestFullscreenFn = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen;
+                if (requestFullscreenFn) {
+                    requestFullscreenFn.call(el).catch(() => {}); // Silently fail if not permitted
                 }
             }
         },
