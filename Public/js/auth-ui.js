@@ -348,17 +348,20 @@ class AuthUI {
     }
     
     getUserProfileHTML(user) {
+        const safeName   = this._escapeHtml(user.name   || '');
+        const safeAvatar = this._escapeHtml(user.avatar || '👤');
+        const safeEmail  = user.email ? this._escapeHtml(user.email) : '';
         return `
             <div class="auth-header">
-                <h2>👋 Hello, ${user.name}!</h2>
+                <h2>👋 Hello, ${safeName}!</h2>
             </div>
             
             <div class="user-profile">
-                <div class="user-avatar">${user.avatar}</div>
+                <div class="user-avatar">${safeAvatar}</div>
                 <div class="user-info">
-                    <h3 class="user-name">${user.name}</h3>
-                    <div class="user-tokens">🪙 ${user.tokens || 0} Tokens</div>
-                    ${user.email ? `<div style="font-size: 12px; opacity: 0.7;">${user.email}</div>` : ''}
+                    <h3 class="user-name">${safeName}</h3>
+                    <div class="user-tokens">🪙 ${Number(user.tokens) || 0} Tokens</div>
+                    ${safeEmail ? `<div style="font-size: 12px; opacity: 0.7;">${safeEmail}</div>` : ''}
                 </div>
             </div>
             
@@ -377,6 +380,19 @@ class AuthUI {
     }
     
     
+    /**
+     * Escape HTML special characters to prevent XSS when inserting
+     * user-supplied strings into innerHTML.
+     */
+    _escapeHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
     showLoginOptions() {
         this.show();
     }
@@ -496,7 +512,7 @@ class AuthUI {
                 <div style="text-align: center; padding: 20px;">
                     <h2 style="margin-bottom: 16px;">❌ Connection Failed</h2>
                     <p style="color: #ff5252; margin-bottom: 24px;">
-                        ${error.message}
+                        ${this._escapeHtml(error.message || 'Unknown error')}
                     </p>
                     <button class="auth-button" onclick="window.authUI.loginWithWallet()">
                         Try Again
