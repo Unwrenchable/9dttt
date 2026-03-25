@@ -3,6 +3,47 @@
  * Ensures smooth gameplay on any device with proper touch controls
  */
 
+/* ===== UNIVERSAL GAME PAGE LAYOUT (all game pages load this file) ===== */
+
+/* Viewport lock: loaded by mobile-game-adapter.js via JS injection too,
+   but having it in CSS ensures it's applied even before JS runs */
+html, body {
+    overflow: hidden;
+    height: 100%;
+}
+
+/* Flex column so game content fills available height */
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+/* When game is running — minimize chrome so game fills the screen */
+body.game-active header {
+    max-height: 40px;
+    overflow: hidden;
+    opacity: 0.7;
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+}
+
+body.game-active footer[role="contentinfo"] {
+    display: none !important;
+}
+
+body.game-active .controls:not(#gamepad-status) {
+    display: none;
+}
+
+body.game-active .control-hint {
+    display: none;
+}
+
+body.game-active .gamepad-widget {
+    display: none;
+}
+
+/* ===== END UNIVERSAL GAME PAGE LAYOUT ===== */
+
 /* Base responsive utilities */
 @media (max-width: 768px) {
     :root {

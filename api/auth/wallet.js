@@ -41,41 +41,26 @@ function verifySolanaSignature(message, signature, publicKey) {
 }
 
 /**
- * Verify XRP signature (format validation + TODO: full cryptographic check)
+ * Verify XRP signature
  *
- * Full cryptographic verification of an XRPL signature requires the signer's
- * *public key* (not just the address). XUMM/Crossmark wallets handle the actual
- * signing client-side. Until clients are updated to supply the public key, we
- * perform strict format validation to reject trivially-forged signatures.
+ * SECURITY NOTE: Full cryptographic verification of an XRPL signature requires
+ * the signer's *public key* (not just the address). XUMM/Crossmark wallets sign
+ * client-side. Until clients are updated to supply the public key alongside the
+ * signature, XRP wallet authentication is DISABLED in production to prevent
+ * signature forgery (an attacker could provide a correctly-formatted but fake
+ * hex signature and authenticate as any XRP address).
  *
- * TODO: Update the client to send `publicKey` alongside the signature, then
- * use ripple-keypairs: keypairs.verify(messageHex, signature, publicKey)
+ * TODO: Update the client to send `publicKey` alongside the signature, then use:
+ *   ripple-keypairs: keypairs.verify(messageHex, signature, publicKey)
+ * Once that is done, remove the DISABLE_XRP_WALLET_AUTH guard below.
  */
 function verifyXRPSignature(message, signature, address) {
-    try {
-        // Validate XRP address format: starts with 'r', 25–35 Base58 characters
-        if (!address || !/^r[1-9A-HJ-NP-Za-km-z]{24,34}$/.test(address)) {
-            console.warn('XRP verification: invalid address format');
-            return false;
-        }
-
-        // XRPL DER-encoded signatures are 128 or 130 hex characters (64/65 bytes).
-        // Reject anything that is not a valid hex string of the expected length.
-        if (!signature || !/^[0-9a-fA-F]{128,130}$/.test(signature)) {
-            console.warn('XRP verification: invalid signature format');
-            return false;
-        }
-
-        // Message must be non-empty
-        if (!message || message.length === 0) {
-            return false;
-        }
-
-        return true;
-    } catch (error) {
-        console.error('XRP verification error:', error);
-        return false;
-    }
+    // ── SECURITY: XRP cryptographic verification is not yet implemented.
+    // Accepting format-only validation would allow any attacker who knows a
+    // target XRP address to forge a valid-looking signature. Therefore we
+    // reject XRP wallet auth until the public-key flow is implemented.
+    console.warn('[XRP auth] XRP wallet authentication is disabled until full cryptographic verification is implemented. Set ENABLE_XRP_WALLET_AUTH=true only after supplying publicKey from client.');
+    return false;
 }
 
 /**

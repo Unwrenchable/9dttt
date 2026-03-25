@@ -7,6 +7,20 @@
  * - Device orientation change handling
  */
 
+// Inject scroll-lock CSS immediately (before DOMContentLoaded)
+(function injectScrollLock() {
+    const s = document.createElement('style');
+    s.id = 'mga-scroll-lock';
+    s.textContent = 'html,body{overflow:hidden!important;height:100%;}';
+    if (document.head) {
+        document.head.appendChild(s);
+    } else {
+        document.addEventListener('DOMContentLoaded', function() {
+            document.head.appendChild(s);
+        });
+    }
+})();
+
 (function() {
     'use strict';
 
@@ -16,6 +30,7 @@
         container: null,
         dpadActive: {},
         resizeTimeout: null,
+        _rafSnapped: false,
 
         init() {
             document.addEventListener('DOMContentLoaded', () => this.setup());
@@ -87,7 +102,18 @@
         },
 
         applyCanvasScaling() {
-            if (!this.canvas) return;
+            if (!this.canvas) {
+                // For DOM-based games (no canvas), ensure container fills viewport
+                if (this.container) {
+                    const vh = window.innerHeight;
+                    const headerH = document.querySelector('header')?.offsetHeight || 56;
+                    const footerH = document.querySelector('footer')?.offsetHeight || 0;
+                    const available = vh - headerH - footerH - 20;
+                    this.container.style.maxHeight = available + 'px';
+                    this.container.style.overflow = 'hidden';
+                }
+                return;
+            }
 
             // Reset any inline size first
             this.canvas.style.removeProperty('width');
@@ -127,6 +153,7 @@
             this.canvas.style.display = 'block';
             this.canvas.style.margin = '0 auto';
             this.canvas.style.maxWidth = '100%';
+            this.canvas.style.objectFit = 'contain';
             this.canvas.classList.add('mga-scaled');
         },
 
@@ -383,12 +410,86 @@
                 cancelable: true
             });
             window.dispatchEvent(event);
-        }
+        },
+
+        detectDevice() {
+            const ua = navigator.userAgent;
+            // iPad is a tablet, not a mobile phone — exclude it from isMobile
+            const isMobile = /iPhone|iPod|Android.*Mobile|webOS|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+            const isTablet = /iPad|Android(?!.*Mobile)/i.test(ua);
+            const isIOS = /iPhone|iPad|iPod/i.test(ua);
+            const isAndroid = /Android/i.test(ua);
+            // Safari: has Version/x.x and Safari in UA, but not Chrome/Chromium
+            const isSafari = /Version\/[\d.]+.*Safari/i.test(ua) && !/Chrome|Chromium/i.test(ua);
+            const isChrome = /Chrome/i.test(ua) && !/Edge/i.test(ua);
+            const isFirefox = /Firefox/i.test(ua);
+            const isEdge = /Edge|Edg\//i.test(ua);
+            const pixelRatio = window.devicePixelRatio || 1;
+            const screenW = window.screen.width;
+            const screenH = window.screen.height;
+
+            return {
+                isMobile: isMobile && !isTablet,
+                isTablet,
+                isDesktop: !isMobile && !isTablet,
+                isIOS,
+                isAndroid,
+                isSafari,
+                isChrome,
+                isFirefox,
+                isEdge,
+                pixelRatio,
+                screenW,
+                screenH,
+                isTouch: this.isTouch,
+                browserName: isEdge ? 'Edge' : isChrome ? 'Chrome' : isFirefox ? 'Firefox' : isSafari ? 'Safari' : 'Unknown'
+            };
+        },
+
+        snapToViewport() {
+            // Apply game-active class to body (hides footer, locks layout)
+            document.body.classList.add('game-active');
+            this._rafSnapped = true;
+
+            // Force canvas scaling update
+            this.applyCanvasScaling();
+
+            // On mobile/tablet, try requesting fullscreen for immersive play
+            const device = this.detectDevice();
+            if (device.isMobile || device.isTablet) {
+                const el = document.documentElement;
+                const requestFullscreenFn = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen;
+                if (requestFullscreenFn) {
+                    requestFullscreenFn.call(el).catch(() => {}); // Silently fail if not permitted
+                }
+            }
+        },
+
+        exitGameMode() {
+            document.body.classList.remove('game-active');
+            this._rafSnapped = false;
+        },
 
         // Legacy alias kept for external callers
-        , fireKeyEvent(type, code) { this.dispatchKeyboardEvent(type, code); }
+        fireKeyEvent(type, code) { this.dispatchKeyboardEvent(type, code); }
     };
 
     MobileGameAdapter.init();
     window.MobileGameAdapter = MobileGameAdapter;
+    window.snapGameToViewport = () => MobileGameAdapter.snapToViewport();
+    window.exitGameViewport = () => MobileGameAdapter.exitGameMode();
+    window.detectGameDevice = () => MobileGameAdapter.detectDevice();
+
+    // Auto-snap to viewport when game starts its RAF loop
+    (function patchGameStart() {
+        const origRAF = window.requestAnimationFrame;
+        window.requestAnimationFrame = function(cb) {
+            if (!MobileGameAdapter._rafSnapped) {
+                MobileGameAdapter._rafSnapped = true;
+                // Tiny delay so game can initialize before we resize
+                setTimeout(function() { MobileGameAdapter.snapToViewport(); }, 80);
+            }
+            return origRAF.call(window, cb);
+        };
+    })();
 })();

@@ -21,7 +21,8 @@ function verifyBearer(req) {
         return { valid: false };
     }
     try {
-        const decoded = jwt.verify(token, JWT_SECRET);
+        // Explicitly restrict to HS256 to prevent algorithm-confusion attacks
+        const decoded = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
         return { valid: true, decoded };
     } catch (err) {
         return { valid: false };
@@ -40,7 +41,18 @@ let stats = {
 
 module.exports = async (req, res) => {
     res.setHeader('Content-Type', 'application/json');
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    // Restrict CORS to known origins — wildcard removed to prevent
+    // cross-origin token leakage from attacker-controlled pages.
+    const origin = req.headers.origin || '';
+    const allowedOrigins = [
+        'https://d9ttt.com', 'https://www.d9ttt.com',
+        'https://9dttt.vercel.app', 'https://ninedttt.onrender.com',
+        'http://localhost:3000', 'http://localhost:5000', 'http://127.0.0.1:3000'
+    ];
+    if (allowedOrigins.includes(origin)) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
+    }
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     

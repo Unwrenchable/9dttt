@@ -5,7 +5,7 @@
 
 class GameUI {
     constructor() {
-        this.authModal = null;
+        // authModal removed — unified auth-ui.js (window.authUI) handles sign-in
         this.profileModal = null;
         this.multiplayerModal = null;
         this.onlineMode = false;
@@ -15,7 +15,7 @@ class GameUI {
      * Initialize UI components
      */
     async init() {
-        this.createAuthModal();
+        // Auth modal creation removed — sign-in is handled exclusively by auth-ui.js
         this.createProfileModal();
         this.createMultiplayerModal();
         this.createHeaderUI();
@@ -89,104 +89,6 @@ class GameUI {
         // Event listeners - signin button now in bottom right corner (auth-ui.js)
         document.getElementById('profile-btn')?.addEventListener('click', () => this.showProfileModal());
         document.getElementById('logout-btn')?.addEventListener('click', () => this.handleLogout());
-    }
-
-    /**
-     * Create auth modal
-     */
-    createAuthModal() {
-        const modal = document.createElement('div');
-        modal.id = 'auth-modal';
-        modal.className = 'modal';
-        modal.setAttribute('role', 'dialog');
-        modal.setAttribute('aria-labelledby', 'auth-modal-title');
-        modal.setAttribute('aria-modal', 'true');
-        
-        modal.innerHTML = `
-            <div class="modal-content auth-modal-content">
-                <button class="modal-close" id="auth-modal-close" aria-label="Close">&times;</button>
-                <h2 id="auth-modal-title">Login</h2>
-                
-                <div class="auth-tabs">
-                    <button class="auth-tab active" data-tab="login">Login</button>
-                    <button class="auth-tab" data-tab="register">Register</button>
-                </div>
-                
-                <div class="auth-form-container">
-                    <!-- Login Form -->
-                    <form id="login-form" class="auth-form">
-                        <div class="form-group">
-                            <label for="login-username">Username or Email</label>
-                            <input type="text" id="login-username" required autocomplete="username">
-                        </div>
-                        <div class="form-group">
-                            <label for="login-password">Password</label>
-                            <input type="password" id="login-password" required autocomplete="current-password">
-                        </div>
-                        <div class="form-error" id="login-error"></div>
-                        <button type="submit" class="auth-submit">Login</button>
-                    </form>
-                    
-                    <!-- Register Form -->
-                    <form id="register-form" class="auth-form" style="display: none;">
-                        <div class="form-group">
-                            <label for="register-username">Username</label>
-                            <input type="text" id="register-username" required minlength="3" maxlength="20" pattern="[a-zA-Z0-9_]+" autocomplete="username">
-                            <small>3-20 characters, letters, numbers, and underscores only</small>
-                        </div>
-                        <div class="form-group">
-                            <label for="register-email">Email</label>
-                            <input type="email" id="register-email" required autocomplete="email">
-                        </div>
-                        <div class="form-group">
-                            <label for="register-password">Password</label>
-                            <input type="password" id="register-password" required minlength="6" autocomplete="new-password">
-                            <small>At least 6 characters</small>
-                        </div>
-                        <div class="form-group">
-                            <label for="register-confirm">Confirm Password</label>
-                            <input type="password" id="register-confirm" required autocomplete="new-password">
-                        </div>
-                        <div class="form-error" id="register-error"></div>
-                        <button type="submit" class="auth-submit">Create Account</button>
-                    </form>
-                </div>
-                
-                <div class="auth-divider">
-                    <span>or continue with</span>
-                </div>
-                
-                <div class="oauth-buttons" id="oauth-buttons">
-                    <button class="oauth-btn browser-credential-btn" data-provider="browser" title="Use saved password from your browser">
-                        <span class="oauth-icon">🔐</span> Saved Password
-                    </button>
-                </div>
-                <p class="oauth-note" style="font-size: 0.8rem; color: var(--text-secondary); text-align: center; margin-top: 8px;">
-                    Use your browser's saved passwords for quick sign-in
-                </p>
-            </div>
-        `;
-        
-        document.body.appendChild(modal);
-        this.authModal = modal;
-        
-        // Event listeners
-        modal.querySelector('#auth-modal-close').addEventListener('click', () => this.hideAuthModal());
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) this.hideAuthModal();
-        });
-        
-        // Tab switching
-        modal.querySelectorAll('.auth-tab').forEach(tab => {
-            tab.addEventListener('click', () => this.switchAuthTab(tab.dataset.tab));
-        });
-        
-        // Form submissions
-        modal.querySelector('#login-form').addEventListener('submit', (e) => this.handleLogin(e));
-        modal.querySelector('#register-form').addEventListener('submit', (e) => this.handleRegister(e));
-        
-        // Browser credential button
-        modal.querySelector('.browser-credential-btn')?.addEventListener('click', () => this.handleBrowserCredentialAuth());
     }
 
     /**
@@ -366,7 +268,7 @@ class GameUI {
         
         modal.querySelector('#mp-login-btn')?.addEventListener('click', () => {
             this.hideMultiplayerModal();
-            this.showAuthModal('login');
+            window.authUI?.show();
         });
         
         // Time control selection
@@ -557,170 +459,19 @@ class GameUI {
     }
 
     /**
-     * Show auth modal
+     * Show auth modal — delegates to the unified auth-ui.js
      */
-    async showAuthModal(tab = 'login') {
-        this.authModal.classList.add('show');
-        this.switchAuthTab(tab);
-        this.authModal.querySelector(`#${tab}-username, #${tab}-email`)?.focus();
-        
-        // Check Firebase and browser auth availability and update OAuth buttons
-        await this.updateOAuthButtons();
+    showAuthModal(tab = 'login') {
+        window.authUI?.show();
     }
 
     /**
-     * Update OAuth buttons based on browser auth availability
-     */
-    async updateOAuthButtons() {
-        const oauthButtons = this.authModal.querySelector('#oauth-buttons');
-        const oauthNote = this.authModal.querySelector('.oauth-note');
-        const divider = this.authModal.querySelector('.auth-divider');
-        const browserCredBtn = this.authModal.querySelector('.browser-credential-btn');
-        
-        // Check browser credential API support
-        const browserAuthSupported = window.browserAuth && window.browserAuth.isSupported();
-        
-        // Update browser credential button visibility
-        if (browserCredBtn) {
-            browserCredBtn.style.display = browserAuthSupported ? 'flex' : 'none';
-        }
-        
-        if (browserAuthSupported) {
-            // Show OAuth section
-            if (oauthButtons) oauthButtons.style.display = 'flex';
-            if (divider) divider.style.display = 'flex';
-            
-            // Update note
-            if (oauthNote) {
-                oauthNote.textContent = '🔐 Use passwords saved in your browser (Chrome, Edge, Safari)';
-                oauthNote.style.display = 'block';
-            }
-        } else {
-            // No OAuth options available
-            if (oauthButtons) oauthButtons.style.display = 'none';
-            if (divider) divider.style.display = 'none';
-        }
-    }
-
-    /**
-     * Hide auth modal
+     * Hide auth modal — delegates to the unified auth-ui.js
      */
     hideAuthModal() {
-        this.authModal.classList.remove('show');
-        this.clearAuthErrors();
+        window.authUI?.hide();
     }
 
-    /**
-     * Switch auth tab
-     */
-    switchAuthTab(tab) {
-        const modal = this.authModal;
-        modal.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
-        modal.querySelector(`[data-tab="${tab}"]`).classList.add('active');
-        
-        modal.querySelector('#login-form').style.display = tab === 'login' ? 'block' : 'none';
-        modal.querySelector('#register-form').style.display = tab === 'register' ? 'block' : 'none';
-        modal.querySelector('#auth-modal-title').textContent = tab === 'login' ? 'Login' : 'Create Account';
-    }
-
-    /**
-     * Clear auth errors
-     */
-    clearAuthErrors() {
-        this.authModal.querySelector('#login-error').textContent = '';
-        this.authModal.querySelector('#register-error').textContent = '';
-    }
-
-    /**
-     * Handle login form submission
-     */
-    async handleLogin(e) {
-        e.preventDefault();
-        const form = e.target;
-        const username = form.querySelector('#login-username').value;
-        const password = form.querySelector('#login-password').value;
-        const errorEl = form.querySelector('#login-error');
-        const submitBtn = form.querySelector('.auth-submit');
-        
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Logging in...';
-        
-        const result = await window.authClient.login(username, password);
-        
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Login';
-        
-        if (result.success) {
-            this.hideAuthModal();
-            this.showNotification('Welcome back, ' + result.user.username + '!', 'success');
-        } else {
-            errorEl.textContent = result.error;
-        }
-    }
-
-    /**
-     * Handle register form submission
-     */
-    async handleRegister(e) {
-        e.preventDefault();
-        const form = e.target;
-        const username = form.querySelector('#register-username').value;
-        const email = form.querySelector('#register-email').value;
-        const password = form.querySelector('#register-password').value;
-        const confirm = form.querySelector('#register-confirm').value;
-        const errorEl = form.querySelector('#register-error');
-        const submitBtn = form.querySelector('.auth-submit');
-        
-        if (password !== confirm) {
-            errorEl.textContent = 'Passwords do not match';
-            return;
-        }
-        
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Creating account...';
-        
-        const result = await window.authClient.register(username, email, password);
-        
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Create Account';
-        
-        if (result.success) {
-            this.hideAuthModal();
-            let message = 'Welcome, ' + result.user.username + '!';
-            if (result.bonus) {
-                message += ' ' + result.bonus.description;
-            }
-            this.showNotification(message, 'success');
-        } else {
-            errorEl.textContent = result.error;
-        }
-    }
-
-    /**
-     * Handle browser credential authentication (Saved Password)
-     */
-    async handleBrowserCredentialAuth() {
-        if (!window.browserAuth || !window.browserAuth.isSupported()) {
-            this.showNotification('Browser credential storage is not supported in this browser.', 'error');
-            return;
-        }
-
-        try {
-            const result = await window.browserAuth.requestCredential();
-            
-            if (result.success) {
-                this.hideAuthModal();
-                const message = `Welcome back, ${result.user.displayName || result.user.username}!`;
-                this.showNotification(message, 'success');
-            } else if (result.error !== 'No credential selected') {
-                // Only show error if it's not just the user cancelling
-                this.showNotification(result.error || 'Authentication failed', 'error');
-            }
-        } catch (error) {
-            console.error('Browser credential auth error:', error);
-            this.showNotification('Failed to retrieve saved credentials', 'error');
-        }
-    }
     /**
      * Handle OAuth login (Legacy - kept for backwards compatibility)
      */
@@ -1147,12 +898,20 @@ class GameUI {
     /**
      * Escape HTML special characters to prevent XSS
      */
+    _escapeHtml(str) {
+        return String(str == null ? '' : str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    /**
+     * Escape HTML special characters to prevent XSS (alias for _escapeHtml)
+     */
     escapeHtml(str) {
-        if (str === null || str === undefined) return '';
-        return String(str).replace(/[&<>"']/g, (c) => ({
-            '&': '&amp;', '<': '&lt;', '>': '&gt;',
-            '"': '&quot;', "'": '&#x27;'
-        }[c]));
+        return this._escapeHtml(str);
     }
 
     /**

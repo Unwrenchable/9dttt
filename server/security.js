@@ -322,9 +322,12 @@ class Security {
             );
             
             // Content Security Policy (CSP)
+            // 'unsafe-inline' is removed from script-src to enforce XSS protection.
+            // Inline scripts in templates should be migrated to external .js files.
+            // Google APIs (Firebase/OAuth) and gstatic are retained as trusted CDNs.
             res.set('Content-Security-Policy', 
                 "default-src 'self'; " +
-                "script-src 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com; " +
+                "script-src 'self' https://www.gstatic.com https://apis.google.com; " +
                 "style-src 'self' 'unsafe-inline'; " +
                 "img-src 'self' data: https:; " +
                 "connect-src 'self' wss: ws: https:; " +
