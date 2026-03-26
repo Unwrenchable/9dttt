@@ -40,6 +40,7 @@ class ContraCommando {
         ];
         this.konamiProgress = 0;
         this.konamiBannerTimer = 0;  // counts down in frames; 240 ≈ 4 s at 60 fps
+        this._inputSetup = false;
         
         this.weaponTypes = {
             rifle: { name: 'RIFLE', icon: '🔫', damage: 10, speed: 15, spread: 0, cooldown: 100 },
@@ -53,6 +54,8 @@ class ContraCommando {
     }
     
     setupInput() {
+        if (this._inputSetup) return;
+        this._inputSetup = true;
         window.addEventListener('keydown', (e) => {
             this.keys[e.code] = true;
             if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) {
@@ -94,7 +97,7 @@ class ContraCommando {
         this.running = true;
         this.lastTime = 0;
         document.getElementById('startScreen').classList.add('hidden');
-        
+        if (this._rafId) { cancelAnimationFrame(this._rafId); this._rafId = null; }
         this.initLevel();
         this.gameLoop(0);
     }

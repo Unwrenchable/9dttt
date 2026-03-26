@@ -85,6 +85,7 @@
                 
                 this.mouse = { x: 0, y: 0, active: false };
                 this.keys = {};
+                this._inputSetup = false;
                 
                 this.reset();
                 this.setupInput();
@@ -106,6 +107,8 @@
             }
             
             setupInput() {
+                if (this._inputSetup) return;
+                this._inputSetup = true;
                 window.addEventListener('keydown', e => this.keys[e.code] = true);
                 window.addEventListener('keyup', e => this.keys[e.code] = false);
                 

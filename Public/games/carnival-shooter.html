@@ -110,12 +110,15 @@
                 // Stats
                 this.wins = 0;
                 this.plays = 0;
+                this._inputSetup = false;
                 
                 this.setupInput();
                 this.gameLoop();
             }
             
             setupInput() {
+                if (this._inputSetup) return;
+                this._inputSetup = true;
                 this.canvas.addEventListener('mousemove', e => {
                     const rect = this.canvas.getBoundingClientRect();
                     this.crosshair.x = (e.clientX - rect.left) * (this.width / rect.width);
