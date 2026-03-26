@@ -447,10 +447,10 @@ class LeaderboardUI {
                 <tbody>
                     ${Object.entries(stats.gameBreakdown).map(([game, data]) => `
                         <tr>
-                            <td>${game}</td>
-                            <td>${data.plays}</td>
-                            <td><span class="score-value">${data.highScore.toLocaleString()}</span></td>
-                            <td>${Math.round(data.avgScore)}</td>
+                            <td>${this._escapeHtml(game)}</td>
+                            <td>${Number(data.plays) || 0}</td>
+                            <td><span class="score-value">${(Number(data.highScore) || 0).toLocaleString()}</span></td>
+                            <td>${Math.round(Number(data.avgScore) || 0)}</td>
                         </tr>
                     `).join('')}
                 </tbody>

@@ -214,7 +214,7 @@ module.exports = async (req, res) => {
         const token = jwt.sign(
             { id: user.id, username: user.username, email: user.email },
             config.JWT_SECRET,
-            { expiresIn: config.JWT_EXPIRES_IN }
+            { expiresIn: config.JWT_EXPIRES_IN, algorithm: 'HS256' }
         );
 
         // Sanitize user data for response
@@ -243,7 +243,7 @@ module.exports = async (req, res) => {
         console.error('Wallet auth error:', error);
         res.status(500).json({ 
             success: false, 
-            error: 'Internal server error: ' + error.message 
+            error: 'Internal server error' 
         });
     }
 };

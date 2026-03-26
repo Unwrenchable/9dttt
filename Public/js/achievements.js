@@ -164,12 +164,12 @@ class AchievementSystem {
         notification.innerHTML = `
             <div class="achievement-glow"></div>
             <div class="achievement-content">
-                <div class="achievement-icon-large">${achievement.icon}</div>
+                <div class="achievement-icon-large">${this._escapeHtml(achievement.icon)}</div>
                 <div class="achievement-text">
                     <div class="achievement-title">Achievement Unlocked!</div>
-                    <div class="achievement-name">${achievement.name}</div>
-                    <div class="achievement-desc">${achievement.description}</div>
-                    <div class="achievement-reward">+${achievement.reward} 🪙</div>
+                    <div class="achievement-name">${this._escapeHtml(achievement.name)}</div>
+                    <div class="achievement-desc">${this._escapeHtml(achievement.description)}</div>
+                    <div class="achievement-reward">+${Number(achievement.reward) || 0} 🪙</div>
                 </div>
             </div>
         `;
@@ -358,6 +358,19 @@ class AchievementSystem {
             total: this.achievements.length,
             percentage: (this.unlockedAchievements.size / this.achievements.length * 100).toFixed(1)
         };
+    }
+
+    /**
+     * Escape HTML special characters to prevent XSS when inserting
+     * achievement data into innerHTML.
+     */
+    _escapeHtml(str) {
+        return String(str == null ? '' : str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
     }
 }
 
