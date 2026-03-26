@@ -165,6 +165,7 @@
                 
                 this.keys = {};
                 this._rafId = null;
+                this._inputSetup = false;
                 this.setupInput();
                 // Clean up loop on page navigation
                 window.addEventListener('beforeunload', () => {
@@ -242,6 +243,8 @@
             }
             
             setupInput() {
+                if (this._inputSetup) return;
+                this._inputSetup = true;
                 window.addEventListener('keydown', e => {
                     this.keys[e.code] = true;
                     e.preventDefault();

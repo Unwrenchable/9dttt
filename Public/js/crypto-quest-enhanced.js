@@ -25,6 +25,7 @@ class CryptoQuestGame {
         // Input handling
         this.keys = {};
         this.mouse = { x: 0, y: 0, clicked: false };
+        this._inputSetup = false;
         this.setupInputHandlers();
         
         // RAF tracking (cancellable loop)
@@ -40,6 +41,8 @@ class CryptoQuestGame {
     }
     
     setupInputHandlers() {
+        if (this._inputSetup) return;
+        this._inputSetup = true;
         window.addEventListener('keydown', (e) => {
             this.keys[e.key.toLowerCase()] = true;
             if (e.key === 'Escape') this.scene = 'menu';

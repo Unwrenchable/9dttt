@@ -57,6 +57,7 @@ class BeatEmUpEngine {
 
         // RAF tracking (cancellable loop)
         this._rafId = null;
+        this._inputSetup = false;
         
         this.init();
     }
@@ -67,6 +68,8 @@ class BeatEmUpEngine {
     }
 
     setupInput() {
+        if (this._inputSetup) return;
+        this._inputSetup = true;
         // Keyboard input
         window.addEventListener('keydown', (e) => {
             this.keys[e.code] = true;

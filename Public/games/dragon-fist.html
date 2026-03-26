@@ -189,11 +189,14 @@
                 this.bossAI = new BossAISystem();
                 
                 this.keys = {};
+                this._inputSetup = false;
                 this.setupInput();
                 this.gameLoop();
             }
             
             setupInput() {
+                if (this._inputSetup) return;
+                this._inputSetup = true;
                 window.addEventListener('keydown', e => {
                     this.keys[e.code] = true;
                     

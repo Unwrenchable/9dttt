@@ -33,6 +33,11 @@
   ],
   "author": "9DTTT Team",
   "license": "MIT",
+  "overrides": {
+    "socket.io-parser": "~4.2.6",
+    "h3": "^1.15.10",
+    "picomatch": "^4.0.4"
+  },
   "dependencies": {
     "@solana/web3.js": "^1.95.8",
     "@walletconnect/sign-client": "^2.16.1",

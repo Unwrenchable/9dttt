@@ -336,7 +336,7 @@ class GlobalLeaderboard {
         notification.innerHTML = `
             <div style="position: fixed; top: 20px; right: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 20px 30px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); z-index: 10000; animation: slideIn 0.5s ease-out;">
                 <div style="font-size: 18px; font-weight: bold;">🎉 Tokens Earned!</div>
-                <div style="font-size: 32px; margin: 10px 0;">+${amount} 🪙</div>
+                <div style="font-size: 32px; margin: 10px 0;">+${Number(amount) || 0} 🪙</div>
                 <div style="font-size: 12px; opacity: 0.8;">Added to your wallet</div>
             </div>
         `;

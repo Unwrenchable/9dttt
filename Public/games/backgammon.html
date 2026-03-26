@@ -665,9 +665,6 @@
                     checker.addEventListener('click', () => selectChecker(i, index));
                     point.appendChild(checker);
                 });
-
-                // Add click handler for moving to points
-                point.addEventListener('click', () => tryMove(i));
             }
 
             // Render bar
@@ -688,6 +685,22 @@
             document.getElementById('bear-off-count-2').textContent = gameState.bornOff[2];
             document.getElementById('home-count-1').textContent = gameState.bornOff[1];
             document.getElementById('home-count-2').textContent = gameState.bornOff[2];
+        }
+
+        // Wire up board point-click via event delegation (single permanent listener — prevents
+        // the previous per-render accumulation of click handlers on .point elements).
+        function initBoardDelegation() {
+            const boardEl = document.querySelector('.board-container');
+            if (!boardEl) return;
+            boardEl.addEventListener('click', (e) => {
+                // Only fire for clicks directly on a .point element (not on checker children)
+                const pointEl = e.target.closest('.point[data-point]');
+                if (!pointEl) return;
+                const ptNum = parseInt(pointEl.dataset.point, 10);
+                if (!isNaN(ptNum) && ptNum >= 1 && ptNum <= 24) {
+                    tryMove(ptNum);
+                }
+            });
         }
 
         // Roll dice
@@ -1008,6 +1021,7 @@
         });
 
         // Initialize game on load
+        initBoardDelegation();
         initGame();
     </script>
 </body>

@@ -27,6 +27,7 @@ class SkyAceCombat {
         this.score = 0;
         this.wave = 1;
         this.keys = {};
+        this._inputSetup = false;
         
         this.setupInput();
         this.generateClouds();
@@ -34,6 +35,8 @@ class SkyAceCombat {
     }
     
     setupInput() {
+        if (this._inputSetup) return;
+        this._inputSetup = true;
         window.addEventListener('keydown', (e) => {
             this.keys[e.code] = true;
             if (e.code === 'Space') this.shoot();
