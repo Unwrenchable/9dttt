@@ -693,10 +693,10 @@
             const boardEl = document.querySelector('.board-container');
             if (!boardEl) return;
             boardEl.addEventListener('click', (e) => {
-                const pointEl = e.target.closest('[data-point]');
+                // Only fire for clicks directly on a .point element (not on checker children)
+                const pointEl = e.target.closest('.point[data-point]');
                 if (!pointEl) return;
-                const ptVal = pointEl.dataset.point;
-                const ptNum = parseInt(ptVal, 10);
+                const ptNum = parseInt(pointEl.dataset.point, 10);
                 if (!isNaN(ptNum) && ptNum >= 1 && ptNum <= 24) {
                     tryMove(ptNum);
                 }
