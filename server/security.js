@@ -322,12 +322,14 @@ class Security {
             );
             
             // Content Security Policy (CSP)
-            // 'unsafe-inline' is removed from script-src to enforce XSS protection.
-            // Inline scripts in templates should be migrated to external .js files.
+            // 'unsafe-inline' is required for script-src because the HTML game pages
+            // contain inline <script> blocks for game initialisation. Removing it breaks
+            // all games. A nonce-based CSP would be the ideal long-term fix, but that
+            // requires a server-side template/build step that does not currently exist.
             // Google APIs (Firebase/OAuth) and gstatic are retained as trusted CDNs.
             res.set('Content-Security-Policy', 
                 "default-src 'self'; " +
-                "script-src 'self' https://www.gstatic.com https://apis.google.com; " +
+                "script-src 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com; " +
                 "style-src 'self' 'unsafe-inline'; " +
                 "img-src 'self' data: https:; " +
                 "connect-src 'self' wss: ws: https:; " +

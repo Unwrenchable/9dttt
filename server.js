@@ -907,6 +907,10 @@ io.on('connection', (socket) => {
     socket.on('forfeit_game', async (data) => {
         const user = connectedUsers.get(socket.id);
         if (!user) return;
+        if (!data || typeof data.gameId !== 'string') {
+            socket.emit('error', { error: 'Invalid forfeit data' });
+            return;
+        }
 
         const result = await gameManager.forfeitGame(data.gameId, user.username);
         
@@ -923,6 +927,10 @@ io.on('connection', (socket) => {
     socket.on('game_chat', async (data) => {
         const user = connectedUsers.get(socket.id);
         if (!user) return;
+        if (!data || typeof data.gameId !== 'string' || typeof data.message !== 'string') {
+            socket.emit('chat_error', { error: 'Invalid chat data' });
+            return;
+        }
 
         // Check if muted
         const canSend = await moderation.canSendMessage(user.username);
@@ -956,6 +964,10 @@ io.on('connection', (socket) => {
     socket.on('lobby_chat', async (data) => {
         const user = connectedUsers.get(socket.id);
         if (!user) return;
+        if (!data || typeof data.message !== 'string') {
+            socket.emit('chat_error', { error: 'Invalid message data' });
+            return;
+        }
 
         const canSend = await moderation.canSendMessage(user.username);
         if (!canSend.allowed) {
@@ -981,6 +993,10 @@ io.on('connection', (socket) => {
     socket.on('direct_message', async (data) => {
         const user = connectedUsers.get(socket.id);
         if (!user) return;
+        if (!data || typeof data.to !== 'string' || typeof data.message !== 'string') {
+            socket.emit('dm_error', { error: 'Invalid message data' });
+            return;
+        }
 
         // Check if blocked
         const blocked = await moderation.areBlocked(user.username, data.to);
@@ -1209,4 +1225,23 @@ async function startServer() {
     });
 }
 
-startServer();
+startServer().catch((err) => {
+    console.error('[server] Fatal startup error:', err);
+    process.exit(1);
+});
+
+// ============================================
+// Global Process Error Handlers
+// ============================================
+
+// Catch unhandled promise rejections — prevents Node from silently crashing
+// on async code paths that are missing a .catch() or try/catch.
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('[server] Unhandled promise rejection at:', promise, 'reason:', reason);
+});
+
+// Catch synchronous uncaught exceptions so a bug in one request doesn't
+// take the entire server down without any log output.
+process.on('uncaughtException', (err) => {
+    console.error('[server] Uncaught exception:', err);
+});
