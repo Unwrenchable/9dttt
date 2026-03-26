@@ -1234,14 +1234,16 @@ startServer().catch((err) => {
 // Global Process Error Handlers
 // ============================================
 
-// Catch unhandled promise rejections — prevents Node from silently crashing
-// on async code paths that are missing a .catch() or try/catch.
+// Catch unhandled promise rejections — prevents Node from crashing silently.
+// We log the rejection and exit so the process manager (Render) can restart clean.
 process.on('unhandledRejection', (reason, promise) => {
     console.error('[server] Unhandled promise rejection at:', promise, 'reason:', reason);
+    process.exit(1);
 });
 
-// Catch synchronous uncaught exceptions so a bug in one request doesn't
-// take the entire server down without any log output.
+// Catch synchronous uncaught exceptions. After an uncaught exception the
+// process is in an undefined state; exit immediately so it can be restarted.
 process.on('uncaughtException', (err) => {
     console.error('[server] Uncaught exception:', err);
+    process.exit(1);
 });
