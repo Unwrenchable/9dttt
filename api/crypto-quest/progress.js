@@ -59,11 +59,21 @@ module.exports = async (req, res) => {
     
     try {
         if (method === 'GET') {
+            // Require a valid JWT — same pattern as POST/PUT
+            const auth = verifyBearer(req);
+            if (!auth.valid) {
+                return res.status(401).json({ error: 'Unauthorized: valid Bearer token required' });
+            }
+
             // Get progress
             if (!userId) {
                 return res.status(400).json({ error: 'userId required' });
             }
-            
+
+            if (String(auth.decoded.id) !== String(userId)) {
+                return res.status(401).json({ error: 'Unauthorized' });
+            }
+
             const progress = progressStore.get(userId) || {
                 userId,
                 coins: 0,

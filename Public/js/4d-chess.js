@@ -49,6 +49,7 @@ class FourDChess {
         this.onlineMode = false;
         this.gameId = null;
         this.playerColor = null;
+        this._timelineNavSetup = false;
     }
 
     /**
@@ -864,6 +865,8 @@ class FourDChess {
      * Setup timeline navigation
      */
     setupTimelineNavigation() {
+        if (this._timelineNavSetup) return;
+        this._timelineNavSetup = true;
         const buttons = document.querySelectorAll('.timeline-btn');
         buttons.forEach(btn => {
             btn.addEventListener('click', () => {

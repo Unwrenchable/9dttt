@@ -263,7 +263,9 @@ class BrainAgeTraining {
             this.displayResult('Number Memory', this.memorizeNumber.length + ' digits', brainAge);
         } else {
             alert('Incorrect! The number was: ' + this.memorizeNumber);
-            location.reload();
+            document.getElementById('gameArea').style.display = 'none';
+            document.getElementById('menu').style.display = '';
+            brainGame = new BrainAgeTraining();
         }
     }
     
@@ -325,7 +327,9 @@ function loadBrainGame(type) {
             break;
         default:
             alert('Coming soon!');
-            location.reload();
+            document.getElementById('gameArea').style.display = 'none';
+            document.getElementById('menu').style.display = '';
+            brainGame = new BrainAgeTraining();
     }
 }
 
