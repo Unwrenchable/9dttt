@@ -924,9 +924,12 @@ class CryptoQuestGame {
         
         // Sync to API (also use the safe wallet without privateKey)
         try {
+            const token = window.authClient?.getToken?.() || localStorage.getItem('authToken') || '';
+            const headers = { 'Content-Type': 'application/json' };
+            if (token) headers['Authorization'] = `Bearer ${token}`;
             const response = await fetch('/api/crypto-quest/progress', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers,
                 body: JSON.stringify(progress)
             });
             console.log('Progress saved:', await response.json());

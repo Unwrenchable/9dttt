@@ -1199,6 +1199,10 @@ io.on('connection', (socket) => {
 // Catch-all route for SPA
 // ============================================
 
+app.use('/api', (req, res) => {
+    res.status(404).json({ success: false, error: 'API endpoint not found' });
+});
+
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'Public', 'index.html'));
 });

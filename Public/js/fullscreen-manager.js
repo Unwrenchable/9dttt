@@ -271,6 +271,27 @@ document.addEventListener('mousemove', () => {
     }
 });
 
+// Desktop: auto-enter fullscreen on first user interaction (click or keydown)
+(function() {
+    const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+                     ('ontouchstart' in window) || (navigator.maxTouchPoints > 1);
+    if (isMobile) return;
+
+    let triggered = false;
+    function tryAutoFullscreen() {
+        if (triggered) return;
+        triggered = true;
+        document.removeEventListener('click', tryAutoFullscreen, true);
+        document.removeEventListener('keydown', tryAutoFullscreen, true);
+        if (window.fullscreenManager && !window.fullscreenManager.isFullscreen) {
+            window.fullscreenManager.enter().catch(function() { /* silently ignore if blocked */ });
+        }
+    }
+
+    document.addEventListener('click', tryAutoFullscreen, true);
+    document.addEventListener('keydown', tryAutoFullscreen, true);
+})();
+
 // Mobile: show a "Tap to go fullscreen" prompt on first interaction
 (function() {
     const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||

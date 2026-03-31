@@ -278,7 +278,8 @@
         loadDashboardData();
         
         // Auto-refresh every 30 seconds
-        setInterval(loadDashboardData, 30000);
+        const refreshInterval = setInterval(loadDashboardData, 30000);
+        window.addEventListener('beforeunload', () => clearInterval(refreshInterval));
     </script>
 </body>
 </html>

@@ -6,7 +6,7 @@
 class GlobalLeaderboard {
     constructor() {
         this.db = null;
-        this.apiEndpoint = 'https://atomicfizzcaps.xyz/api';
+        this.apiEndpoint = (window.API_CONFIG && window.API_CONFIG.apiUrl) ? window.API_CONFIG.apiUrl : 'https://ninedttt.onrender.com/api';
         this.games = [
             'monster-rampage', 'contra-commando', 'sky-ace-combat', 
             'mega-heroes', 'tournament-fighters', 'brain-academy',
