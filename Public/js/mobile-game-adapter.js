@@ -58,6 +58,11 @@
                 setTimeout(() => this.applyCanvasScaling(), 300);
             });
 
+            // Re-scale when fullscreen state changes so the canvas
+            // fills the entire viewport (or restores normal sizing).
+            window.addEventListener('fullscreenEntered', () => this.applyCanvasScaling());
+            window.addEventListener('fullscreenExited', () => this.applyCanvasScaling());
+
             if (this.isTouch) {
                 this.setupTouchControls();
             }
@@ -136,8 +141,15 @@
                                  this.autoDetectControlType();
             const needsDpad = this.isTouch && controlType !== 'tap' && controlType !== 'none';
             const controlsHeight = needsDpad ? 140 : 0;
-            const maxH = vh - controlsHeight - 56; // 56px for minimal header
-            const maxW = vw - 12; // small margin (avoids edge on notched devices)
+            const inFullscreen = !!(
+                document.fullscreenElement ||
+                document.webkitFullscreenElement ||
+                document.mozFullScreenElement ||
+                document.msFullscreenElement
+            );
+            const headerH = inFullscreen ? 0 : 56; // hide header reservation in fullscreen
+            const maxH = vh - controlsHeight - headerH;
+            const maxW = vw - (inFullscreen ? 0 : 12); // edge margin only outside fullscreen
 
             let displayW = maxW;
             let displayH = displayW / aspectRatio;
