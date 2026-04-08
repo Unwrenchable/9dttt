@@ -55,8 +55,6 @@
             const nativeH = this.canvas.height;
             if (!nativeW || !nativeH) return;
 
-            const aspectRatio = nativeW / nativeH;
-
             // Available viewport space (minus safe areas)
             const vw = window.innerWidth;
             const vh = window.innerHeight;
@@ -67,26 +65,23 @@
             const maxH = vh - controlsHeight - headerHeight;
             const maxW = vw - 32; // margins on both sides
 
-            let displayW = maxW;
-            let displayH = displayW / aspectRatio;
+            if (maxW <= 0 || maxH <= 0) return;
 
-            // If height exceeds available space, scale down based on height
-            if (displayH > maxH) {
-                displayH = maxH;
-                displayW = displayH * aspectRatio;
-            }
+            // Compute a single scale factor that preserves aspect ratio while
+            // respecting viewport constraints and only applying the minimum
+            // playable size when it can fit without overflowing.
+            const fitScale = Math.min(maxW / nativeW, maxH / nativeH);
 
-            // Ensure minimum playable size on very small screens
+            // Ensure minimum playable size on very small screens when possible.
             const minSize = 300;
-            if (displayW < minSize && displayH < minSize) {
-                if (aspectRatio > 1) {
-                    displayW = minSize;
-                    displayH = minSize / aspectRatio;
-                } else {
-                    displayH = minSize;
-                    displayW = minSize * aspectRatio;
-                }
-            }
+            const minScale = Math.min(
+                Math.max(minSize / nativeW, minSize / nativeH),
+                fitScale
+            );
+
+            const scale = Math.max(fitScale, minScale);
+            const displayW = nativeW * scale;
+            const displayH = nativeH * scale;
 
             // Apply CSS scaling (preserves internal canvas resolution)
             this.canvas.style.width = Math.floor(displayW) + 'px';
@@ -96,8 +91,6 @@
             this.canvas.style.maxWidth = '100%';
             this.canvas.style.objectFit = 'contain';
             this.canvas.classList.add('mga-scaled');
-
-            console.log(`📐 Canvas scaled: ${nativeW}x${nativeH} → ${Math.floor(displayW)}x${Math.floor(displayH)}px (viewport: ${vw}x${vh})`);
         },
 
         setupTouchControls() {

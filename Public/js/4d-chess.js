@@ -221,7 +221,7 @@ class FourDChess {
 
         // If a piece is already selected
         if (this.selectedSquare) {
-            const { row: fromRow, col: fromCol, timeline: fromTimeline } = this.selectedSquare;
+            const { row: fromRow, col: fromCol } = this.selectedSquare;
 
             // Check if clicking on a valid move
             const isValidMove = this.validMoves.some(
@@ -866,6 +866,8 @@ class FourDChess {
      * Setup timeline navigation
      */
     setupTimelineNavigation() {
+        if (this._timelineNavSetup) return;
+        this._timelineNavSetup = true;
         const buttons = document.querySelectorAll('.timeline-btn');
         buttons.forEach(btn => {
             btn.addEventListener('click', () => {

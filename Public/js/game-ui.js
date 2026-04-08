@@ -21,12 +21,16 @@ class GameUI {
         this.createMultiplayerModal();
         this.createHeaderUI();
 
-        // Use unified auth system instead of legacy authClient
+        // Use unified auth system if available, fall back to legacy authClient
         if (window.unifiedAuth) {
             await window.unifiedAuth.init();
             this.updateAuthUI();
             // Listen for auth state changes
             window.unifiedAuth.onAuthStateChanged(() => this.updateAuthUI());
+        } else if (window.authClient) {
+            await window.authClient.init();
+            this.updateAuthUI();
+            window.authClient.addListener(() => this.updateAuthUI());
         }
 
         // Check URL params for auth callbacks (legacy support)
@@ -98,9 +102,7 @@ class GameUI {
      * All authentication is managed by unified-auth.js and auth-ui.js
      */
     createAuthModal() {
-        // This function intentionally left empty
-        // Do not recreate - see auth-ui.js for the unified auth modal
-        console.log('ℹ️ Auth modal handled by auth-ui.js');
+        // Intentionally empty — auth-ui.js owns the auth modal
     }
 
     /**
@@ -1003,7 +1005,8 @@ class GameUI {
      * Update auth UI based on login state
      */
     updateAuthUI() {
-        const user = window.authClient.user;
+        const user = (window.authClient && window.authClient.user) ||
+                     (window.unifiedAuth && window.unifiedAuth.user);
         const authButtons = document.getElementById('auth-buttons');
         const userInfo = document.getElementById('user-info');
         
