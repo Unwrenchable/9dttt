@@ -6,7 +6,7 @@
 class GlobalLeaderboard {
     constructor() {
         this.db = null;
-        this.apiEndpoint = 'https://atomicfizzcaps.xyz/api';
+        this.apiEndpoint = (window.API_CONFIG && window.API_CONFIG.apiUrl) ? window.API_CONFIG.apiUrl : 'https://ninedttt.onrender.com/api';
         this.games = [
             'monster-rampage', 'contra-commando', 'sky-ace-combat', 
             'mega-heroes', 'tournament-fighters', 'brain-academy',
@@ -112,9 +112,13 @@ class GlobalLeaderboard {
     
     async syncScoreToBackend(scoreEntry) {
         try {
+            const token = window.authClient?.token || localStorage.getItem('auth_token') || '';
             await fetch(`${this.apiEndpoint}/scores/submit`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                },
                 body: JSON.stringify(scoreEntry)
             });
         } catch (error) {
@@ -134,9 +138,13 @@ class GlobalLeaderboard {
             }
             
             // Sync with blockchain
+            const token = window.authClient?.token || localStorage.getItem('auth_token') || '';
             await fetch(`${this.apiEndpoint}/tokens/award`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                },
                 body: JSON.stringify({
                     userId,
                     amount,
@@ -328,7 +336,7 @@ class GlobalLeaderboard {
         notification.innerHTML = `
             <div style="position: fixed; top: 20px; right: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 20px 30px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); z-index: 10000; animation: slideIn 0.5s ease-out;">
                 <div style="font-size: 18px; font-weight: bold;">🎉 Tokens Earned!</div>
-                <div style="font-size: 32px; margin: 10px 0;">+${amount} 🪙</div>
+                <div style="font-size: 32px; margin: 10px 0;">+${Number(amount) || 0} 🪙</div>
                 <div style="font-size: 12px; opacity: 0.8;">Added to your wallet</div>
             </div>
         `;

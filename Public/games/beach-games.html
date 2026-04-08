@@ -62,6 +62,7 @@
     </div>
 
         <script src="../js/mobile-game-adapter.js"></script>
+    <script src="../js/fullscreen-manager.js"></script>
     <script src="../js/gamepad-manager.js"></script>
     <script src="../js/controller-guide.js"></script>
     <script src="../js/advanced-graphics.js"></script>
@@ -92,11 +93,14 @@
                 };
                 
                 this.keys = {};
+                this._inputSetup = false;
                 this.setupInput();
                 this.gameLoop();
             }
             
             setupInput() {
+                if (this._inputSetup) return;
+                this._inputSetup = true;
                 window.addEventListener('keydown', e => {
                     this.keys[e.code] = true;
                     if (['Space', 'ArrowUp', 'ArrowDown'].includes(e.code)) {
@@ -107,6 +111,7 @@
             }
             
             startGame(mode) {
+                if (this._rafId) { cancelAnimationFrame(this._rafId); this._rafId = null; }
                 this.gameMode = mode;
                 this.state = 'playing';
                 this.score = 0;
@@ -114,6 +119,7 @@
                 if (mode === 'surf') this.initSurf();
                 else if (mode === 'skate') this.initSkate();
                 else if (mode === 'hacky') this.initHacky();
+                this.gameLoop();
             }
             
             // ============ SURFING GAME ============

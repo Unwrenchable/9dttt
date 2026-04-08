@@ -316,8 +316,8 @@ class LeaderboardUI {
                             <td><span class="rank-badge rank-${index < 3 ? index + 1 : 'other'}">${index + 1}</span></td>
                             <td>
                                 <div class="player-info">
-                                    <span class="player-avatar">${entry.userAvatar || '👤'}</span>
-                                    <span class="player-name">${entry.userName}</span>
+                                    <span class="player-avatar">${this._escapeHtml(entry.userAvatar || '👤')}</span>
+                                    <span class="player-name">${this._escapeHtml(entry.userName || 'Anonymous')}</span>
                                 </div>
                             </td>
                             <td><span class="score-value">${entry.totalScore.toLocaleString()}</span></td>
@@ -390,8 +390,8 @@ class LeaderboardUI {
                             <td><span class="rank-badge rank-${index < 3 ? index + 1 : 'other'}">${index + 1}</span></td>
                             <td>
                                 <div class="player-info">
-                                    <span class="player-avatar">${entry.userAvatar || '👤'}</span>
-                                    <span class="player-name">${entry.userName}</span>
+                                    <span class="player-avatar">${this._escapeHtml(entry.userAvatar || '👤')}</span>
+                                    <span class="player-name">${this._escapeHtml(entry.userName || 'Anonymous')}</span>
                                 </div>
                             </td>
                             <td><span class="score-value">${entry.score.toLocaleString()}</span></td>
@@ -447,15 +447,28 @@ class LeaderboardUI {
                 <tbody>
                     ${Object.entries(stats.gameBreakdown).map(([game, data]) => `
                         <tr>
-                            <td>${game}</td>
-                            <td>${data.plays}</td>
-                            <td><span class="score-value">${data.highScore.toLocaleString()}</span></td>
-                            <td>${Math.round(data.avgScore)}</td>
+                            <td>${this._escapeHtml(game)}</td>
+                            <td>${Number(data.plays) || 0}</td>
+                            <td><span class="score-value">${(Number(data.highScore) || 0).toLocaleString()}</span></td>
+                            <td>${Math.round(Number(data.avgScore) || 0)}</td>
                         </tr>
                     `).join('')}
                 </tbody>
             </table>
         `;
+    }
+
+    /**
+     * Escape HTML special characters to prevent XSS when rendering
+     * server-supplied strings into innerHTML.
+     */
+    _escapeHtml(str) {
+        return String(str == null ? '' : str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
     }
 }
 

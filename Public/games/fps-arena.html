@@ -63,6 +63,7 @@
     </div>
 
         <script src="../js/mobile-game-adapter.js"></script>
+    <script src="../js/fullscreen-manager.js"></script>
     <script src="../js/gamepad-manager.js"></script>
     <script src="../js/controller-guide.js"></script>
     <script src="../js/advanced-graphics.js"></script>
@@ -104,12 +105,15 @@
                 this.shooting = false;
                 this.lastShot = 0;
                 this.fireRate = 100;
+                this._inputSetup = false;
                 
                 this.setupInput();
                 this.gameLoop();
             }
             
             setupInput() {
+                if (this._inputSetup) return;
+                this._inputSetup = true;
                 window.addEventListener('keydown', e => {
                     this.keys[e.code] = true;
                     if (e.code === 'KeyR' && this.player && !this.player.reloading && this.player.ammo < this.player.maxAmmo) {
@@ -130,6 +134,7 @@
             }
             
             startGame(difficulty) {
+                if (this._rafId) { cancelAnimationFrame(this._rafId); this._rafId = null; }
                 this.difficulty = difficulty;
                 this.state = 'playing';
                 this.score = 0;
@@ -156,6 +161,7 @@
                 this.pickups = [];
                 
                 this.spawnWave();
+                this.gameLoop();
             }
             
             spawnWave() {

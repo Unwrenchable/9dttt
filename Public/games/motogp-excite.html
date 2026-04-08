@@ -60,6 +60,7 @@
     </div>
 
         <script src="../js/mobile-game-adapter.js"></script>
+    <script src="../js/fullscreen-manager.js"></script>
     <script src="../js/gamepad-manager.js"></script>
     <script src="../js/controller-guide.js"></script>
     <script src="../js/advanced-graphics.js"></script>
@@ -165,6 +166,7 @@
                 
                 this.keys = {};
                 this._rafId = null;
+                this._inputSetup = false;
                 this.setupInput();
                 // Clean up loop on page navigation
                 window.addEventListener('beforeunload', () => {
@@ -242,6 +244,8 @@
             }
             
             setupInput() {
+                if (this._inputSetup) return;
+                this._inputSetup = true;
                 window.addEventListener('keydown', e => {
                     this.keys[e.code] = true;
                     e.preventDefault();
@@ -300,6 +304,7 @@
                     return;
                 }
                 
+                if (this._rafId) { cancelAnimationFrame(this._rafId); this._rafId = null; }
                 this.mode = mode;
                 this.state = 'playing';
                 this.scroll = 0;
@@ -330,6 +335,7 @@
                 this.currentTrack = { name: 'Quick Race', obstacles: 12, ramps: 6, boosts: 8, difficulty: 2, bgColor: '#4a90e2' };
                 this.generateTrackFromConfig(this.currentTrack);
                 this.generateCPU(2);
+                this.gameLoop();
             }
             
             getLaneY(lane) {
@@ -418,6 +424,10 @@
             gameLoop() {
                 this.update();
                 this.render();
+                if (this.state === 'finished' || this.state === 'cupComplete' || this.state === 'menu') {
+                    this._rafId = null;
+                    return;
+                }
                 this._rafId = requestAnimationFrame(() => this.gameLoop());
             }
             

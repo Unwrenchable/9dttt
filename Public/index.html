@@ -722,25 +722,16 @@
                     </div>
                 </a>
 
-                <!-- All other games: locked by default, require sign-in/account to unlock -->
-                <div id="addon-games-locked">
-                    <div class="game-card locked" role="listitem" data-game-id="4d-chess" style="opacity:0.6;position:relative;">
-                        <div class="game-icon">♟️</div>
-                        <h2 class="game-title">4D Chess</h2>
-                        <p class="game-description">Sign in to unlock this game and more!</p>
-                        <div class="game-meta">
-                            <span>⏱️ 20-40 min</span>
-                            <span class="badge new">STRATEGY</span>
-                        </div>
-                        <div class="lock-overlay" style="position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-size:1.2rem;z-index:10;">
-                            <span style="font-size:2rem;">🔒</span>
-                            <span>Sign in to unlock</span>
-                            <button class="add-game-btn" style="margin-top:16px;padding:8px 18px;font-size:1rem;border-radius:8px;border:none;background:#FFD700;color:#222;font-weight:bold;cursor:pointer;display:none;">Add Game</button>
-                        </div>
+                <!-- 4D Chess - now fully playable -->
+                <a href="games/4d-chess.html" class="game-card" role="listitem" data-game-id="4d-chess" data-categories="strategy,board">
+                    <div class="game-icon">♟️</div>
+                    <h2 class="game-title">4D Chess</h2>
+                    <p class="game-description">Chess across multiple timelines! Moves in one timeline affect parallel boards. The ultimate strategic chess variant.</p>
+                    <div class="game-meta">
+                        <span>⏱️ 20-40 min</span>
+                        <span class="badge new">STRATEGY</span>
                     </div>
-                    <!-- Repeat for each add-on game, or generate dynamically in future -->
-                    <!-- ...existing code for other games, but wrapped in locked card with overlay... -->
-                </div>
+                </a>
 
                 <!-- Space Debris (Asteroids-style) -->
                 <a href="games/space-debris.html" class="game-card" role="listitem" data-categories="arcade,shooter">

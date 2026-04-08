@@ -217,7 +217,12 @@ app.post('/api/auth/login', security.rateLimitMiddleware('api_auth'), async (req
     }
 });
 
-app.get('/api/auth/verify', async (req, res) => {
+// Session verification — accepts both GET and POST so the client-side
+// fetch({ method: 'POST' }) call in unified-auth.js is correctly handled.
+// Previously only GET was registered; a POST from the client would fall
+// through to a 404, causing JSON.parse to throw, and clearSession() to
+// fire on every page reload (perpetual logout bug).
+async function handleVerifyToken(req, res) {
     try {
         const token = req.headers.authorization?.replace('Bearer ', '');
         if (!token) {
@@ -234,7 +239,9 @@ app.get('/api/auth/verify', async (req, res) => {
     } catch (error) {
         res.json({ valid: false });
     }
-});
+}
+app.get('/api/auth/verify', security.rateLimitMiddleware('api_auth'), handleVerifyToken);
+app.post('/api/auth/verify', security.rateLimitMiddleware('api_auth'), handleVerifyToken);
 
 // ============================================
 // Web3 Wallet Authentication
@@ -530,13 +537,13 @@ app.get('/api/stats', async (req, res) => {
 });
 
 // Client configuration (public values only)
+// SECURITY: Never expose API keys or secrets here. infuraKey / alchemyKey are
+// server-side keys and must NOT be returned to unauthenticated clients.
 app.get('/api/config', (req, res) => {
     res.json({
         success: true,
         config: {
-            // Only expose safe, public configuration
-            infuraKey: config.INFURA_KEY,
-            alchemyKey: config.ALCHEMY_API_KEY,
+            // Only expose safe, non-secret public configuration
             environment: config.NODE_ENV,
             maintenanceMode: config.MAINTENANCE_MODE
         }
@@ -679,6 +686,7 @@ io.on('connection', (socket) => {
 
     // Authenticate socket connection
     socket.on('authenticate', async (token) => {
+        try {
         const result = auth.verifyToken(token);
         if (!result.valid) {
             socket.emit('auth_error', { error: 'Invalid token' });
@@ -719,6 +727,10 @@ io.on('connection', (socket) => {
 
         socket.emit('authenticated', { user, restrictions });
         console.log(`User authenticated: ${user.username}`);
+        } catch (error) {
+            console.error('[socket] authenticate error:', error);
+            socket.emit('auth_error', { error: 'Authentication failed. Please try again.' });
+        }
     });
 
     // Matchmaking
@@ -862,8 +874,14 @@ io.on('connection', (socket) => {
 
     // Game moves
     socket.on('make_move', async (data) => {
+        try {
         const user = connectedUsers.get(socket.id);
         if (!user) return;
+
+        if (!data || typeof data.gameId !== 'string' || data.move === undefined) {
+            socket.emit('move_error', { error: 'Invalid move data' });
+            return;
+        }
 
         const result = await gameManager.makeMove(data.gameId, user.username, data.move);
         
@@ -879,12 +897,20 @@ io.on('connection', (socket) => {
         } else {
             socket.emit('move_error', { error: result.error });
         }
+        } catch (error) {
+            console.error('[socket] make_move error:', error);
+            socket.emit('move_error', { error: 'Internal error processing move' });
+        }
     });
 
     // Forfeit game
     socket.on('forfeit_game', async (data) => {
         const user = connectedUsers.get(socket.id);
         if (!user) return;
+        if (!data || typeof data.gameId !== 'string') {
+            socket.emit('error', { error: 'Invalid forfeit data' });
+            return;
+        }
 
         const result = await gameManager.forfeitGame(data.gameId, user.username);
         
@@ -901,6 +927,10 @@ io.on('connection', (socket) => {
     socket.on('game_chat', async (data) => {
         const user = connectedUsers.get(socket.id);
         if (!user) return;
+        if (!data || typeof data.gameId !== 'string' || typeof data.message !== 'string') {
+            socket.emit('chat_error', { error: 'Invalid chat data' });
+            return;
+        }
 
         // Check if muted
         const canSend = await moderation.canSendMessage(user.username);
@@ -934,6 +964,10 @@ io.on('connection', (socket) => {
     socket.on('lobby_chat', async (data) => {
         const user = connectedUsers.get(socket.id);
         if (!user) return;
+        if (!data || typeof data.message !== 'string') {
+            socket.emit('chat_error', { error: 'Invalid message data' });
+            return;
+        }
 
         const canSend = await moderation.canSendMessage(user.username);
         if (!canSend.allowed) {
@@ -959,6 +993,10 @@ io.on('connection', (socket) => {
     socket.on('direct_message', async (data) => {
         const user = connectedUsers.get(socket.id);
         if (!user) return;
+        if (!data || typeof data.to !== 'string' || typeof data.message !== 'string') {
+            socket.emit('dm_error', { error: 'Invalid message data' });
+            return;
+        }
 
         // Check if blocked
         const blocked = await moderation.areBlocked(user.username, data.to);
@@ -1075,6 +1113,11 @@ io.on('connection', (socket) => {
 
     // Relay remote player input to the host for authoritative simulation
     socket.on('rampage_input', (data) => {
+        // Require an authenticated user before relaying any input.
+        // Without this check, any connected socket knowing a session ID
+        // could flood the host with arbitrary inputs (DoS vector).
+        const user = connectedUsers.get(socket.id);
+        if (!user) return;
         if (!data || !data.sessionId) return;
         const session = rampageSessions.get(data.sessionId);
         if (!session) return;
@@ -1156,6 +1199,10 @@ io.on('connection', (socket) => {
 // Catch-all route for SPA
 // ============================================
 
+app.use('/api', (req, res) => {
+    res.status(404).json({ success: false, error: 'API endpoint not found' });
+});
+
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'Public', 'index.html'));
 });
@@ -1182,4 +1229,25 @@ async function startServer() {
     });
 }
 
-startServer();
+startServer().catch((err) => {
+    console.error('[server] Fatal startup error:', err);
+    process.exit(1);
+});
+
+// ============================================
+// Global Process Error Handlers
+// ============================================
+
+// Catch unhandled promise rejections — prevents Node from crashing silently.
+// We log the rejection and exit so the process manager (Render) can restart clean.
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('[server] Unhandled promise rejection at:', promise, 'reason:', reason);
+    process.exit(1);
+});
+
+// Catch synchronous uncaught exceptions. After an uncaught exception the
+// process is in an undefined state; exit immediately so it can be restarted.
+process.on('uncaughtException', (err) => {
+    console.error('[server] Uncaught exception:', err);
+    process.exit(1);
+});

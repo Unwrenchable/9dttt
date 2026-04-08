@@ -270,3 +270,159 @@ document.addEventListener('mousemove', () => {
         document.body.style.cursor = 'default';
     }
 });
+
+// Desktop: auto-enter fullscreen on first user interaction (click or keydown)
+(function() {
+    const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+                     ('ontouchstart' in window) || (navigator.maxTouchPoints > 1);
+    if (isMobile) return;
+
+    let triggered = false;
+    function tryAutoFullscreen() {
+        if (triggered) return;
+        triggered = true;
+        document.removeEventListener('click', tryAutoFullscreen, true);
+        document.removeEventListener('keydown', tryAutoFullscreen, true);
+        if (window.fullscreenManager && !window.fullscreenManager.isFullscreen) {
+            window.fullscreenManager.enter().catch(function() { /* silently ignore if blocked */ });
+        }
+    }
+
+    document.addEventListener('click', tryAutoFullscreen, true);
+    document.addEventListener('keydown', tryAutoFullscreen, true);
+})();
+
+// Mobile: show a "Tap to go fullscreen" prompt on first interaction
+(function() {
+    const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+                     ('ontouchstart' in window) || (navigator.maxTouchPoints > 1);
+    if (!isMobile) return;
+
+    function showMobileFullscreenPrompt() {
+        if (document.getElementById('fsm-mobile-prompt')) return;
+
+        const overlay = document.createElement('div');
+        overlay.id = 'fsm-mobile-prompt';
+        overlay.setAttribute('role', 'button');
+        overlay.setAttribute('aria-label', 'Tap to enter fullscreen and start game');
+        overlay.style.cssText = [
+            'position:fixed', 'bottom:0', 'left:0', 'right:0',
+            'background:linear-gradient(transparent,rgba(0,0,0,0.85) 30%)',
+            'color:#fff', 'text-align:center', 'padding:24px 16px 32px',
+            'z-index:99998', 'cursor:pointer', 'pointer-events:auto',
+            'font-family:sans-serif', 'transition:opacity 0.3s ease',
+            'display:flex', 'flex-direction:column', 'align-items:center',
+            'gap:8px', 'user-select:none', '-webkit-user-select:none'
+        ].join(';');
+
+        overlay.innerHTML =
+            '<span style="font-size:2rem;">⛶</span>' +
+            '<span style="font-size:1.1rem;font-weight:bold;">Tap for Fullscreen</span>' +
+            '<span style="font-size:0.85rem;opacity:0.75;">Best experience in fullscreen mode</span>';
+
+        function dismiss() {
+            overlay.style.opacity = '0';
+            setTimeout(() => overlay.remove(), 350);
+            if (window.fullscreenManager) {
+                window.fullscreenManager.enter().catch((err) => {
+                    console.warn('Fullscreen request failed:', err && err.message || err);
+                });
+            }
+        }
+
+        overlay.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            dismiss();
+        }, { passive: false });
+        overlay.addEventListener('click', dismiss);
+
+        // Auto-dismiss after 8 seconds
+        setTimeout(() => {
+            if (overlay.parentNode) {
+                overlay.style.opacity = '0';
+                setTimeout(() => overlay.remove(), 350);
+            }
+        }, 8000);
+
+        document.body.appendChild(overlay);
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', showMobileFullscreenPrompt);
+    } else {
+        showMobileFullscreenPrompt();
+    }
+})();
+
+// Mobile: "Rotate Your Device" prompt for landscape-first games
+// Auto-shown when a portrait-mode device plays a landscape game.
+// Games can opt-in explicitly via <body data-orientation="landscape">.
+// Canvas-based games are auto-detected from their canvas aspect ratio.
+(function() {
+    const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+                     ('ontouchstart' in window) || (navigator.maxTouchPoints > 1);
+    if (!isMobile) return;
+
+    function prefersLandscape() {
+        // Explicit opt-in on the body element
+        if (document.body && document.body.dataset.orientation === 'landscape') return true;
+
+        // Auto-detect from canvas dimensions (aspect ratio > 1.15 = landscape game)
+        const canvases = document.querySelectorAll('canvas');
+        for (const c of canvases) {
+            if (c.width && c.height && (c.width / c.height) > 1.15) return true;
+        }
+        return false;
+    }
+
+    function isPortrait() {
+        return window.innerHeight > window.innerWidth;
+    }
+
+    function showRotatePrompt() {
+        if (document.getElementById('fsm-rotate-prompt')) return;
+        const el = document.createElement('div');
+        el.id = 'fsm-rotate-prompt';
+        el.setAttribute('role', 'alert');
+        el.setAttribute('aria-live', 'polite');
+        el.innerHTML =
+            '<span class="fsm-rotate-icon">&#x1F4F1;</span>' +
+            '<h2>Rotate Your Device</h2>' +
+            '<p>This game plays best in landscape mode</p>';
+        document.body.appendChild(el);
+    }
+
+    function hideRotatePrompt() {
+        const el = document.getElementById('fsm-rotate-prompt');
+        if (el) el.remove();
+    }
+
+    function checkOrientation() {
+        if (!prefersLandscape()) {
+            hideRotatePrompt();
+            return;
+        }
+        if (isPortrait()) {
+            showRotatePrompt();
+        } else {
+            hideRotatePrompt();
+        }
+    }
+
+    function init() {
+        // Delay slightly so canvas dimensions are available
+        const ORIENT_DELAY_MS = 400;
+        setTimeout(checkOrientation, ORIENT_DELAY_MS);
+        window.addEventListener('orientationchange', () => setTimeout(checkOrientation, ORIENT_DELAY_MS));
+        window.addEventListener('resize', checkOrientation);
+        // Re-check when fullscreen changes (orientation may change with it)
+        window.addEventListener('fullscreenEntered', checkOrientation);
+        window.addEventListener('fullscreenExited', checkOrientation);
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();

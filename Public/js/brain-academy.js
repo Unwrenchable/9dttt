@@ -377,7 +377,9 @@ class BrainAcademy {
         const animate = () => {
             draw();
             if (matched.length < cards.length) {
-                requestAnimationFrame(animate);
+                academy._matchRafId = requestAnimationFrame(animate);
+            } else {
+                academy._matchRafId = null;
             }
         };
         animate();
@@ -426,6 +428,7 @@ function loadGame(gameType) {
 function backToMenu() {
     // Clean up RAF loop and intervals from any running mini-game
     if (academy && academy._rafId) { cancelAnimationFrame(academy._rafId); academy._rafId = null; }
+    if (academy && academy._matchRafId) { cancelAnimationFrame(academy._matchRafId); academy._matchRafId = null; }
     if (academy && academy._spawnInterval) { clearInterval(academy._spawnInterval); academy._spawnInterval = null; }
     if (academy && academy._wordInterval) { clearInterval(academy._wordInterval); academy._wordInterval = null; }
     // Clean up the Typing Master keydown listener if it is still attached

@@ -188,6 +188,16 @@
     </div>
     
     <script>
+        // HTML escape helper — prevents XSS when rendering server data into innerHTML
+        function escapeHtml(str) {
+            return String(str == null ? '' : str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
         // Fetch dashboard data
         async function loadDashboardData() {
             try {
@@ -211,9 +221,9 @@
                     tbody.innerHTML = leaderboard.global.map((entry, index) => `
                         <tr>
                             <td>${index + 1}</td>
-                            <td>${entry.username}</td>
-                            <td>${entry.gameId}</td>
-                            <td><strong>${entry.score}</strong></td>
+                            <td>${escapeHtml(entry.username)}</td>
+                            <td>${escapeHtml(entry.gameId)}</td>
+                            <td><strong>${Number(entry.score)}</strong></td>
                             <td>${new Date(entry.timestamp).toLocaleDateString()}</td>
                         </tr>
                     `).join('');
@@ -268,7 +278,8 @@
         loadDashboardData();
         
         // Auto-refresh every 30 seconds
-        setInterval(loadDashboardData, 30000);
+        const refreshInterval = setInterval(loadDashboardData, 30000);
+        window.addEventListener('beforeunload', () => clearInterval(refreshInterval));
     </script>
 </body>
 </html>

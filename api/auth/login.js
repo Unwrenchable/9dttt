@@ -45,7 +45,18 @@ function clearAttempts(username) {
 
 module.exports = async (req, res) => {
     res.setHeader('Content-Type', 'application/json');
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    // Restrict CORS to known origins — wildcard removed to prevent
+    // cross-origin credential theft from attacker-controlled pages.
+    const origin = req.headers.origin || '';
+    const allowedOrigins = [
+        'https://d9ttt.com', 'https://www.d9ttt.com',
+        'https://9dttt.vercel.app', 'https://ninedttt.onrender.com',
+        'http://localhost:3000', 'http://localhost:5000', 'http://127.0.0.1:3000'
+    ];
+    if (allowedOrigins.includes(origin)) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
+    }
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     
@@ -109,7 +120,7 @@ module.exports = async (req, res) => {
         const token = jwt.sign(
             { id: user.id, username: user.username },
             JWT_SECRET,
-            { expiresIn: '7d' }
+            { expiresIn: '7d', algorithm: 'HS256' }
         );
         
         // Remove password hash from response

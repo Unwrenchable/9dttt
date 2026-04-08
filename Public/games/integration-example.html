@@ -82,6 +82,7 @@
                 this.ctx = this.canvas.getContext('2d');
                 this.score = 0;
                 this.isRunning = false;
+                this._rafId = null;
                 this.init();
             }
             
@@ -111,11 +112,12 @@
                 this.ctx.font = '16px Arial';
                 this.ctx.fillText('Press SPACE to add points, ESC to end', this.canvas.width/2, this.canvas.height/2 + 40);
                 
-                requestAnimationFrame(() => this.gameLoop());
+                this._rafId = requestAnimationFrame(() => this.gameLoop());
             }
             
             async endGame() {
                 this.isRunning = false;
+                if (this._rafId) { cancelAnimationFrame(this._rafId); this._rafId = null; }
                 
                 // THIS IS THE KEY INTEGRATION!
                 // Submit score with metadata for token calculation

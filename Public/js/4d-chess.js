@@ -49,6 +49,7 @@ class FourDChess {
         this.onlineMode = false;
         this.gameId = null;
         this.playerColor = null;
+        this._timelineNavSetup = false;
     }
 
     /**

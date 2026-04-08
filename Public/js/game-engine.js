@@ -20,14 +20,20 @@
     // Prevent arrow keys and space from scrolling the page when any game is active
     
     let gameActive = false;
-    
+
+    // All keys that browsers use to scroll the page
+    const SCROLL_KEYS = new Set([
+        'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
+        'Space', 'PageUp', 'PageDown', 'Home', 'End'
+    ]);
+
     function preventGameKeyScroll(e) {
         if (!gameActive) return;
-        
-        const scrollKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'];
-        if (scrollKeys.includes(e.code)) {
-            e.preventDefault();
-        }
+        if (!SCROLL_KEYS.has(e.code)) return;
+        // Don't block input inside form elements
+        const el = document.activeElement;
+        if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT')) return;
+        e.preventDefault();
     }
     
     // Add global listener for scroll prevention
@@ -36,14 +42,30 @@
     // Function to enable/disable scroll prevention
     window.setGameActive = function(active) {
         gameActive = active;
+        if (active) {
+            document.documentElement.style.overflow = 'hidden';
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.documentElement.style.overflow = '';
+            document.body.style.overflow = '';
+        }
     };
     
     // Auto-detect game pages and enable scroll prevention
     document.addEventListener('DOMContentLoaded', function() {
-        // If there's a game canvas, enable scroll prevention
-        const gameCanvas = document.getElementById('game-canvas');
+        // Enable on any page with a known game canvas id, or a canvas inside a
+        // recognised game container. Avoids false-positives from charts/analytics
+        // canvases that may appear on non-game pages.
+        const gameCanvas = document.getElementById('game-canvas') ||
+                           document.getElementById('gameCanvas') ||
+                           document.querySelector(
+                               '#game-container canvas, .game-container canvas, ' +
+                               '.game-canvas-wrapper canvas, main canvas'
+                           );
         if (gameCanvas) {
             gameActive = true;
+            document.documentElement.style.overflow = 'hidden';
+            document.body.style.overflow = 'hidden';
         }
     });
 
