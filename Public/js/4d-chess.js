@@ -212,6 +212,8 @@ class FourDChess {
         // Must play on current timeline (unless timeline jumping)
         if (timeline !== this.currentTimeline) {
             this.showNotification('Play on the active timeline!');
+            // Switch to the clicked timeline to help the player
+            this.switchTimeline(timeline);
             return;
         }
 

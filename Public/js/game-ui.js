@@ -15,20 +15,25 @@ class GameUI {
      * Initialize UI components
      */
     async init() {
-        // Auth modal creation removed — sign-in is handled exclusively by auth-ui.js
+        // DO NOT create auth modal - unified-auth.js and auth-ui.js handle all authentication
+        // This prevents duplicate login popups
         this.createProfileModal();
         this.createMultiplayerModal();
         this.createHeaderUI();
-        
-        // Initialize auth client (unified auth provides compatibility layer)
-        if (window.authClient) {
-            await window.authClient.init();
+
+        // Use unified auth system if available, fall back to legacy authClient
+        if (window.unifiedAuth) {
+            await window.unifiedAuth.init();
             this.updateAuthUI();
             // Listen for auth state changes
+            window.unifiedAuth.onAuthStateChanged(() => this.updateAuthUI());
+        } else if (window.authClient) {
+            await window.authClient.init();
+            this.updateAuthUI();
             window.authClient.addListener(() => this.updateAuthUI());
         }
-        
-        // Check URL params for auth callbacks (legacy)
+
+        // Check URL params for auth callbacks (legacy support)
         this.handleAuthCallback();
     }
 
@@ -89,6 +94,15 @@ class GameUI {
         // Event listeners - signin button now in bottom right corner (auth-ui.js)
         document.getElementById('profile-btn')?.addEventListener('click', () => this.showProfileModal());
         document.getElementById('logout-btn')?.addEventListener('click', () => this.handleLogout());
+    }
+
+    /**
+     * Create auth modal - REMOVED
+     * Auth modal is now handled by auth-ui.js to prevent duplicate login popups
+     * All authentication is managed by unified-auth.js and auth-ui.js
+     */
+    createAuthModal() {
+        // Intentionally empty — auth-ui.js owns the auth modal
     }
 
     /**
@@ -842,7 +856,8 @@ class GameUI {
      * Update auth UI based on login state
      */
     updateAuthUI() {
-        const user = window.authClient.user;
+        const user = (window.authClient && window.authClient.user) ||
+                     (window.unifiedAuth && window.unifiedAuth.user);
         const authButtons = document.getElementById('auth-buttons');
         const userInfo = document.getElementById('user-info');
         

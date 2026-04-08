@@ -49,12 +49,24 @@ class GamepadManager {
     init() {
         window.addEventListener('gamepadconnected', (e) => this.onGamepadConnected(e));
         window.addEventListener('gamepaddisconnected', (e) => this.onGamepadDisconnected(e));
-        
+
         // Check for already connected gamepads and start polling immediately
         // (some browsers don't fire gamepadconnected for pre-connected devices)
-        this.scanGamepads();
+        const found = this.scanGamepads();
         if (!this.polling) {
             this.startPolling();
+        }
+
+        // Show helpful message if no gamepad detected initially
+        if (!found) {
+            setTimeout(() => {
+                if (Object.keys(this.gamepads).length === 0) {
+                    console.log('🎮 No gamepad detected. Connect a USB/Bluetooth controller to play!');
+                    this.emit('no-gamepad-detected', {
+                        message: 'No gamepad detected. You can still play with keyboard/touch controls, or connect a controller.'
+                    });
+                }
+            }, 1000);
         }
     }
 
