@@ -21,12 +21,27 @@ class UltimateTicTacToe {
         this.gameId = null;
         this.playerSymbol = null; // 'X' or 'O' - which symbol this player is
         this.opponentInfo = null;
+
+        // 3D properties
+        this.is3DMode = false;
+        this.renderer3D = null;
     }
 
     /**
      * Initialize the game board
      */
     initGame() {
+        if (this.is3DMode) {
+            this.init3DGame();
+        } else {
+            this.init2DGame();
+        }
+    }
+
+    /**
+     * Initialize 2D game board
+     */
+    init2DGame() {
         const ultimateBoard = document.getElementById('ultimate-board');
         ultimateBoard.innerHTML = '';
 
@@ -35,6 +50,17 @@ class UltimateTicTacToe {
             ultimateBoard.appendChild(smallBoard);
         }
 
+        this.updateBoard();
+    }
+
+    /**
+     * Initialize 3D game board
+     */
+    async init3DGame() {
+        if (!this.renderer3D) {
+            this.renderer3D = new UltimateTicTacToe3D(this);
+        }
+        await this.renderer3D.init();
         this.updateBoard();
     }
 
@@ -137,6 +163,11 @@ class UltimateTicTacToe {
             const movesInSection = this.boards[boardIndex].cells.filter(cell => cell !== null).length;
             this.scores[boardWinner] += movesInSection;
             this.announceToScreenReader(`Board ${boardIndex + 1} won by ${boardWinner}! +${movesInSection} points!`);
+
+            // 3D win effect
+            if (this.is3DMode && this.renderer3D) {
+                this.renderer3D.showWinEffect(boardIndex);
+            }
         } else if (this.boards[boardIndex].cells.every(cell => cell !== null)) {
             this.boards[boardIndex].winner = 'draw';
             this.announceToScreenReader(`Board ${boardIndex + 1} is a draw!`);
@@ -146,6 +177,11 @@ class UltimateTicTacToe {
         const targetBoard = cellIndex;
         if (this.boards[targetBoard].winner === null) {
             this.activeBoard = targetBoard;
+            // 3D camera focus and send effect
+            if (this.is3DMode && this.renderer3D) {
+                this.renderer3D.showSendToBoardEffect(boardIndex, targetBoard);
+                setTimeout(() => this.renderer3D.focusOnBoard(targetBoard), 500);
+            }
         } else {
             // If target board is complete, player can choose any available board
             this.activeBoard = null;
@@ -216,6 +252,17 @@ class UltimateTicTacToe {
      * Update the board display
      */
     updateBoard() {
+        if (this.is3DMode && this.renderer3D) {
+            this.renderer3D.updateBoard();
+        } else {
+            this.update2DBoard();
+        }
+    }
+
+    /**
+     * Update the 2D board display
+     */
+    update2DBoard() {
         // Update cells
         this.boards.forEach((board, boardIndex) => {
             const boardElement = document.querySelector(`[data-board="${boardIndex}"].small-board`);
@@ -292,6 +339,23 @@ class UltimateTicTacToe {
         // Update scores
         document.getElementById('score-x').textContent = this.scores.X;
         document.getElementById('score-o').textContent = this.scores.O;
+    }
+
+    /**
+     * Toggle between 2D and 3D modes
+     */
+    async toggle3DMode() {
+        this.is3DMode = !this.is3DMode;
+        const toggleBtn = document.getElementById('toggle-3d-btn');
+
+        if (this.is3DMode) {
+            toggleBtn.textContent = 'Switch to 2D';
+            await this.init3DGame();
+            this.renderer3D.show3D();
+        } else {
+            toggleBtn.textContent = 'Switch to 3D';
+            this.renderer3D.show2D();
+        }
     }
 
     /**
@@ -616,6 +680,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Event listeners
     document.getElementById('new-game-btn').addEventListener('click', () => game.resetGame());
     document.getElementById('modal-new-game-btn').addEventListener('click', () => game.resetGame());
+    
+    document.getElementById('toggle-3d-btn').addEventListener('click', async () => {
+        await game.toggle3DMode();
+    });
     
     document.getElementById('toggle-instructions-btn').addEventListener('click', () => {
         const instructions = document.getElementById('instructions');

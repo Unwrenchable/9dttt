@@ -495,6 +495,37 @@ app.get('/api/leaderboard', async (req, res) => {
     }
 });
 
+// CAPS Token routes - Atomic Fizz Reward Layer
+app.get('/api/caps/balance', authenticateToken, async (req, res) => {
+    try {
+        const balance = await auth.getCapsBalance(req.user.username);
+        if (!balance) {
+            return res.status(404).json({ success: false, error: 'User not found' });
+        }
+        res.json({ success: true, balance });
+    } catch (error) {
+        res.status(500).json({ success: false, error: 'Server error' });
+    }
+});
+
+app.post('/api/caps/redeem', authenticateToken, async (req, res) => {
+    try {
+        const { amount } = req.body;
+        if (!amount || typeof amount !== 'number' || amount <= 0) {
+            return res.status(400).json({ success: false, error: 'Valid amount required' });
+        }
+
+        const result = await auth.redeemCaps(req.user.username, amount);
+        if (!result.success) {
+            return res.status(400).json({ success: false, error: result.error });
+        }
+
+        res.json({ success: true, result });
+    } catch (error) {
+        res.status(500).json({ success: false, error: 'Server error' });
+    }
+});
+
 // Game routes
 app.get('/api/games/active', authenticateToken, async (req, res) => {
     try {
@@ -889,6 +920,32 @@ io.on('connection', (socket) => {
             io.to(`game:${data.gameId}`).emit('game_update', result.game);
             
             if (result.game.status === 'finished') {
+                // Award CAPS for game completion
+                const game = result.game;
+                const winner = game.winner;
+                
+                if (winner && winner !== 'draw') {
+                    // Award CAPS to winner
+                    const winnerUsername = game.players[winner].username;
+                    const capsAmount = game.type === 'ultimate-tictactoe' ? 50 : 25; // More CAPS for complex games
+                    await auth.awardCaps(winnerUsername, capsAmount, `win_${game.type}`);
+                    
+                    // Award smaller amount to loser for participation
+                    const loserSymbol = winner === 'X' ? 'O' : 'X';
+                    if (game.players[loserSymbol]) {
+                        const loserUsername = game.players[loserSymbol].username;
+                        await auth.awardCaps(loserUsername, Math.floor(capsAmount / 4), `participation_${game.type}`);
+                    }
+                } else if (winner === 'draw') {
+                    // Award participation CAPS to both players in a draw
+                    const drawCaps = game.type === 'ultimate-tictactoe' ? 15 : 10;
+                    for (const [symbol, player] of Object.entries(game.players)) {
+                        if (player && player.username) {
+                            await auth.awardCaps(player.username, drawCaps, `draw_${game.type}`);
+                        }
+                    }
+                }
+
                 io.to(`game:${data.gameId}`).emit('game_ended', {
                     game: result.game,
                     winner: result.game.winner
@@ -915,6 +972,19 @@ io.on('connection', (socket) => {
         const result = await gameManager.forfeitGame(data.gameId, user.username);
         
         if (result.success) {
+            // Award CAPS for forfeit - winner gets full amount, forfeiter gets small participation
+            const game = result.game;
+            const winner = game.winner;
+            
+            if (winner && winner !== 'draw') {
+                const winnerUsername = game.players[winner].username;
+                const capsAmount = game.type === 'ultimate-tictactoe' ? 40 : 20; // Slightly less for forfeit
+                await auth.awardCaps(winnerUsername, capsAmount, `forfeit_win_${game.type}`);
+                
+                // Award very small participation to forfeiter
+                await auth.awardCaps(user.username, Math.floor(capsAmount / 10), `forfeit_participation_${game.type}`);
+            }
+
             io.to(`game:${data.gameId}`).emit('game_ended', {
                 game: result.game,
                 winner: result.game.winner,

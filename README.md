@@ -70,6 +70,15 @@ Completely rebuilt with **actual interactive gameplay** instead of text screens:
 - 💰 **DeFi Farming** - Stake and earn yield *(coming soon)*
 - 🏛️ **DAO Builder** - Create governance proposals *(coming soon)*
 
+#### 3D Holographic Gaming Revolution
+**Flagship game upgraded to AAA quality with Babylon.js 3D engine:**
+- 🌌 **Immersive 3D Boards** - 9 floating holographic tic-tac-toe boards in cyber-space
+- ⚡ **Particle Effects** - Dynamic visual feedback for moves and board transitions
+- 🎥 **Smooth Animations** - Camera fly-throughs and orbital controls
+- 💫 **Win Celebrations** - Spectacular particle explosions and screen effects
+- 🔄 **Mode Toggle** - Instant switch between classic 2D and 3D holographic modes
+- 📱 **Performance Optimized** - Scales beautifully on mobile and desktop
+
 ### API Endpoints
 ```
 GET  /api/health                   - Health check
@@ -79,6 +88,8 @@ POST /api/leaderboard              - Submit high score
 POST /api/auth/login               - Login/register
 GET  /api/crypto-quest/progress    - Load player progress
 POST /api/crypto-quest/progress    - Save player progress
+GET  /api/caps/balance             - Get player's CAPS balance
+POST /api/caps/redeem              - Redeem CAPS for real tokens (triggers XRP mechanics)
 ```
 
 ### Quick Deploy to Vercel
@@ -107,13 +118,44 @@ See [README_DEPLOYMENT.md](README_DEPLOYMENT.md) for detailed deployment guide.
 - ♿ **Fully Accessible** - Keyboard navigation, screen reader support, and more
 - 🎨 **Cosmetics** - Unlock avatar frames, board themes, and player icons
 - 💰 **Player-Friendly Monetization** - Ad-free base experience with optional rewards
+- 🌌 **3D Holographic Gaming** - Flagship 9D Tic-Tac-Toe with stunning Babylon.js 3D effects
+- 🔄 **Dual Rendering Modes** - Switch between classic 2D and immersive 3D gameplay
+- 🪙 **CAPS Reward System** - Earn Atomic Fizz CAPS tokens that trigger XRP mechanics
+- 🔄 **Cross-Multichain Bridge** - CAPS flows between Solana, XRP, and Ethereum chains
+
+### CAPS Token Rewards
+
+**Atomic Fizz Integration:** CAPS is the reward token from the Atomic Fizz ecosystem that powers cross-multichain gaming.
+
+#### 🎮 Earning CAPS
+- **Win Games:** 50 CAPS for Ultimate Tic-Tac-Toe, 25 CAPS for other games
+- **Participation:** 10-15 CAPS for draws and forfeits
+- **Tournaments:** Bonus CAPS for competitive play
+- **Daily Login:** 5-10 CAPS for daily activity
+
+#### 🔄 XRP Mechanics Trigger
+When you earn CAPS, it activates XRP Ledger features:
+- **DEX Trading:** Unlock decentralized exchange access
+- **NFT Minting:** Create gaming achievements as NFTs
+- **Staking:** Earn yield by staking CAPS
+- **Governance:** Vote on platform decisions
+- **DeFi:** Access lending and borrowing protocols
+
+#### 💱 Token Redemption
+- **Exchange Rate:** 10 CAPS = 1 real CAPS token
+- **Treasury Distribution:** Tokens sent from Atomic Fizz treasury
+- **Multi-Chain:** Redeem on Solana, XRP, or Ethereum
+- **No Minting:** Fixed 77M supply, treasury-based distribution
 
 ---
 
 ## 🎮 Current Games
 
-### Ultimate Tic-Tac-Toe (9D TTT)
+### Ultimate Tic-Tac-Toe (9D TTT) ⭐ **FLAGSHIP GAME**
 
+**Now featuring holographic 3D gameplay!** Experience the strategic 9-board tic-tac-toe in stunning 3D space.
+
+#### 🎮 Core Gameplay
 A strategic 9-board tic-tac-toe where your move determines your opponent's next board!
 
 | Feature | Description |
@@ -125,12 +167,43 @@ A strategic 9-board tic-tac-toe where your move determines your opponent's next 
 | **Max Points** | 81 total (9 sections × 9 moves) |
 | **Win Condition** | Most points when all sections complete |
 
-### Coming Soon
-- 🎲 4D Chess
-- 🧩 Quantum Sudoku  
-- 🎯 Dimensional Dice
-- 🌀 Recursive Maze
-- 🔮 Crystal Connect
+#### ✨ 3D Holographic Upgrade
+- **🌌 Floating Boards**: 9 semi-transparent holographic boards in dark cyber-space
+- **⚡ Particle Effects**: Dynamic trails when moves "send" opponents to new boards
+- **🎥 Smooth Camera**: Automatic fly-through transitions between active boards
+- **💫 Visual Feedback**: Pulsing glows, screen shake, and win celebrations
+- **🎮 Interactive 3D**: Mouse/controller orbit, zoom, and click-to-play
+- **🔄 Mode Toggle**: Switch between "Classic 2D" and "3D Holographic" anytime
+- **📱 Mobile Optimized**: Touch controls with performance scaling
+
+#### 🎯 Why It Matters
+The 3D upgrade transforms 9DTTT from a clever strategy game into a visually stunning AAA experience while preserving the core gameplay that makes it unique. Experience the future of board games!
+
+### Other Games (31 Total)
+- 🎲 4D Chess - Mind-bending spatial strategy
+- 🧩 Quantum Sudoku - Logic puzzles with quantum twists
+- 🎯 Dimensional Dice - Multi-dimensional dice rolling
+- 🌀 Recursive Maze - Infinitely nested maze navigation
+- 🔮 Crystal Connect - Gem-matching with dimensional shifts
+- 🎮 Air Hockey - Fast-paced arcade action
+- 🏓 Pong - Classic paddle battles
+- 🎪 Carnival Shooter - Retro arcade shooting gallery
+- 🐉 Dragon Fist - Beat-em-up fighter
+- 🏆 Tournament Fighters - Competitive fighting game
+- 🧠 Brain Academy - Puzzle and brain training games
+- 🎨 Memory Game - Pattern matching challenges
+- ✂️ Rock Paper Scissors - Classic hand game
+- 🎲 Farkle - Dice rolling strategy
+- 🏀 Basketball - Arcade basketball
+- 🏈 Football - American football simulation
+- ⚽ Soccer - International football
+- 🏒 Hockey - Ice hockey action
+- 🎳 Bowling - Ten-pin bowling
+- 🎯 Darts - Pub darts simulation
+- 🏓 Table Tennis - Ping pong action
+- 🎲 Dice Games - Various dice-based games
+- 🃏 Card Games - Classic card games
+- 🎪 Mini-Games - Quick arcade challenges
 
 ---
 

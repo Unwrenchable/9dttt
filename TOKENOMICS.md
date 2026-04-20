@@ -1,14 +1,15 @@
-# FIZZ Token Tokenomics - Fixed Supply Treasury Model
+# CAPS Token Tokenomics - Atomic Fizz Reward Layer
 
 ## 🪙 Token Overview
 
-**Token Name**: FIZZ Token (Atomic Fizz Caps)  
-**Total Supply**: 77,000,000 FIZZ (FIXED - pre-minted at launch)  
+**Token Name**: CAPS Token (Atomic Fizz Caps)  
+**Total Supply**: 77,000,000 CAPS (FIXED - pre-minted at launch)  
 **Primary Chain**: Solana (SPL Token - ALREADY EXISTS on testnet)  
 **Secondary Chain**: XRP Ledger (This repo - 9dttt.com)  
+**Tertiary Chain**: Ethereum (via bridge)  
 **Decimals**: 6  
 **Distribution Model**: Treasury-Based (NO MINTING)  
-**Additional Chains**: Ethereum (via bridge)
+**Reward Layer**: Game tokens trigger XRP mechanics through CAPS
 
 ### Multi-Chain Deployment Status
 
@@ -21,6 +22,7 @@
 - 🔄 Ready for deployment (this repo)
 - 🔄 Gaming rewards distribution
 - 🔄 Bridge integration with Solana
+- 🔄 **CAPS triggers XRP mechanics**
 
 **Ethereum (Tertiary):**
 - ⏳ Future expansion
@@ -30,14 +32,14 @@
 ## 🏦 Treasury Distribution Model
 
 ### Core Principle
-**All 77 million FIZZ tokens are pre-minted at launch and held in a treasury wallet.**
+**All 77 million CAPS tokens are pre-minted at launch and held in a treasury wallet.**
 
 NO additional tokens will EVER be created. The treasury DISTRIBUTES tokens to players - it does NOT mint new ones.
 
 ### How It Works
 
 ```
-Total Supply = 77,000,000 FIZZ (fixed forever)
+Total Supply = 77,000,000 CAPS (fixed forever)
 Treasury Wallet = Holds all tokens
 Distribution = Treasury SENDS tokens to players
 ```
@@ -45,31 +47,32 @@ Distribution = Treasury SENDS tokens to players
 **NOT burn-and-mint!** Instead:
 1. **Treasury Holds**: All tokens pre-minted and secured
 2. **Players Earn**: In-game rewards (virtual CAPS)
-3. **Redemption**: Players claim real FIZZ from treasury
+3. **Redemption**: Players claim real CAPS from treasury
 4. **Multi-Chain**: Treasury distributes on each chain
 
 ---
 
 ## 📊 Initial Distribution Strategy
 
-### Total Supply: 77,000,000 FIZZ (Fixed)
+### Total Supply: 77,000,000 CAPS (Fixed)
 
 **Cross-Chain Allocation:**
 
 ```
-Solana (Primary):            50,000,000 FIZZ (65%)
+Solana (Primary):            50,000,000 CAPS (65%)
 ├─ Already deployed on testnet
 ├─ Managed by atomicfizzcaps.xyz
 ├─ Main treasury and reserves
-└─ DeFi and NFT liquidity
+├─ DeFi and NFT liquidity
 
-XRP Ledger (Secondary):      20,000,000 FIZZ (26%)
+XRP Ledger (Secondary):      20,000,000 CAPS (26%)
 ├─ 9dttt.com gaming rewards
 ├─ XRP DEX liquidity
 ├─ Cross-chain bridge reserve
+├─ **CAPS triggers XRP mechanics**
 └─ Community distributions
 
-Ethereum (Tertiary):          7,000,000 FIZZ (9%)
+Ethereum (Tertiary):          7,000,000 CAPS (9%)
 ├─ CEX listings (future)
 ├─ Ethereum DeFi access
 └─ Institutional integration
@@ -78,35 +81,35 @@ Ethereum (Tertiary):          7,000,000 FIZZ (9%)
 **By Function:**
 
 ```
-Treasury Reserve:      30,800,000 FIZZ (40%)
+Treasury Reserve:      30,800,000 CAPS (40%)
 ├─ Gaming Rewards Pool
 ├─ Airdrop Campaigns
 ├─ Community Events
 └─ Future Distribution
 
-Gaming Rewards:        15,400,000 FIZZ (20%)
+Gaming Rewards:        15,400,000 CAPS (20%)
 ├─ 9dttt.com games (XRP layer)
 ├─ Vault 77 (Solana layer)
 ├─ Cross-game achievements
 └─ Tournament prizes
 
-Liquidity Pools:       11,550,000 FIZZ (15%)
-├─ Solana DEX: 5,000,000 FIZZ
-├─ XRP DEX: 4,000,000 FIZZ
-├─ Ethereum DEX: 2,000,000 FIZZ
-└─ Market making: 550,000 FIZZ
+Liquidity Pools:       11,550,000 CAPS (15%)
+├─ Solana DEX: 5,000,000 CAPS
+├─ XRP DEX: 4,000,000 CAPS
+├─ Ethereum DEX: 2,000,000 CAPS
+└─ Market making: 550,000 CAPS
 
-Community/Marketing:    7,700,000 FIZZ (10%)
+Community/Marketing:    7,700,000 CAPS (10%)
 ├─ Airdrops
 ├─ Promotions
 └─ Partnerships
 
-Team & Development:     7,700,000 FIZZ (10%)
+Team & Development:     7,700,000 CAPS (10%)
 ├─ Core team (vested)
 ├─ Advisors
 └─ Development fund
 
-Early Supporters:       3,850,000 FIZZ (5%)
+Early Supporters:       3,850,000 CAPS (5%)
 ├─ Beta testers
 ├─ Early backers
 └─ Initial liquidity
@@ -135,16 +138,16 @@ Early Supporters:       3,850,000 FIZZ (5%)
 player:wallet:profile → { caps: 5000, ... }
 ```
 
-### 2. REAL FIZZ TOKENS (Blockchain Assets)
+### 2. REAL CAPS TOKENS (Blockchain Assets)
 
 **What they are:**
-- Actual SPL tokens on Solana
-- Real cryptocurrency
+- Actual SPL/XRP tokens
 - Blockchain verified
-- Can be traded/sold
+- Can be traded/sold/transfered
+- **Triggers XRP mechanics when earned**
 
 **How players get them:**
-- Redeem in-game CAPS for FIZZ
+- Redeem in-game CAPS for real CAPS
 - Treasury sends tokens to player wallet
 - Airdrop campaigns
 - Special events
@@ -152,8 +155,8 @@ player:wallet:profile → { caps: 5000, ... }
 **Redemption example:**
 ```javascript
 // Player has 1000 in-game CAPS
-// Redeems for FIZZ tokens
-Treasury sends: 100 FIZZ → Player wallet
+// Redeems for CAPS tokens
+Treasury sends: 100 CAPS → Player wallet
 In-game CAPS: 1000 → 0 (consumed)
 ```
 
@@ -163,18 +166,18 @@ In-game CAPS: 1000 → 0 (consumed)
 
 ### Lock-and-Unlock Bridge (NOT Burn-and-Mint!)
 
-**XRP Treasury:** Holds X FIZZ  
-**Solana Treasury:** Holds Y FIZZ  
-**Ethereum Treasury:** Holds Z FIZZ  
+**XRP Treasury:** Holds X CAPS  
+**Solana Treasury:** Holds Y CAPS  
+**Ethereum Treasury:** Holds Z CAPS  
 
-**Total:** X + Y + Z = 77,000,000 FIZZ ✅
+**Total:** X + Y + Z = 77,000,000 CAPS ✅
 
 ### Bridge Operations
 
-**User bridges 100 FIZZ from Solana to Ethereum:**
+**User bridges 100 CAPS from Solana to Ethereum:**
 
 1. **Lock** on Solana:
-   - User sends 100 FIZZ to Solana treasury
+   - User sends 100 CAPS to Solana treasury
    - Tokens LOCKED (not burned)
    - Solana treasury: Y + 100
 
@@ -194,14 +197,59 @@ Initial State:
 ├─ XRP Treasury:      30,800,000 FIZZ
 ├─ Solana Treasury:   30,800,000 FIZZ
 ├─ Ethereum Treasury: 15,400,000 FIZZ
-└─ Total:             77,000,000 FIZZ ✅
+└─ Total:             77,000,000 CAPS ✅
 
 User bridges 5M from Solana to XRP:
-├─ XRP Treasury:      35,800,000 FIZZ (+5M)
-├─ Solana Treasury:   25,800,000 FIZZ (-5M)
-├─ Ethereum Treasury: 15,400,000 FIZZ (unchanged)
-└─ Total:             77,000,000 FIZZ ✅
+├─ XRP Treasury:      35,800,000 CAPS (+5M)
+├─ Solana Treasury:   25,800,000 CAPS (-5M)
+├─ Ethereum Treasury: 15,400,000 CAPS (unchanged)
+└─ Total:             77,000,000 CAPS ✅
 ```
+
+---
+
+## 🎮 CAPS Reward Layer - XRP Mechanics Trigger
+
+### Atomic Fizz Cross-Multichain Integration
+
+**CAPS as the Reward Token Layer:**
+- **Primary Reward Token**: All game rewards distributed as CAPS
+- **XRP Mechanics Trigger**: CAPS earnings activate XRP Ledger features
+- **Multichain Bridge**: CAPS flows between Solana, XRP, and Ethereum
+- **Atomic Fizz Engine**: Cross-chain game mechanics powered by CAPS
+
+### How CAPS Triggers XRP Mechanics
+
+```
+Game Reward → Earn CAPS → XRP Ledger Activation
+     ↓              ↓              ↓
+  Win Game    +100 CAPS     DEX Trading Unlocked
+Complete Quest +50 CAPS     NFT Minting Enabled
+Daily Login   +10 CAPS     Staking Opportunities
+Tournament    +500 CAPS    Governance Voting
+```
+
+### XRP Mechanics Activated by CAPS
+
+**Trading & DEX:**
+- CAPS unlocks XRP DEX access
+- Cross-chain swaps enabled
+- Automated market making
+
+**NFT & Digital Assets:**
+- CAPS enables NFT minting on XRP
+- Gaming achievements as NFTs
+- Collectible game assets
+
+**Staking & Governance:**
+- CAPS staking for rewards
+- DAO voting rights
+- Protocol governance
+
+**DeFi Integration:**
+- Lending protocols
+- Yield farming
+- Cross-chain liquidity
 
 ---
 
@@ -210,9 +258,9 @@ User bridges 5M from Solana to XRP:
 **Fee Structure**: 1% per bridge transfer
 
 **Fee Collection:**
-- User bridges 1,000 FIZZ
-- Fee: 10 FIZZ (1%)
-- User receives: 990 FIZZ
+- User bridges 1,000 CAPS
+- Fee: 10 CAPS (1%)
+- User receives: 990 CAPS
 - **Fee goes to treasury** (not burned!)
 
 **Treasury grows from:**
