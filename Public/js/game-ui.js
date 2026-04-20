@@ -1027,12 +1027,7 @@ class GameUI {
         }
         return '#4a90e2';
     }
-}
 
-// Export GameUI class globally
-window.GameUI = GameUI;
-
-// Note: GameUI instance is created in game-init.js to avoid duplicate initialization
     /**
      * Clean up all event listeners
      */
@@ -1045,3 +1040,8 @@ window.GameUI = GameUI;
         this.eventListeners.clear();
     }
 }
+
+// Export GameUI class globally
+window.GameUI = GameUI;
+
+// Note: GameUI instance is created in game-init.js to avoid duplicate initialization
