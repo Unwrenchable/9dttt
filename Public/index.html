@@ -217,6 +217,37 @@
             font-size: 1.2rem;
         }
 
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .header-btn {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #000;
+            border: 2px solid #000;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .header-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+        }
+
         .library-header {
             text-align: center;
             margin-bottom: var(--spacing-lg);
@@ -606,7 +637,14 @@
 
     <div class="container">
         <header role="banner" class="arcade-frame">
-            <h1 class="pixel-font neon-cyan">🎮 9DTTT Game Library</h1>
+            <div class="header-content">
+                <h1 class="pixel-font neon-cyan">🎮 9DTTT Game Library</h1>
+                <div class="header-actions">
+                    <button id="progression-btn" class="header-btn" aria-label="View player progression" style="display: none;">
+                        📊 PROGRESSION
+                    </button>
+                </div>
+            </div>
             <p class="subtitle">Retro Arcade Collection</p>
         </header>
 
@@ -1022,6 +1060,7 @@
     <script src="js/accessibility-manager.js"></script>
     <script src="js/retro-arcade.js"></script>
     <script src="js/game-launcher.js"></script>
+    <script src="js/progression.js"></script>
     
     <!-- API Configuration (Must load first) -->
     <script src="js/api-config.js"></script>
@@ -1050,6 +1089,11 @@
             if (window.unifiedAuth && window.unifiedAuth.addListener) {
                 window.unifiedAuth.addListener(function(user) {
                     downloadsLink.style.display = user ? 'block' : 'none';
+                    // Show/hide progression button based on auth status
+                    const progressionBtn = document.getElementById('progression-btn');
+                    if (progressionBtn) {
+                        progressionBtn.style.display = user ? 'block' : 'none';
+                    }
                 });
             }
         })();
@@ -1214,6 +1258,16 @@
                 window.gamepadManager.on('connected', () => {
                     currentFocus = 0;
                     updateControllerFocus();
+                });
+            }
+
+            // Progression button handler
+            const progressionBtn = document.getElementById('progression-btn');
+            if (progressionBtn) {
+                progressionBtn.addEventListener('click', () => {
+                    if (window.progressionClient) {
+                        window.progressionClient.toggle();
+                    }
                 });
             }
         });

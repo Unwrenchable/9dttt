@@ -628,6 +628,7 @@
 
             this.keys = {};
             this.remoteInputs = {}; // slot→{left,right,up,down,act} injected by online co-op
+            this.eventListeners = new Map(); // Track event listeners for cleanup
             this._inputSetup = false;
             this._setupInput();
             this._init();
@@ -648,8 +649,16 @@
         _setupInput() {
             if (this._inputSetup) return;
             this._inputSetup = true;
-            window.addEventListener('keydown', e => { this.keys[e.code] = true;  e.preventDefault(); });
-            window.addEventListener('keyup',   e => { this.keys[e.code] = false; });
+            
+            const keydownHandler = e => { this.keys[e.code] = true;  e.preventDefault(); };
+            const keyupHandler = e => { this.keys[e.code] = false; };
+            
+            window.addEventListener('keydown', keydownHandler);
+            window.addEventListener('keyup', keyupHandler);
+            
+            // Store references for cleanup
+            this.eventListeners.set('keydown', keydownHandler);
+            this.eventListeners.set('keyup', keyupHandler);
         }
 
         _init() {
@@ -1046,6 +1055,7 @@
         }
 
         _gameOver() {
+            this.cleanup(); // Clean up all resources
             this.state = 'gameover';
             const screen = document.getElementById('gameOverScreen');
             const scores = document.getElementById('finalScores');
@@ -1356,6 +1366,23 @@
                 if (sBar) sBar.style.width = ((p.size   / p.maxSize)   * 100) + '%';
                 if (sc)   sc.textContent = p.score;
             });
+        }
+
+        /**
+         * Clean up all event listeners and RAF
+         */
+        cleanup() {
+            // Cancel RAF
+            if (this._rafId) {
+                cancelAnimationFrame(this._rafId);
+                this._rafId = null;
+            }
+            
+            // Remove event listeners
+            for (const [event, handler] of this.eventListeners) {
+                window.removeEventListener(event, handler);
+            }
+            this.eventListeners.clear();
         }
 
         _gameLoop() {

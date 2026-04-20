@@ -580,10 +580,308 @@ class TutorialSystem {
         this.tips = [];
         this.currentTip = null;
         this.shown = new Set();
+        this.activeTutorial = null;
+        this.tutorialSteps = [];
+        this.currentStepIndex = 0;
+        this.overlay = null;
+        this.highlightElement = null;
     }
     
     addTip(id, text, trigger = 'auto', duration = 5) {
         this.tips.push({ id, text, trigger, duration });
+    }
+    
+    /**
+     * Start an interactive tutorial
+     */
+    startTutorial(tutorialId, steps) {
+        if (this.activeTutorial) {
+            this.endTutorial();
+        }
+        
+        this.activeTutorial = tutorialId;
+        this.tutorialSteps = steps;
+        this.currentStepIndex = 0;
+        
+        this.createTutorialOverlay();
+        this.showTutorialStep(0);
+    }
+    
+    /**
+     * Create tutorial overlay
+     */
+    createTutorialOverlay() {
+        // Create overlay
+        this.overlay = document.createElement('div');
+        this.overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 9997;
+            pointer-events: none;
+        `;
+        document.body.appendChild(this.overlay);
+        
+        // Create tutorial panel
+        const panel = document.createElement('div');
+        panel.id = 'tutorial-panel';
+        panel.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a1a1a;
+            color: #fff;
+            padding: 25px;
+            border-radius: 15px;
+            border: 3px solid #FFD700;
+            z-index: 9998;
+            max-width: 600px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            animation: slideUp 0.5s;
+        `;
+        document.body.appendChild(panel);
+        
+        // Add navigation buttons
+        const navDiv = document.createElement('div');
+        navDiv.style.cssText = `
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        `;
+        
+        const prevBtn = document.createElement('button');
+        prevBtn.textContent = '← Previous';
+        prevBtn.style.cssText = `
+            background: #333;
+            color: #fff;
+            border: 2px solid #666;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        `;
+        prevBtn.onclick = () => this.previousStep();
+        
+        const nextBtn = document.createElement('button');
+        nextBtn.textContent = 'Next →';
+        nextBtn.style.cssText = `
+            background: #FFD700;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+        `;
+        nextBtn.onclick = () => this.nextStep();
+        
+        const skipBtn = document.createElement('button');
+        skipBtn.textContent = 'Skip Tutorial';
+        skipBtn.style.cssText = `
+            background: transparent;
+            color: #999;
+            border: none;
+            cursor: pointer;
+            font-size: 12px;
+            text-decoration: underline;
+        `;
+        skipBtn.onclick = () => this.endTutorial();
+        
+        navDiv.appendChild(prevBtn);
+        navDiv.appendChild(skipBtn);
+        navDiv.appendChild(nextBtn);
+        
+        panel.appendChild(navDiv);
+        this.panel = panel;
+    }
+    
+    /**
+     * Show a specific tutorial step
+     */
+    showTutorialStep(stepIndex) {
+        if (!this.tutorialSteps[stepIndex]) return;
+        
+        const step = this.tutorialSteps[stepIndex];
+        const panel = this.panel;
+        
+        // Clear previous content
+        const contentDiv = panel.querySelector('.tutorial-content') || document.createElement('div');
+        contentDiv.className = 'tutorial-content';
+        contentDiv.innerHTML = '';
+        
+        // Add step content
+        const title = document.createElement('h3');
+        title.textContent = step.title;
+        title.style.cssText = `
+            margin: 0 0 15px 0;
+            color: #FFD700;
+            font-size: 18px;
+        `;
+        
+        const description = document.createElement('p');
+        description.textContent = step.description;
+        description.style.cssText = `
+            margin: 0 0 15px 0;
+            line-height: 1.5;
+        `;
+        
+        contentDiv.appendChild(title);
+        contentDiv.appendChild(description);
+        
+        // Insert content before navigation
+        const navDiv = panel.querySelector('div');
+        panel.insertBefore(contentDiv, navDiv);
+        
+        // Highlight target element if specified
+        this.highlightElement(step.target);
+        
+        // Update navigation buttons
+        this.updateNavigationButtons();
+        
+        // Trigger visual effect if available
+        if (step.effect && window.visualEffects) {
+            this.triggerTutorialEffect(step.effect);
+        }
+    }
+    
+    /**
+     * Highlight a target element
+     */
+    highlightElement(selector) {
+        if (!selector) {
+            if (this.highlightElement) {
+                this.highlightElement.remove();
+                this.highlightElement = null;
+            }
+            return;
+        }
+        
+        const element = document.querySelector(selector);
+        if (!element) return;
+        
+        // Remove previous highlight
+        if (this.highlightElement) {
+            this.highlightElement.remove();
+        }
+        
+        // Create highlight
+        this.highlightElement = document.createElement('div');
+        this.highlightElement.style.cssText = `
+            position: absolute;
+            background: rgba(255, 215, 0, 0.3);
+            border: 3px solid #FFD700;
+            border-radius: 8px;
+            z-index: 9996;
+            pointer-events: none;
+            animation: pulse 2s infinite;
+        `;
+        
+        const rect = element.getBoundingClientRect();
+        this.highlightElement.style.left = rect.left - 10 + 'px';
+        this.highlightElement.style.top = rect.top - 10 + 'px';
+        this.highlightElement.style.width = rect.width + 20 + 'px';
+        this.highlightElement.style.height = rect.height + 20 + 'px';
+        
+        document.body.appendChild(this.highlightElement);
+    }
+    
+    /**
+     * Trigger tutorial visual effect
+     */
+    triggerTutorialEffect(effect) {
+        if (!window.visualEffects) return;
+        
+        const canvas = window.visualEffects.canvas;
+        const x = canvas.width / 2;
+        const y = canvas.height / 2;
+        
+        switch (effect) {
+            case 'welcome':
+                window.visualEffects.createParticleExplosion(x, y, '#FFD700', 30, 1.0);
+                break;
+            case 'highlight':
+                window.visualEffects.createEnergyPulse(x, y, '#00FF88', 2);
+                break;
+            case 'celebrate':
+                window.visualEffects.createWinCelebration(x, y);
+                break;
+        }
+    }
+    
+    /**
+     * Update navigation button states
+     */
+    updateNavigationButtons() {
+        const prevBtn = this.panel.querySelector('button:first-child');
+        const nextBtn = this.panel.querySelector('button:nth-child(3)');
+        
+        prevBtn.disabled = this.currentStepIndex === 0;
+        prevBtn.style.opacity = prevBtn.disabled ? '0.5' : '1';
+        
+        const isLastStep = this.currentStepIndex === this.tutorialSteps.length - 1;
+        nextBtn.textContent = isLastStep ? 'Finish Tutorial' : 'Next →';
+        nextBtn.onclick = () => isLastStep ? this.endTutorial() : this.nextStep();
+    }
+    
+    /**
+     * Go to next step
+     */
+    nextStep() {
+        if (this.currentStepIndex < this.tutorialSteps.length - 1) {
+            this.currentStepIndex++;
+            this.showTutorialStep(this.currentStepIndex);
+        }
+    }
+    
+    /**
+     * Go to previous step
+     */
+    previousStep() {
+        if (this.currentStepIndex > 0) {
+            this.currentStepIndex--;
+            this.showTutorialStep(this.currentStepIndex);
+        }
+    }
+    
+    /**
+     * End the current tutorial
+     */
+    endTutorial() {
+        if (this.overlay) {
+            this.overlay.remove();
+            this.overlay = null;
+        }
+        if (this.panel) {
+            this.panel.remove();
+            this.panel = null;
+        }
+        if (this.highlightElement) {
+            this.highlightElement.remove();
+            this.highlightElement = null;
+        }
+        
+        this.activeTutorial = null;
+        this.tutorialSteps = [];
+        this.currentStepIndex = 0;
+        
+        // Mark tutorial as completed
+        if (this.activeTutorial) {
+            localStorage.setItem(`tutorial_${this.activeTutorial}_completed`, 'true');
+        }
+    }
+    
+    /**
+     * Check if tutorial has been completed
+     */
+    isTutorialCompleted(tutorialId) {
+        return localStorage.getItem(`tutorial_${tutorialId}_completed`) === 'true';
     }
     
     showTip(text, duration = 5) {

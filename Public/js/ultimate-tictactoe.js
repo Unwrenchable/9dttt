@@ -25,6 +25,12 @@ class UltimateTicTacToe {
         // 3D properties
         this.is3DMode = false;
         this.renderer3D = null;
+
+        // Visual effects system
+        this.visualEffects = null;
+
+        // Event listener cleanup
+        this.cellEventListeners = new Map(); // Store cell -> {click: handler, keydown: handler}
     }
 
     /**
@@ -45,12 +51,80 @@ class UltimateTicTacToe {
         const ultimateBoard = document.getElementById('ultimate-board');
         ultimateBoard.innerHTML = '';
 
+        // Initialize visual effects system
+        this.initVisualEffects();
+
         for (let boardIndex = 0; boardIndex < 9; boardIndex++) {
             const smallBoard = this.createSmallBoard(boardIndex);
             ultimateBoard.appendChild(smallBoard);
         }
 
         this.updateBoard();
+    }
+
+    /**
+     * Initialize visual effects system
+     */
+    initVisualEffects() {
+        // Create effects canvas
+        const gameContainer = document.querySelector('.game-container') || document.getElementById('ultimate-board').parentElement;
+        let effectsCanvas = gameContainer.querySelector('.effects-canvas');
+        
+        if (!effectsCanvas) {
+            effectsCanvas = document.createElement('canvas');
+            effectsCanvas.className = 'effects-canvas';
+            effectsCanvas.style.position = 'absolute';
+            effectsCanvas.style.top = '0';
+            effectsCanvas.style.left = '0';
+            effectsCanvas.style.pointerEvents = 'none';
+            effectsCanvas.style.zIndex = '10';
+            gameContainer.style.position = 'relative';
+            gameContainer.appendChild(effectsCanvas);
+        }
+
+        // Resize canvas to match container
+        const rect = gameContainer.getBoundingClientRect();
+        effectsCanvas.width = rect.width;
+        effectsCanvas.height = rect.height;
+
+        // Initialize visual effects
+        const ctx = effectsCanvas.getContext('2d');
+        this.visualEffects = new VisualEffects(effectsCanvas, ctx);
+
+        // Start effects animation loop
+        this.startEffectsLoop();
+    }
+
+    /**
+     * Start visual effects animation loop
+     */
+    startEffectsLoop() {
+        if (!this.visualEffects) return;
+
+        const animate = () => {
+            if (!this.visualEffects) return;
+
+            const ctx = this.visualEffects.ctx;
+            const canvas = this.visualEffects.canvas;
+
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Update and render effects
+            const shakeOffset = this.visualEffects.update();
+
+            // Apply screen shake to the game container
+            const gameContainer = canvas.parentElement;
+            if (shakeOffset.x !== 0 || shakeOffset.y !== 0) {
+                gameContainer.style.transform = `translate(${shakeOffset.x}px, ${shakeOffset.y}px)`;
+            } else {
+                gameContainer.style.transform = '';
+            }
+
+            requestAnimationFrame(animate);
+        };
+
+        requestAnimationFrame(animate);
     }
 
     /**
@@ -94,13 +168,21 @@ class UltimateTicTacToe {
         cell.setAttribute('tabindex', '-1');
         cell.setAttribute('aria-label', `Board ${boardIndex + 1}, Cell ${cellIndex + 1}`);
         
-        cell.addEventListener('click', () => this.handleCellClick(boardIndex, cellIndex));
-        cell.addEventListener('keydown', (e) => {
+        // Create event handlers
+        const clickHandler = () => this.handleCellClick(boardIndex, cellIndex);
+        const keydownHandler = (e) => {
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
                 this.handleCellClick(boardIndex, cellIndex);
             }
-        });
+        };
+
+        // Add event listeners
+        cell.addEventListener('click', clickHandler);
+        cell.addEventListener('keydown', keydownHandler);
+
+        // Store references for cleanup
+        this.cellEventListeners.set(cell, { click: clickHandler, keydown: keydownHandler });
 
         return cell;
     }
@@ -155,6 +237,28 @@ class UltimateTicTacToe {
         // Make the move
         this.boards[boardIndex].cells[cellIndex] = this.currentPlayer;
 
+        // Add move effect
+        if (this.visualEffects) {
+            const cellElement = document.querySelector(`[data-board="${boardIndex}"] [data-cell="${cellIndex}"]`);
+            if (cellElement) {
+                const rect = cellElement.getBoundingClientRect();
+                const containerRect = this.visualEffects.canvas.getBoundingClientRect();
+                const x = rect.left - containerRect.left + rect.width / 2;
+                const y = rect.top - containerRect.top + rect.height / 2;
+                
+                // Particle effect for the move
+                this.visualEffects.createParticleExplosion(x, y, 
+                    this.currentPlayer === 'X' ? '#FF6B35' : '#00FF88', 8, 0.8);
+                
+                // Button press ripple
+                this.visualEffects.createButtonPressEffect(
+                    rect.left - containerRect.left, 
+                    rect.top - containerRect.top, 
+                    rect.width, rect.height
+                );
+            }
+        }
+
         // Check if this board is won
         const boardWinner = this.checkWinner(this.boards[boardIndex].cells);
         if (boardWinner) {
@@ -163,6 +267,27 @@ class UltimateTicTacToe {
             const movesInSection = this.boards[boardIndex].cells.filter(cell => cell !== null).length;
             this.scores[boardWinner] += movesInSection;
             this.announceToScreenReader(`Board ${boardIndex + 1} won by ${boardWinner}! +${movesInSection} points!`);
+
+            // Add board win effect
+            if (this.visualEffects) {
+                const boardElement = document.querySelector(`[data-board="${boardIndex}"]`);
+                if (boardElement) {
+                    const rect = boardElement.getBoundingClientRect();
+                    const containerRect = this.visualEffects.canvas.getBoundingClientRect();
+                    const x = rect.left - containerRect.left + rect.width / 2;
+                    const y = rect.top - containerRect.top + rect.height / 2;
+                    
+                    // Celebration effect for board win
+                    this.visualEffects.createParticleExplosion(x, y, '#FFD700', 20, 1.2);
+                    this.visualEffects.createEnergyPulse(x, y, '#FFD700', 3);
+                    
+                    // Combo effect if multiple boards won in sequence
+                    const wonBoards = this.boards.filter(b => b.winner === boardWinner).length;
+                    if (wonBoards >= 2) {
+                        this.visualEffects.createComboEffect(x, y + 50, wonBoards);
+                    }
+                }
+            }
 
             // 3D win effect
             if (this.is3DMode && this.renderer3D) {
@@ -378,6 +503,14 @@ class UltimateTicTacToe {
             message.textContent = `Player ${winner} wins! Final Score - X: ${this.scores.X}, O: ${this.scores.O}`;
         }
 
+        // Add victory celebration effect for wins
+        if (winner !== 'draw' && this.visualEffects) {
+            const canvas = this.visualEffects.canvas;
+            const x = canvas.width / 2;
+            const y = canvas.height / 2;
+            this.visualEffects.createWinCelebration(x, y);
+        }
+
         modal.classList.add('show');
         this.announceToScreenReader(message.textContent);
         
@@ -414,11 +547,25 @@ class UltimateTicTacToe {
     }
 
     /**
+     * Clean up all event listeners from cells
+     */
+    cleanupEventListeners() {
+        for (const [cell, handlers] of this.cellEventListeners) {
+            cell.removeEventListener('click', handlers.click);
+            cell.removeEventListener('keydown', handlers.keydown);
+        }
+        this.cellEventListeners.clear();
+    }
+
+    /**
      * Reset game
      * Note: Scores are preserved across games in the same session
      * This allows players to track their performance over multiple games
      */
     resetGame() {
+        // Clean up event listeners from previous game
+        this.cleanupEventListeners();
+
         this.currentPlayer = 'X';
         this.activeBoard = null;
         this.boards = Array(9).fill(null).map(() => ({
@@ -676,6 +823,74 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Make game instance globally accessible for multiplayer events
     window.currentGame = game;
+
+    // Initialize tutorial system
+    function initTutorial() {
+        if (!window.tutorialSystem) {
+            window.tutorialSystem = new TutorialSystem();
+        }
+
+        // Check if tutorial has been completed
+        if (!window.tutorialSystem.isTutorialCompleted('ultimate-tictactoe-intro')) {
+            // Start tutorial after a short delay
+            setTimeout(() => {
+                startUltimateTicTacToeTutorial();
+            }, 1000);
+        }
+    }
+
+    // Define the Ultimate Tic-Tac-Toe tutorial
+    function startUltimateTicTacToeTutorial() {
+        const tutorialSteps = [
+            {
+                title: "Welcome to Ultimate Tic-Tac-Toe!",
+                description: "This is a strategic 9-board version of tic-tac-toe. Your move on one board determines where your opponent must play next. Let's learn how to play!",
+                target: "#ultimate-board",
+                effect: "welcome"
+            },
+            {
+                title: "The Game Board",
+                description: "You see 9 small tic-tac-toe boards arranged in a 3x3 grid. Each small board contains 9 cells, just like regular tic-tac-toe.",
+                target: "#ultimate-board",
+                effect: "highlight"
+            },
+            {
+                title: "How to Win a Small Board",
+                description: "Win a small board by getting 3 of your symbols (X or O) in a row, column, or diagonal - just like regular tic-tac-toe!",
+                target: ".small-board:first-child",
+                effect: "highlight"
+            },
+            {
+                title: "The Active Board Rule",
+                description: "The golden highlighted board shows where you MUST play. Your opponent chooses which cell you click, and that determines their next board!",
+                target: ".small-board.active",
+                effect: "highlight"
+            },
+            {
+                title: "Winning the Whole Game",
+                description: "To win the entire game, get 3 small boards in a row (horizontally, vertically, or diagonally) on the big board. The small board winners become the symbols on the big board!",
+                target: "#ultimate-board",
+                effect: "highlight"
+            },
+            {
+                title: "Special Rules",
+                description: "If you're sent to a board that's already won or full, you can play anywhere! Watch for the golden highlights to know where to play.",
+                target: "#turn-indicator",
+                effect: "highlight"
+            },
+            {
+                title: "Ready to Play!",
+                description: "Click any empty cell in the highlighted board to make your move. Try to control the center boards and set up winning patterns. Good luck!",
+                target: "#new-game-btn",
+                effect: "celebrate"
+            }
+        ];
+
+        window.tutorialSystem.startTutorial('ultimate-tictactoe-intro', tutorialSteps);
+    }
+
+    // Listen for game ready event to initialize tutorial
+    window.addEventListener('gameReady', initTutorial);
 
     // Event listeners
     document.getElementById('new-game-btn').addEventListener('click', () => game.resetGame());

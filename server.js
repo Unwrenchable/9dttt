@@ -18,6 +18,7 @@ const auth = require('./server/auth');
 const gameManager = require('./server/gameManager');
 const moderation = require('./server/moderation');
 const security = require('./server/security');
+const progression = new (require('./server/progression'))();
 const keepAlive = require('./server/keepAlive');
 const boot = require('./server/boot');
 const browserAuth = require('./server/browser-auth');
@@ -545,6 +546,49 @@ app.get('/api/games/recent', authenticateToken, async (req, res) => {
     }
 });
 
+// Progression routes
+app.get('/api/progression/stats', authenticateToken, async (req, res) => {
+    try {
+        const stats = progression.getPlayerStats(req.user.username);
+        res.json({ success: true, stats });
+    } catch (error) {
+        res.status(500).json({ success: false, error: 'Server error' });
+    }
+});
+
+app.post('/api/progression/claim-challenge', authenticateToken, async (req, res) => {
+    try {
+        const { challengeId } = req.body;
+        if (!challengeId) {
+            return res.status(400).json({ success: false, error: 'Challenge ID required' });
+        }
+
+        const progress = progression.getPlayerProgress(req.user.username);
+        const challenge = progress.dailyChallenges.find(c => c.id === challengeId);
+
+        if (!challenge || !challenge.completed || challenge.claimed) {
+            return res.status(400).json({ success: false, error: 'Challenge not available for claiming' });
+        }
+
+        // Award rewards
+        challenge.claimed = true;
+        const rewards = {
+            caps: challenge.reward.caps,
+            xp: challenge.reward.xp
+        };
+
+        // Award CAPS
+        await auth.awardCaps(req.user.username, rewards.caps, `daily_challenge_${challengeId}`);
+
+        // Award XP
+        progression.awardXP(req.user.username, rewards.xp, `daily_challenge_${challengeId}`);
+
+        res.json({ success: true, rewards });
+    } catch (error) {
+        res.status(500).json({ success: false, error: 'Server error' });
+    }
+});
+
 // Get time controls
 app.get('/api/games/time-controls', (req, res) => {
     res.json({ success: true, timeControls: gameManager.getTimeControls() });
@@ -920,28 +964,34 @@ io.on('connection', (socket) => {
             io.to(`game:${data.gameId}`).emit('game_update', result.game);
             
             if (result.game.status === 'finished') {
-                // Award CAPS for game completion
+                // Award CAPS and XP for game completion
                 const game = result.game;
                 const winner = game.winner;
-                
+
                 if (winner && winner !== 'draw') {
-                    // Award CAPS to winner
+                    // Award CAPS and XP to winner
                     const winnerUsername = game.players[winner].username;
-                    const capsAmount = game.type === 'ultimate-tictactoe' ? 50 : 25; // More CAPS for complex games
+                    const capsAmount = game.type === 'ultimate-tictactoe' ? 50 : 25;
                     await auth.awardCaps(winnerUsername, capsAmount, `win_${game.type}`);
-                    
-                    // Award smaller amount to loser for participation
+
+                    // Award XP for winning
+                    const winnerXP = game.type === 'ultimate-tictactoe' ? 100 : 50;
+                    progression.trackGameCompletion(winnerUsername, game.type, true, 0, 0);
+
+                    // Award smaller CAPS and XP to loser for participation
                     const loserSymbol = winner === 'X' ? 'O' : 'X';
                     if (game.players[loserSymbol]) {
                         const loserUsername = game.players[loserSymbol].username;
                         await auth.awardCaps(loserUsername, Math.floor(capsAmount / 4), `participation_${game.type}`);
+                        progression.trackGameCompletion(loserUsername, game.type, false, 0, 0);
                     }
                 } else if (winner === 'draw') {
-                    // Award participation CAPS to both players in a draw
+                    // Award participation CAPS and XP to both players in a draw
                     const drawCaps = game.type === 'ultimate-tictactoe' ? 15 : 10;
                     for (const [symbol, player] of Object.entries(game.players)) {
                         if (player && player.username) {
                             await auth.awardCaps(player.username, drawCaps, `draw_${game.type}`);
+                            progression.trackGameCompletion(player.username, game.type, false, 0, 0);
                         }
                     }
                 }
@@ -980,9 +1030,14 @@ io.on('connection', (socket) => {
                 const winnerUsername = game.players[winner].username;
                 const capsAmount = game.type === 'ultimate-tictactoe' ? 40 : 20; // Slightly less for forfeit
                 await auth.awardCaps(winnerUsername, capsAmount, `forfeit_win_${game.type}`);
-                
+
+                // Award XP for winning by forfeit
+                const winnerXP = game.type === 'ultimate-tictactoe' ? 80 : 40;
+                progression.trackGameCompletion(winnerUsername, game.type, true, 0, 0);
+
                 // Award very small participation to forfeiter
                 await auth.awardCaps(user.username, Math.floor(capsAmount / 10), `forfeit_participation_${game.type}`);
+                progression.trackGameCompletion(user.username, game.type, false, 0, 0);
             }
 
             io.to(`game:${data.gameId}`).emit('game_ended', {

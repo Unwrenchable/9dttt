@@ -9,6 +9,9 @@ class GameUI {
         this.profileModal = null;
         this.multiplayerModal = null;
         this.onlineMode = false;
+        
+        // Event listener cleanup
+        this.eventListeners = new Map(); // Store element -> {event: handler}
     }
 
     /**
@@ -88,12 +91,25 @@ class GameUI {
             multiplayerBtn.setAttribute('aria-label', 'Play online multiplayer');
             controls.insertBefore(multiplayerBtn, controls.firstChild);
             
-            multiplayerBtn.addEventListener('click', () => this.showMultiplayerModal());
+            const multiplayerClickHandler = () => this.showMultiplayerModal();
+            multiplayerBtn.addEventListener('click', multiplayerClickHandler);
+            this.eventListeners.set(multiplayerBtn, { click: multiplayerClickHandler });
         }
 
         // Event listeners - signin button now in bottom right corner (auth-ui.js)
-        document.getElementById('profile-btn')?.addEventListener('click', () => this.showProfileModal());
-        document.getElementById('logout-btn')?.addEventListener('click', () => this.handleLogout());
+        const profileBtn = document.getElementById('profile-btn');
+        if (profileBtn) {
+            const profileClickHandler = () => this.showProfileModal();
+            profileBtn.addEventListener('click', profileClickHandler);
+            this.eventListeners.set(profileBtn, { click: profileClickHandler });
+        }
+        
+        const logoutBtn = document.getElementById('logout-btn');
+        if (logoutBtn) {
+            const logoutClickHandler = () => this.handleLogout();
+            logoutBtn.addEventListener('click', logoutClickHandler);
+            this.eventListeners.set(logoutBtn, { click: logoutClickHandler });
+        }
     }
 
     /**
@@ -166,11 +182,25 @@ class GameUI {
         this.profileModal = modal;
         
         // Event listeners
-        modal.querySelector('#profile-modal-close').addEventListener('click', () => this.hideProfileModal());
-        modal.addEventListener('click', (e) => {
+        const closeBtn = modal.querySelector('#profile-modal-close');
+        if (closeBtn) {
+            const closeClickHandler = () => this.hideProfileModal();
+            closeBtn.addEventListener('click', closeClickHandler);
+            this.eventListeners.set(closeBtn, { click: closeClickHandler });
+        }
+        
+        const modalClickHandler = (e) => {
             if (e.target === modal) this.hideProfileModal();
-        });
-        modal.querySelector('#profile-form').addEventListener('submit', (e) => this.handleProfileUpdate(e));
+        };
+        modal.addEventListener('click', modalClickHandler);
+        this.eventListeners.set(modal, { click: modalClickHandler });
+        
+        const profileForm = modal.querySelector('#profile-form');
+        if (profileForm) {
+            const formSubmitHandler = (e) => this.handleProfileUpdate(e);
+            profileForm.addEventListener('submit', formSubmitHandler);
+            this.eventListeners.set(profileForm, { submit: formSubmitHandler });
+        }
     }
 
     /**
@@ -275,41 +305,98 @@ class GameUI {
         this.selectedTimeControl = 'blitz-5';
         
         // Event listeners
-        modal.querySelector('#multiplayer-modal-close').addEventListener('click', () => this.hideMultiplayerModal());
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) this.hideMultiplayerModal();
-        });
+        const modalCloseBtn = modal.querySelector('#multiplayer-modal-close');
+        if (modalCloseBtn) {
+            const modalCloseClickHandler = () => this.hideMultiplayerModal();
+            modalCloseBtn.addEventListener('click', modalCloseClickHandler);
+            this.eventListeners.set(modalCloseBtn, { click: modalCloseClickHandler });
+        }
         
-        modal.querySelector('#mp-login-btn')?.addEventListener('click', () => {
-            this.hideMultiplayerModal();
-            window.authUI?.show();
-        });
+        const mpModalClickHandler = (e) => {
+            if (e.target === modal) this.hideMultiplayerModal();
+        };
+        modal.addEventListener('click', mpModalClickHandler);
+        this.eventListeners.set(modal, { click: mpModalClickHandler });
+        
+        const mpLoginBtn = modal.querySelector('#mp-login-btn');
+        if (mpLoginBtn) {
+            const mpLoginClickHandler = () => {
+                this.hideMultiplayerModal();
+                window.authUI?.show();
+            };
+            mpLoginBtn.addEventListener('click', mpLoginClickHandler);
+            this.eventListeners.set(mpLoginBtn, { click: mpLoginClickHandler });
+        }
         
         // Time control selection
         modal.querySelectorAll('.tc-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
+            const tcClickHandler = () => {
                 modal.querySelectorAll('.tc-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 this.selectedTimeControl = btn.dataset.tc;
-            });
+            };
+            btn.addEventListener('click', tcClickHandler);
+            this.eventListeners.set(btn, { click: tcClickHandler });
         });
         
         // Tab switching
         modal.querySelectorAll('.mp-tab').forEach(tab => {
-            tab.addEventListener('click', () => this.switchMultiplayerTab(tab.dataset.tab));
+            const tabClickHandler = () => this.switchMultiplayerTab(tab.dataset.tab);
+            tab.addEventListener('click', tabClickHandler);
+            this.eventListeners.set(tab, { click: tabClickHandler });
         });
         
-        modal.querySelector('#mp-find-match')?.addEventListener('click', () => this.handleFindMatch());
-        modal.querySelector('#mp-create-private')?.addEventListener('click', () => this.handleCreatePrivate());
-        modal.querySelector('#mp-join-btn')?.addEventListener('click', () => this.handleJoinPrivate());
-        modal.querySelector('#mp-cancel-btn')?.addEventListener('click', () => this.handleCancelMatchmaking());
-        modal.querySelector('#mp-copy-code')?.addEventListener('click', () => this.handleCopyCode());
+        const findMatchBtn = modal.querySelector('#mp-find-match');
+        if (findMatchBtn) {
+            const findMatchClickHandler = () => this.handleFindMatch();
+            findMatchBtn.addEventListener('click', findMatchClickHandler);
+            this.eventListeners.set(findMatchBtn, { click: findMatchClickHandler });
+        }
+        
+        const createPrivateBtn = modal.querySelector('#mp-create-private');
+        if (createPrivateBtn) {
+            const createPrivateClickHandler = () => this.handleCreatePrivate();
+            createPrivateBtn.addEventListener('click', createPrivateClickHandler);
+            this.eventListeners.set(createPrivateBtn, { click: createPrivateClickHandler });
+        }
+        
+        const joinBtn = modal.querySelector('#mp-join-btn');
+        if (joinBtn) {
+            const joinClickHandler = () => this.handleJoinPrivate();
+            joinBtn.addEventListener('click', joinClickHandler);
+            this.eventListeners.set(joinBtn, { click: joinClickHandler });
+        }
+        
+        const cancelBtn = modal.querySelector('#mp-cancel-btn');
+        if (cancelBtn) {
+            const cancelClickHandler = () => this.handleCancelMatchmaking();
+            cancelBtn.addEventListener('click', cancelClickHandler);
+            this.eventListeners.set(cancelBtn, { click: cancelClickHandler });
+        }
+        
+        const copyCodeBtn = modal.querySelector('#mp-copy-code');
+        if (copyCodeBtn) {
+            const copyCodeClickHandler = () => this.handleCopyCode();
+            copyCodeBtn.addEventListener('click', copyCodeClickHandler);
+            this.eventListeners.set(copyCodeBtn, { click: copyCodeClickHandler });
+        }
         
         // Friends search
-        modal.querySelector('#friend-search-btn')?.addEventListener('click', () => this.handleFriendSearch());
-        modal.querySelector('#friend-search-input')?.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') this.handleFriendSearch();
-        });
+        const friendSearchBtn = modal.querySelector('#friend-search-btn');
+        if (friendSearchBtn) {
+            const friendSearchClickHandler = () => this.handleFriendSearch();
+            friendSearchBtn.addEventListener('click', friendSearchClickHandler);
+            this.eventListeners.set(friendSearchBtn, { click: friendSearchClickHandler });
+        }
+        
+        const friendSearchInput = modal.querySelector('#friend-search-input');
+        if (friendSearchInput) {
+            const friendSearchKeypressHandler = (e) => {
+                if (e.key === 'Enter') this.handleFriendSearch();
+            };
+            friendSearchInput.addEventListener('keypress', friendSearchKeypressHandler);
+            this.eventListeners.set(friendSearchInput, { keypress: friendSearchKeypressHandler });
+        }
     }
 
     /**
@@ -946,3 +1033,15 @@ class GameUI {
 window.GameUI = GameUI;
 
 // Note: GameUI instance is created in game-init.js to avoid duplicate initialization
+    /**
+     * Clean up all event listeners
+     */
+    cleanupEventListeners() {
+        for (const [element, handlers] of this.eventListeners) {
+            for (const [event, handler] of Object.entries(handlers)) {
+                element.removeEventListener(event, handler);
+            }
+        }
+        this.eventListeners.clear();
+    }
+}

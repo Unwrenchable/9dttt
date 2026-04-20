@@ -37,6 +37,9 @@ class TournamentFighters {
         this.keys = {};
         this._inputSetup = false;
         
+        // Event listener cleanup
+        this.eventListeners = new Map();
+        
         this.round = 1;
         this.timer = 99;
         this.wins = [0, 0];
@@ -50,13 +53,22 @@ class TournamentFighters {
     setupInput() {
         if (this._inputSetup) return;
         this._inputSetup = true;
-        window.addEventListener('keydown', (e) => {
+        
+        const keydownHandler = (e) => {
             this.keys[e.code] = true;
             e.preventDefault();
-        });
-        window.addEventListener('keyup', (e) => {
+        };
+        
+        const keyupHandler = (e) => {
             this.keys[e.code] = false;
-        });
+        };
+        
+        window.addEventListener('keydown', keydownHandler);
+        window.addEventListener('keyup', keyupHandler);
+        
+        // Store references for cleanup
+        this.eventListeners.set('keydown', keydownHandler);
+        this.eventListeners.set('keyup', keyupHandler);
     }
     
     renderFighterSelect() {
@@ -698,6 +710,23 @@ class TournamentFighters {
         timerEl.className = 'timer' + (this.timer <= 10 ? ' urgent' : '');
     }
     
+    /**
+     * Clean up all event listeners and RAF
+     */
+    cleanup() {
+        // Cancel RAF
+        if (this._rafId) {
+            cancelAnimationFrame(this._rafId);
+            this._rafId = null;
+        }
+        
+        // Remove event listeners
+        for (const [event, handler] of this.eventListeners) {
+            window.removeEventListener(event, handler);
+        }
+        this.eventListeners.clear();
+    }
+    
     gameLoop() {
         if (this.state !== 'fighting') return;
 
@@ -708,6 +737,8 @@ class TournamentFighters {
     }
 
     _showResult(msg) {
+        this.cleanup(); // Clean up all resources
+        
         const existing = document.getElementById('resultOverlay');
         if (existing) existing.remove();
         const overlay = document.createElement('div');
@@ -734,7 +765,6 @@ class TournamentFighters {
             this.wins = [0, 0];
             this.tournamentRound = 0;
             this.tournamentOpponents = [];
-            if (this._rafId) { cancelAnimationFrame(this._rafId); this._rafId = null; }
             document.getElementById('menu').classList.remove('hidden');
         };
 

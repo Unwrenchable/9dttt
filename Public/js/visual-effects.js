@@ -225,6 +225,18 @@ class VisualEffects {
                 case 'pulse':
                     this.renderEnergyPulse(effect, progress);
                     break;
+                case 'particles':
+                    this.renderParticleExplosion(effect, progress);
+                    break;
+                case 'combo':
+                    this.renderComboEffect(effect, progress);
+                    break;
+                case 'victory':
+                    this.renderVictoryEffect(effect, progress);
+                    break;
+                case 'ripple':
+                    this.renderRippleEffect(effect, progress);
+                    break;
             }
 
             return true;
@@ -301,6 +313,106 @@ class VisualEffects {
         ctx.arc(effect.x, effect.y, radius, 0, Math.PI * 2);
         ctx.fill();
 
+        ctx.restore();
+    }
+
+    /**
+     * Render particle explosion effect
+     */
+    renderParticleExplosion(effect, progress) {
+        const ctx = this.ctx;
+        
+        effect.particles.forEach(particle => {
+            particle.x += particle.vx;
+            particle.y += particle.vy;
+            particle.vy += 0.1; // Gravity
+            particle.life -= 0.02;
+            
+            if (particle.life > 0) {
+                ctx.save();
+                ctx.globalAlpha = particle.life;
+                ctx.fillStyle = particle.color;
+                ctx.beginPath();
+                ctx.arc(particle.x, particle.y, particle.size * particle.life, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        });
+    }
+
+    /**
+     * Render combo effect
+     */
+    renderComboEffect(effect, progress) {
+        const ctx = this.ctx;
+        const scale = effect.scale = Math.min(1, progress * 4);
+        const alpha = Math.max(0, 1 - progress * 2);
+        
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.translate(effect.x, effect.y);
+        ctx.scale(scale, scale);
+        
+        // Draw combo text
+        ctx.font = 'bold 24px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = 3;
+        ctx.strokeText(effect.text, 0, 0);
+        ctx.fillStyle = '#FFD700';
+        ctx.fillText(effect.text, 0, 0);
+        
+        ctx.restore();
+    }
+
+    /**
+     * Render victory effect
+     */
+    renderVictoryEffect(effect, progress) {
+        const ctx = this.ctx;
+        const scale = effect.scale = Math.min(2, progress * 6);
+        const alpha = effect.alpha = Math.max(0, 1 - progress * 0.7);
+        
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.translate(effect.x, effect.y);
+        ctx.scale(scale, scale);
+        
+        // Draw victory text with glow
+        ctx.font = 'bold 48px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        
+        // Glow effect
+        ctx.shadowColor = '#FFD700';
+        ctx.shadowBlur = 20;
+        ctx.strokeStyle = '#FFD700';
+        ctx.lineWidth = 2;
+        ctx.strokeText(effect.text, 0, 0);
+        
+        // Main text
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillText(effect.text, 0, 0);
+        
+        ctx.restore();
+    }
+
+    /**
+     * Render ripple effect
+     */
+    renderRippleEffect(effect, progress) {
+        const ctx = this.ctx;
+        const radius = effect.maxRadius * progress;
+        const alpha = Math.max(0, 1 - progress);
+        
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.strokeStyle = effect.color;
+        ctx.lineWidth = 3 - progress * 2;
+        ctx.beginPath();
+        ctx.arc(effect.x, effect.y, radius, 0, Math.PI * 2);
+        ctx.stroke();
         ctx.restore();
     }
 
@@ -413,6 +525,124 @@ class VisualEffects {
         return result 
             ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}`
             : '255, 255, 255';
+    }
+
+    /**
+     * Create particle explosion effect
+     * @param {number} x - X position
+     * @param {number} y - Y position
+     * @param {string} color - Particle color (default: '#FFD700')
+     * @param {number} count - Number of particles (default: 20)
+     * @param {number} speed - Particle speed multiplier (default: 1.0)
+     */
+    createParticleExplosion(x, y, color = '#FFD700', count = 20, speed = 1.0) {
+        const particles = [];
+        for (let i = 0; i < count; i++) {
+            const angle = (Math.PI * 2 * i) / count;
+            const velocity = (Math.random() * 3 + 2) * speed;
+            particles.push({
+                x, y,
+                vx: Math.cos(angle) * velocity,
+                vy: Math.sin(angle) * velocity,
+                life: 1.0,
+                color: this.adjustColorBrightness(color, Math.random() * 0.5 - 0.25),
+                size: Math.random() * 3 + 2
+            });
+        }
+        
+        this.effects.push({
+            type: 'particles',
+            particles,
+            startTime: Date.now(),
+            duration: 2000
+        });
+    }
+
+    /**
+     * Create combo multiplier effect
+     * @param {number} x - X position
+     * @param {number} y - Y position
+     * @param {number} multiplier - Combo multiplier (default: 2)
+     */
+    createComboEffect(x, y, multiplier = 2) {
+        this.effects.push({
+            type: 'combo',
+            x, y, multiplier,
+            startTime: Date.now(),
+            duration: 1500,
+            scale: 0,
+            text: `${multiplier}x COMBO!`
+        });
+        
+        // Add screen shake for high combos
+        if (multiplier >= 3) {
+            this.createScreenShake(5 + multiplier, 400);
+        }
+    }
+
+    /**
+     * Create win celebration effect
+     * @param {number} x - Center X position
+     * @param {number} y - Center Y position
+     */
+    createWinCelebration(x, y) {
+        // Multiple particle explosions
+        this.createParticleExplosion(x - 50, y - 50, '#FFD700', 15, 1.5);
+        this.createParticleExplosion(x + 50, y - 50, '#FF6B35', 15, 1.5);
+        this.createParticleExplosion(x, y + 50, '#00FF88', 15, 1.5);
+        
+        // Energy pulses
+        this.createEnergyPulse(x, y, '#FFD700', 5);
+        
+        // Screen shake
+        this.createScreenShake(15, 800);
+        
+        // Victory text effect
+        this.effects.push({
+            type: 'victory',
+            x, y,
+            startTime: Date.now(),
+            duration: 3000,
+            text: 'VICTORY!',
+            scale: 0,
+            alpha: 1
+        });
+    }
+
+    /**
+     * Create juicy button press effect
+     * @param {number} x - Button X position
+     * @param {number} y - Button Y position
+     * @param {number} width - Button width
+     * @param {number} height - Button height
+     */
+    createButtonPressEffect(x, y, width, height) {
+        // Ripple effect
+        this.effects.push({
+            type: 'ripple',
+            x: x + width/2,
+            y: y + height/2,
+            startTime: Date.now(),
+            duration: 600,
+            maxRadius: Math.max(width, height) * 0.8,
+            color: '#FFFFFF'
+        });
+        
+        // Small particle burst
+        this.createParticleExplosion(x + width/2, y + height/2, '#FFFFFF', 8, 0.5);
+    }
+
+    /**
+     * Adjust color brightness
+     * @param {string} color - Hex color
+     * @param {number} factor - Brightness factor (-1 to 1)
+     */
+    adjustColorBrightness(color, factor) {
+        const hex = color.replace('#', '');
+        const r = Math.max(0, Math.min(255, parseInt(hex.substr(0, 2), 16) + factor * 255));
+        const g = Math.max(0, Math.min(255, parseInt(hex.substr(2, 2), 16) + factor * 255));
+        const b = Math.max(0, Math.min(255, parseInt(hex.substr(4, 2), 16) + factor * 255));
+        return `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)})`;
     }
 
     /**

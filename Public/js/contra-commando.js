@@ -31,6 +31,7 @@ class ContraCommando {
         this.keys = {};
         this.lastTime = 0;
         this.running = false;
+        this.eventListeners = new Map(); // Track event listeners for cleanup
 
         // Konami Code sequence: ↑↑↓↓←→←→BA (KeyboardEvent.code values)
         this.konamiCode = [
@@ -56,7 +57,8 @@ class ContraCommando {
     setupInput() {
         if (this._inputSetup) return;
         this._inputSetup = true;
-        window.addEventListener('keydown', (e) => {
+        
+        const keydownHandler = (e) => {
             this.keys[e.code] = true;
             if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) {
                 e.preventDefault();
@@ -78,11 +80,18 @@ class ContraCommando {
             } else {
                 this.konamiProgress = e.code === this.konamiCode[0] ? 1 : 0;
             }
-        });
+        };
         
-        window.addEventListener('keyup', (e) => {
+        const keyupHandler = (e) => {
             this.keys[e.code] = false;
-        });
+        };
+        
+        window.addEventListener('keydown', keydownHandler);
+        window.addEventListener('keyup', keyupHandler);
+        
+        // Store references for cleanup
+        this.eventListeners.set('keydown', keydownHandler);
+        this.eventListeners.set('keyup', keyupHandler);
     }
 
     activateKonamiCode() {
@@ -689,9 +698,9 @@ class ContraCommando {
     }
     
     gameOver() {
+        this.cleanup(); // Clean up all resources
         this.state = 'gameover';
         this.running = false;
-        if (this._rafId) { cancelAnimationFrame(this._rafId); this._rafId = null; }
         document.getElementById('gameOverScreen').classList.remove('hidden');
         document.getElementById('finalScore').innerHTML = 
             `<h3>Final Score: ${this.score}</h3><p>Level Reached: ${this.level}</p>`;
@@ -908,6 +917,23 @@ class ContraCommando {
             document.getElementById('weapon').textContent = weapon.icon;
             document.getElementById('weaponName').textContent = weapon.name;
         }
+    }
+    
+    /**
+     * Clean up all event listeners and RAF
+     */
+    cleanup() {
+        // Cancel RAF
+        if (this._rafId) {
+            cancelAnimationFrame(this._rafId);
+            this._rafId = null;
+        }
+        
+        // Remove event listeners
+        for (const [event, handler] of this.eventListeners) {
+            window.removeEventListener(event, handler);
+        }
+        this.eventListeners.clear();
     }
     
     gameLoop(timestamp) {
