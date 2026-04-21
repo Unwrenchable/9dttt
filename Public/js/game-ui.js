@@ -1031,17 +1031,3 @@ class GameUI {
 
 // Export GameUI class globally
 window.GameUI = GameUI;
-
-// Note: GameUI instance is created in game-init.js to avoid duplicate initialization
-    /**
-     * Clean up all event listeners
-     */
-    cleanupEventListeners() {
-        for (const [element, handlers] of this.eventListeners) {
-            for (const [event, handler] of Object.entries(handlers)) {
-                element.removeEventListener(event, handler);
-            }
-        }
-        this.eventListeners.clear();
-    }
-}
