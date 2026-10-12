@@ -1,7 +1,7 @@
 {
-  "name": "9DTTT - Strategic Multiplayer Games",
+  "name": "9DTTT - 9D Ultimate Tic-Tac-Toe",
   "short_name": "9DTTT",
-  "description": "Free strategic multiplayer game library featuring Ultimate Tic-Tac-Toe, 4D Chess, Connect Four, and 15+ more games",
+  "description": "9D Ultimate Tic-Tac-Toe with an AI opponent, plus an add-on game catalog",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0a0e27",
