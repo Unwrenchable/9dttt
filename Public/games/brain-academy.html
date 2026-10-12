@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Add-on unlock guard (client-side UX gate only; see js/unlock-guard.js) -->
+    <script src="../js/catalog.js"></script>
+    <script src="../js/unlock-guard.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Brain Academy - Educational Games Collection</title>
@@ -95,7 +98,7 @@
     </style>
     <link rel="stylesheet" href="../css/responsive.css">
 </head>
-<body>
+<body data-orientation="any">
     <div class="container">
         <h1>🧠 BRAIN ACADEMY 🎓</h1>
         <p style="text-align: center; font-size: 20px;">Fun Educational Games for All Ages!</p>
@@ -169,5 +172,6 @@
             window.gameIntegration = new UniversalGameIntegration('brain-academy', 'Brain Academy');
         });
     </script>
+    <script src="../js/home-button.js"></script>
 </body>
 </html>

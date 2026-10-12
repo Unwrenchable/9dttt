@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Add-on unlock guard (client-side UX gate only; see js/unlock-guard.js) -->
+    <script src="../js/catalog.js"></script>
+    <script src="../js/unlock-guard.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
@@ -1026,5 +1029,22 @@
         initBoardDelegation();
         initGame();
     </script>
+    <script>
+    // Fit the board to narrow screens instead of overflowing horizontally.
+    (function () {
+        function fitBoard() {
+            var board = document.querySelector('.board');
+            if (!board) return;
+            board.style.zoom = '';
+            var avail = document.documentElement.clientWidth - 16;
+            var natural = board.scrollWidth;
+            if (natural > avail && avail > 0) board.style.zoom = String(Math.max(0.4, avail / natural));
+        }
+        window.addEventListener('resize', fitBoard);
+        window.addEventListener('orientationchange', function () { setTimeout(fitBoard, 300); });
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fitBoard); else fitBoard();
+    })();
+    </script>
+    <script src="../js/home-button.js"></script>
 </body>
 </html>
