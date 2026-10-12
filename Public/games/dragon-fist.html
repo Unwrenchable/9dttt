@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Add-on unlock guard (client-side UX gate only; see js/unlock-guard.js) -->
+    <script src="../js/catalog.js"></script>
+    <script src="../js/unlock-guard.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#0a0e27">
@@ -198,6 +201,18 @@
                 this._inputSetup = true;
                 window.addEventListener('keydown', e => {
                     this.keys[e.code] = true;
+
+                    // Keyboard / touch start: Enter or Space starts 1P from menu, game over or victory
+                    // (the canvas says "Select players to start!" but only the buttons did it before).
+                    if ((e.code === 'Enter' || e.code === 'Space') && !e.repeat &&
+                        (this.state === 'menu' || this.state === 'gameover' || this.state === 'victory')) {
+                        const t = e.target;
+                        if (!(t && (t.tagName === 'BUTTON' || t.tagName === 'INPUT' || t.tagName === 'TEXTAREA'))) {
+                            e.preventDefault();
+                            this.startGame(this.state === 'menu' ? 1 : (this.numPlayers || 1));
+                            return;
+                        }
+                    }
                     
                     // Pause menu toggle (ESC key)
                     if (e.code === 'Escape' && this.state === 'playing') {
@@ -662,15 +677,19 @@
                 const gp = window.gamepadManager?.getState(playerIndex);
                 
                 if (playerIndex === 0) {
+                    // In 1-player mode P1 also accepts arrows + Z/X/Space, which is what the
+                    // shared mobile touch overlay (mobile-game-adapter.js) sends.
+                    const solo = this.numPlayers === 1;
+                    const k = this.keys;
                     return {
-                        left: this.keys['KeyA'] || gp?.axes.leftX < -0.3,
-                        right: this.keys['KeyD'] || gp?.axes.leftX > 0.3,
-                        up: this.keys['KeyW'] || gp?.axes.leftY < -0.3,
-                        down: this.keys['KeyS'] || gp?.axes.leftY > 0.3,
-                        punch: this.keys['KeyJ'] || gp?.buttons.x,
-                        kick: this.keys['KeyK'] || gp?.buttons.y,
-                        jump: this.keys['KeyL'] || gp?.buttons.a,
-                        special: (this.keys['KeyJ'] && this.keys['KeyK']) || gp?.buttons.lb
+                        left: k['KeyA'] || (solo && k['ArrowLeft']) || gp?.axes.leftX < -0.3,
+                        right: k['KeyD'] || (solo && k['ArrowRight']) || gp?.axes.leftX > 0.3,
+                        up: k['KeyW'] || (solo && k['ArrowUp']) || gp?.axes.leftY < -0.3,
+                        down: k['KeyS'] || (solo && k['ArrowDown']) || gp?.axes.leftY > 0.3,
+                        punch: k['KeyJ'] || (solo && k['KeyZ']) || gp?.buttons.x,
+                        kick: k['KeyK'] || (solo && k['KeyX']) || gp?.buttons.y,
+                        jump: k['KeyL'] || (solo && k['Space']) || gp?.buttons.a,
+                        special: (k['KeyJ'] && k['KeyK']) || (solo && k['KeyZ'] && k['KeyX']) || gp?.buttons.lb
                     };
                 } else {
                     return {
@@ -1505,7 +1524,7 @@
                     
                     this.ctx.fillStyle = '#4a90e2';
                     this.ctx.font = '24px Arial';
-                    this.ctx.fillText('Select players to start!', this.width / 2, 360);
+                    this.ctx.fillText('Select players or press Enter to start!', this.width / 2, 360);
                 }
                 
                 if (this.state === 'gameover') {
@@ -1607,5 +1626,6 @@
             if (window.GamepadWidget) new GamepadWidget('gamepad-status');
         });
     </script>
+    <script src="../js/home-button.js"></script>
 </body>
 </html>

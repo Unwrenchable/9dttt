@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Add-on unlock guard (client-side UX gate only; see js/unlock-guard.js) -->
+    <script src="../js/catalog.js"></script>
+    <script src="../js/unlock-guard.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#0a0e27">
@@ -9,6 +12,7 @@
     
     <link rel="stylesheet" href="../css/styles.css">
     <link rel="stylesheet" href="../css/arcade-games.css">
+    <link rel="stylesheet" href="../css/game-ui.css">
     <link rel="stylesheet" href="../css/responsive.css">
 </head>
 <body>
@@ -489,5 +493,6 @@
             if (window.GamepadWidget) new GamepadWidget('gamepad-status');
         });
     </script>
+    <script src="../js/home-button.js"></script>
 </body>
 </html>

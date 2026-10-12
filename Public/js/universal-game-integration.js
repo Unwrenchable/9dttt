@@ -31,7 +31,10 @@ class UniversalGameIntegration {
         this.setupKeyboardShortcuts();
         
         // Setup mobile controls if needed
-        if (window.mobileControls) {
+        // Skip the legacy MobileControls when the shared mobile-game-adapter overlay
+        // is present, otherwise two D-pads / button sets stack on top of each other.
+        if (window.mobileControls && !document.getElementById('mga-dpad-overlay') &&
+            !document.body.classList.contains('mga-dpad-active') && !window.MobileGameAdapter) {
             window.mobileControls.show();
         }
         
@@ -43,6 +46,8 @@ class UniversalGameIntegration {
         // Add floating menu button
         const menuBtn = document.createElement('button');
         menuBtn.innerHTML = '☰';
+        menuBtn.id = 'game-menu-btn';
+        menuBtn.setAttribute('aria-label', 'Game Menu');
         menuBtn.style.cssText = `
             position: fixed;
             top: 10px;

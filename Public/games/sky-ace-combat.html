@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Add-on unlock guard (client-side UX gate only; see js/unlock-guard.js) -->
+    <script src="../js/catalog.js"></script>
+    <script src="../js/unlock-guard.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Sky Ace Combat - 9DTTT Arcade</title>
@@ -13,7 +16,8 @@
             padding: 0;
             background: #000;
             font-family: 'Press Start 2P', cursive;
-            overflow: hidden;
+            overflow-x: hidden;
+            overflow-y: auto; /* was overflow:hidden; page taller than viewport hid the HUD/controls */
         }
         #gameCanvas {
             display: block;
@@ -37,6 +41,19 @@
             height: 150px;
             border: 2px solid #0f0;
             background: rgba(0, 0, 0, 0.7);
+        }
+        /* keep the radar a small HUD widget: shared canvas rules (responsive.css)
+           otherwise stretch it to 100% width and overflow the page */
+        canvas#radar { width: 150px !important; height: 150px !important; max-height: 150px !important; }
+        @media (max-width: 768px) {
+            canvas#radar {
+                width: 110px !important;
+                height: 110px !important;
+                max-width: 30vw !important;
+                max-height: 30vw !important;
+                left: 10px;
+                bottom: 10px;
+            }
         }
         #crosshair {
             position: absolute;
@@ -137,5 +154,6 @@
             }
         });
     </script>
+    <script src="../js/home-button.js"></script>
 </body>
 </html>

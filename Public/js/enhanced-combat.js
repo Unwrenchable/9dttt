@@ -89,6 +89,40 @@ class ComboSystem {
         return this.checkCombo(playerId);
     }
     
+    // Compatibility API used by dragon-fist.html (addInput / checkCombos), which
+    // previously threw "addInput is not a function" on the first punch/kick.
+    _comboKey(player) {
+        return (player && typeof player === 'object')
+            ? (player.id || player.label || player.name || (player._comboKey = player._comboKey || ('p' + Math.random().toString(36).slice(2))))
+            : player;
+    }
+
+    addInput(player, inputType) {
+        const key = this._comboKey(player);
+        const combo = this.recordInput(key, inputType);
+        if (combo) {
+            if (!this.pendingCombos) this.pendingCombos = new Map();
+            this.pendingCombos.set(key, combo);
+        }
+        return combo;
+    }
+
+    checkCombos(player) {
+        const key = this._comboKey(player);
+        const combo = this.pendingCombos && this.pendingCombos.get(key);
+        if (!combo) return null;
+        this.pendingCombos.delete(key);
+        const effect = combo.specialEffect;
+        return Object.assign({}, combo, {
+            damageMultiplier: combo.damageMultiplier || Math.max(1, (combo.damage || 20) / 20),
+            effects: combo.effects || {
+                shake: 3 + (combo.hits || 1),
+                flash: effect === 'launch' || effect === 'stun',
+                knockback: effect === 'knockback' || effect === 'launch' ? 10 : 5
+            }
+        });
+    }
+
     checkCombo(playerId) {
         const buffer = this.comboBuffers.get(playerId);
         if (!buffer || buffer.length === 0) return null;

@@ -65,7 +65,7 @@ class UniversalAuth {
         }
         
         return new Promise((resolve, reject) => {
-            const request = indexedDB.open('9DTTT_GameDB', 1);
+            const request = indexedDB.open('9DTTT_GameDB', 2); // keep in sync with global-leaderboard.js
             
             request.onerror = () => {
                 console.error('IndexedDB error:', request.error);
@@ -74,6 +74,7 @@ class UniversalAuth {
             
             request.onsuccess = () => {
                 this.db = request.result;
+                this.db.onversionchange = () => this.db.close();
                 console.log('IndexedDB initialized successfully');
                 resolve(this.db);
             };
