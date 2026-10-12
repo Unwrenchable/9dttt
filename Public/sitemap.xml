@@ -2,171 +2,171 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
     
-    <!-- Homepage / Game Library -->
+    <!-- Homepage: 9D Ultimate Tic-Tac-Toe -->
     <url>
-        <loc>https://www.d9ttt.com/</loc>
-        <lastmod>2026-01-29</lastmod>
+        <loc>https://9dttt.com/</loc>
+        <lastmod>2026-10-12</lastmod>
         <changefreq>daily</changefreq>
         <priority>1.0</priority>
     </url>
     
     <url>
-        <loc>https://www.d9ttt.com/index.html</loc>
-        <lastmod>2026-01-29</lastmod>
-        <changefreq>daily</changefreq>
-        <priority>1.0</priority>
+        <loc>https://9dttt.com/games.html</loc>
+        <lastmod>2026-10-12</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
     </url>
-    
+
     <!-- Individual Game Pages -->
     <url>
-        <loc>https://www.d9ttt.com/games/ultimate-tictactoe.html</loc>
+        <loc>https://9dttt.com/games/ultimate-tictactoe.html</loc>
+        <lastmod>2026-10-12</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.9</priority>
+    </url>
+    
+    <url>
+        <loc>https://9dttt.com/games/4d-chess.html</loc>
         <lastmod>2026-01-29</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
     </url>
     
     <url>
-        <loc>https://www.d9ttt.com/games/4d-chess.html</loc>
+        <loc>https://9dttt.com/games/connect-four.html</loc>
         <lastmod>2026-01-29</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
     </url>
     
     <url>
-        <loc>https://www.d9ttt.com/games/connect-four.html</loc>
+        <loc>https://9dttt.com/games/farkle.html</loc>
         <lastmod>2026-01-29</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
     </url>
     
     <url>
-        <loc>https://www.d9ttt.com/games/farkle.html</loc>
+        <loc>https://9dttt.com/games/dimensional-dice.html</loc>
         <lastmod>2026-01-29</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
     </url>
     
     <url>
-        <loc>https://www.d9ttt.com/games/dimensional-dice.html</loc>
-        <lastmod>2026-01-29</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.9</priority>
-    </url>
-    
-    <url>
-        <loc>https://www.d9ttt.com/games/pong.html</loc>
+        <loc>https://9dttt.com/games/pong.html</loc>
         <lastmod>2026-01-29</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     
     <url>
-        <loc>https://www.d9ttt.com/games/air-hockey.html</loc>
+        <loc>https://9dttt.com/games/air-hockey.html</loc>
         <lastmod>2026-01-29</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     
     <url>
-        <loc>https://www.d9ttt.com/games/hangman.html</loc>
+        <loc>https://9dttt.com/games/hangman.html</loc>
         <lastmod>2026-01-29</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     
     <url>
-        <loc>https://www.d9ttt.com/games/memory-game.html</loc>
+        <loc>https://9dttt.com/games/memory-game.html</loc>
         <lastmod>2026-01-29</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     
     <url>
-        <loc>https://www.d9ttt.com/games/thirteen.html</loc>
+        <loc>https://9dttt.com/games/thirteen.html</loc>
         <lastmod>2026-01-29</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     
     <url>
-        <loc>https://www.d9ttt.com/games/dragon-fist.html</loc>
+        <loc>https://9dttt.com/games/dragon-fist.html</loc>
         <lastmod>2026-01-29</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     
     <url>
-        <loc>https://www.d9ttt.com/games/carnival-shooter.html</loc>
+        <loc>https://9dttt.com/games/carnival-shooter.html</loc>
         <lastmod>2026-01-29</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     
     <url>
-        <loc>https://www.d9ttt.com/games/space-debris.html</loc>
+        <loc>https://9dttt.com/games/space-debris.html</loc>
         <lastmod>2026-01-29</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     
     <url>
-        <loc>https://www.d9ttt.com/games/recursive-maze.html</loc>
+        <loc>https://9dttt.com/games/recursive-maze.html</loc>
         <lastmod>2026-01-29</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     
     <url>
-        <loc>https://www.d9ttt.com/games/beach-games.html</loc>
+        <loc>https://9dttt.com/games/beach-games.html</loc>
         <lastmod>2026-01-29</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     
     <url>
-        <loc>https://www.d9ttt.com/games/crystal-connect.html</loc>
+        <loc>https://9dttt.com/games/crystal-connect.html</loc>
         <lastmod>2026-01-29</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     
     <url>
-        <loc>https://www.d9ttt.com/games/quantum-sudoku.html</loc>
+        <loc>https://9dttt.com/games/quantum-sudoku.html</loc>
         <lastmod>2026-01-29</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     
     <url>
-        <loc>https://www.d9ttt.com/games/fps-arena.html</loc>
+        <loc>https://9dttt.com/games/fps-arena.html</loc>
         <lastmod>2026-01-29</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     
     <url>
-        <loc>https://www.d9ttt.com/games/motogp-excite.html</loc>
+        <loc>https://9dttt.com/games/motogp-excite.html</loc>
         <lastmod>2026-01-29</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     
     <url>
-        <loc>https://www.d9ttt.com/games/street-brawlers.html</loc>
+        <loc>https://9dttt.com/games/street-brawlers.html</loc>
         <lastmod>2026-01-29</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     
     <url>
-        <loc>https://www.d9ttt.com/games/tide-turner.html</loc>
+        <loc>https://9dttt.com/games/tide-turner.html</loc>
         <lastmod>2026-01-29</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     
     <url>
-        <loc>https://www.d9ttt.com/games/backgammon.html</loc>
+        <loc>https://9dttt.com/games/backgammon.html</loc>
         <lastmod>2026-01-29</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
