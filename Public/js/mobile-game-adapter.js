@@ -306,6 +306,27 @@
                     z-index: 10000;
                     -webkit-tap-highlight-color: transparent;
                 }
+                /* Keep the accessibility widget clear of the touch controls:
+                   move it to the top-right row, next to the opacity toggle. */
+                @media (max-width: 768px) {
+                    body.mga-dpad-active:not(.mga-controls-hidden) .accessibility-btn {
+                        top: calc(6px + env(safe-area-inset-top, 0px)) !important;
+                        bottom: auto !important;
+                        right: calc(102px + env(safe-area-inset-right, 0px)) !important;
+                        left: auto !important;
+                        width: 44px !important; height: 44px !important;
+                        font-size: 20px !important;
+                        z-index: 10000 !important;
+                    }
+                    body.mga-dpad-active:not(.mga-controls-hidden) .accessibility-panel {
+                        top: calc(56px + env(safe-area-inset-top, 0px)) !important;
+                        bottom: auto !important;
+                        right: calc(10px + env(safe-area-inset-right, 0px)) !important;
+                        max-height: calc(100vh - 66px) !important;
+                        overflow-y: auto !important;
+                        z-index: 10001 !important;
+                    }
+                }
                 body:not(.mga-dpad-active) #mga-opacity-toggle,
                 body.mga-controls-hidden #mga-opacity-toggle { display: none; }
                 @media (min-width: 769px) { #mga-opacity-toggle { display: none !important; } }
