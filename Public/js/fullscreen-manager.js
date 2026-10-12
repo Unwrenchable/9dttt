@@ -175,6 +175,10 @@ class FullscreenManager {
     }
     
     restoreStyles() {
+        document.querySelectorAll('canvas[data-fs-prev-margin]').forEach(c => {
+            c.style.margin = c.dataset.fsPrevMargin;
+            delete c.dataset.fsPrevMargin;
+        });
         if (!this.container || !this.beforeFullscreenStyle) return;
         
         const style = this.container.style;
@@ -209,6 +213,10 @@ class FullscreenManager {
             
             canvas.style.maxWidth = '100vw';
             canvas.style.maxHeight = '100vh';
+            // Margins/borders would push a 100vh canvas past the viewport
+            if (canvas.dataset.fsPrevMargin === undefined) canvas.dataset.fsPrevMargin = canvas.style.margin || '';
+            canvas.style.margin = '0 auto';
+            canvas.style.boxSizing = 'border-box';
             canvas.style.objectFit = 'contain';
         });
     }

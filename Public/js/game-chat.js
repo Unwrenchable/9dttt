@@ -95,6 +95,10 @@ class GameChat {
 
     attachEventListeners() {
         // Toggle chat
+        // Tapping the collapsed header (icon-only on phones) also opens the chat
+        document.getElementById('chat-header')?.addEventListener('click', (e) => {
+            if (this.isMinimized && !e.target.closest('#chat-toggle')) this.toggleMinimize();
+        });
         document.getElementById('chat-toggle')?.addEventListener('click', () => {
             this.toggleMinimize();
         });
