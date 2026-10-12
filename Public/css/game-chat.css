@@ -298,3 +298,19 @@
     color: white;
     font-weight: bold;
 }
+
+/* Small screens: when collapsed, shrink to a compact pill on the left so it
+   doesn't cover the board or the accessibility button (bottom-right). */
+@media (max-width: 768px), (max-height: 500px) {
+    .chat-widget.minimized {
+        width: auto;
+        min-width: 110px;
+        right: auto;
+        left: 10px;
+        bottom: 10px;
+    }
+    .chat-widget.minimized .chat-header {
+        border-radius: var(--radius-md);
+        padding: 6px 12px;
+    }
+}
