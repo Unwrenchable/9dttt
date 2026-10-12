@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Add-on unlock guard (client-side UX gate only; see js/unlock-guard.js) -->
+    <script src="../js/catalog.js"></script>
+    <script src="../js/unlock-guard.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Reflex Master - Motor Skills Training</title>
@@ -10,8 +13,14 @@
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             font-family: 'Arial', sans-serif;
             color: #fff;
-            overflow: hidden;
+            overflow-x: hidden;
+            overflow-y: auto; /* was overflow:hidden; page taller than viewport hid the HUD/controls */
         }
+        /* phones: keep the game area inside the viewport */
+        #gameArea { max-width: 100%; box-sizing: border-box; }
+        #gameArea > * { max-width: 100%; box-sizing: border-box; }
+        #stats { flex-wrap: wrap; }
+
         .container {
             display: flex;
             flex-direction: column;
@@ -175,5 +184,6 @@
             window.gameIntegration = new UniversalGameIntegration('reflex-master', 'Reflex Master');
         });
     </script>
+    <script src="../js/home-button.js"></script>
 </body>
 </html>
