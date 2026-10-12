@@ -308,10 +308,16 @@
                 @media (min-width: 769px) {
                     #mga-dpad-overlay { display: none !important; }
                 }
+                /* Games hide the pad on menu / select screens via body.mga-controls-hidden */
+                body.mga-controls-hidden #mga-dpad-overlay { display: none !important; }
             `;
             document.head.appendChild(style);
             document.body.appendChild(overlay);
             document.body.classList.add('mga-dpad-active');
+            // Only one set of touch controls: hide the legacy MobileControls if it was shown.
+            if (window.mobileControls && typeof window.mobileControls.hide === 'function') {
+                window.mobileControls.hide();
+            }
 
             // Wire up touch events → keyboard events (arrow functions preserve lexical this)
             overlay.querySelectorAll('[data-key]').forEach(btn => {
