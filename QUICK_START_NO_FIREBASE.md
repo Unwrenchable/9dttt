@@ -45,8 +45,9 @@ Create a `.env` file with just these essentials:
 PORT=3000
 NODE_ENV=development
 
-# Authentication (REQUIRED)
-JWT_SECRET=your-super-secret-jwt-key-change-this-to-something-random
+# Authentication (required in production; see .env.example)
+# Generate: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+JWT_SECRET=
 
 # Redis (Optional - will use in-memory storage if not provided)
 REDIS_URL=redis://localhost:6379

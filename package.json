@@ -7,7 +7,7 @@
     "start": "node server.js",
     "dev": "node server.js",
     "build": "echo 'Building for production'",
-    "test": "echo 'Running tests...'",
+    "test": "node --test tests/ttt9d-engine.test.js tests/secrets.test.js",
     "setup:xrp-testnet": "node scripts/xrp-testnet-token.js",
     "bridge:check": "node scripts/check-bridge-status.js",
     "bridge:info": "cat TESTNET_BRIDGE_SETUP.md",

@@ -3,13 +3,12 @@
  * Environment-based configuration for the 9DTTT Game Platform
  */
 
-const NODE_ENV = process.env.NODE_ENV || 'development';
-const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production';
+const { requireSecret } = require('./secrets');
 
-// Fail fast in production if the default insecure JWT secret is still in use
-if (NODE_ENV === 'production' && JWT_SECRET === 'your-super-secret-jwt-key-change-in-production') {
-    throw new Error('FATAL: JWT_SECRET environment variable must be set to a strong secret in production. Refusing to start.');
-}
+const NODE_ENV = process.env.NODE_ENV || 'development';
+// Production throws at load time when JWT_SECRET is missing.
+// Development and test receive a random per-process secret instead of a committed literal.
+const JWT_SECRET = requireSecret('JWT_SECRET');
 
 module.exports = {
     // Server
