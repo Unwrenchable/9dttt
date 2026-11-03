@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Add-on unlock guard (client-side UX gate only; see js/unlock-guard.js) -->
+    <script src="../js/catalog.js"></script>
+    <script src="../js/unlock-guard.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Monster Rampage — 9DTTT Arcade</title>
@@ -14,7 +17,16 @@
             padding: 0;
             background: linear-gradient(135deg, #0a0a1e 0%, #12183a 100%);
             font-family: 'Press Start 2P', cursive, monospace;
-            overflow: hidden;
+            overflow-x: hidden;
+            overflow-y: auto; /* was overflow:hidden; page taller than viewport hid the HUD/controls */
+        }
+
+        /* phones: keep everything inside the viewport width */
+        #gameContainer { box-sizing: border-box; max-width: 100%; }
+        @media (max-width: 480px) {
+            #gameContainer { padding-left: 4px; padding-right: 4px; }
+            #gameTitle { font-size: 16px; letter-spacing: 1px; }
+            #gameContainer > * { max-width: 100%; box-sizing: border-box; }
         }
 
         #gameContainer {
@@ -647,5 +659,6 @@
         });
     })();
     </script>
+    <script src="../js/home-button.js"></script>
 </body>
 </html>

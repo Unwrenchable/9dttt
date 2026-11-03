@@ -338,6 +338,9 @@ class ProgressionClient {
     }
 
     async loadStats() {
+        // Signed-out visitors have no stats; skip the request instead of logging a 401.
+        const token = this.getAuthToken();
+        if (!token || token === 'null' || token === 'undefined') return;
         try {
             const response = await fetch('/api/progression/stats', {
                 headers: {

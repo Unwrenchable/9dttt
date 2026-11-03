@@ -28,6 +28,17 @@ class TournamentFighters {
             { id: 'sagat',   name: 'SAGAT',    speed: 5, power: 9,  special: 'Tiger Uppercut',     origin: 'Thailand' }
         ];
         
+        // Touch D-pad (mobile-game-adapter) only while fighting; on the fighter
+        // select / menu / game-over screens it would cover the roster.
+        let _state = 'menu';
+        Object.defineProperty(this, 'state', {
+            configurable: true,
+            get: () => _state,
+            set: (v) => {
+                _state = v;
+                try { document.body.classList.toggle('mga-controls-hidden', v !== 'fighting'); } catch (e) {}
+            }
+        });
         this.state = 'menu';
         this.mode = null;
         this.selectedFighters = [null, null];

@@ -298,3 +298,30 @@
     color: white;
     font-weight: bold;
 }
+
+/* Small screens: when collapsed, shrink to a compact pill on the left so it
+   doesn't cover the board or the accessibility button (bottom-right). */
+@media (max-width: 768px), (max-height: 500px) {
+    .chat-widget.minimized {
+        width: auto;
+        min-width: 110px;
+        right: auto;
+        left: 10px;
+        bottom: 10px;
+    }
+    .chat-widget.minimized .chat-header {
+        border-radius: var(--radius-md);
+        padding: 6px 12px;
+    }
+}
+
+/* Short/landscape phones: collapsed chat is an icon-only 44px button, and the page
+   gets bottom padding so controls can always be scrolled clear of it. */
+@media (max-height: 500px), (max-width: 480px) {
+    .chat-widget.minimized { min-width: 44px; width: 44px; height: 44px; max-height: 44px; border-radius: 22px; }
+    .chat-widget.minimized .chat-header { padding: 0; height: 40px; justify-content: center; cursor: pointer; }
+    .chat-widget.minimized .chat-title { font-size: 0; }
+    .chat-widget.minimized .chat-title::first-letter { font-size: 20px; }
+    .chat-widget.minimized .chat-toggle { display: none; }
+    body:has(.chat-widget.minimized) { padding-bottom: 64px; }
+}

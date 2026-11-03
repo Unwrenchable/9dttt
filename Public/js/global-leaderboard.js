@@ -19,10 +19,36 @@ class GlobalLeaderboard {
     }
     
     async initDB() {
-        const dbRequest = indexedDB.open('9DTTT_GameDB', 1);
+        // Same DB/schema as universal-auth.js. Version 2 + an upgrade handler here too:
+        // pages that load this file without universal-auth.js used to create an EMPTY v1
+        // database (no stores), which then broke leaderboards everywhere in that browser
+        // ("NotFoundError: One of the specified object stores was not found").
+        if (!window.indexedDB) return;
+        const dbRequest = indexedDB.open('9DTTT_GameDB', 2);
+        dbRequest.onupgradeneeded = (e) => GlobalLeaderboard.upgradeSchema(e.target.result);
         dbRequest.onsuccess = (e) => {
             this.db = e.target.result;
+            this.db.onversionchange = () => this.db.close();
         };
+        dbRequest.onerror = () => console.warn('Leaderboard DB unavailable:', dbRequest.error);
+    }
+
+    static upgradeSchema(db) {
+        if (!db.objectStoreNames.contains('users')) {
+            db.createObjectStore('users', { keyPath: 'id' });
+        }
+        if (!db.objectStoreNames.contains('scores')) {
+            const scoreStore = db.createObjectStore('scores', { keyPath: 'id', autoIncrement: true });
+            scoreStore.createIndex('userId', 'userId', { unique: false });
+            scoreStore.createIndex('game', 'game', { unique: false });
+            scoreStore.createIndex('score', 'score', { unique: false });
+        }
+        if (!db.objectStoreNames.contains('achievements')) {
+            db.createObjectStore('achievements', { keyPath: 'id', autoIncrement: true });
+        }
+        if (!db.objectStoreNames.contains('tokens')) {
+            db.createObjectStore('tokens', { keyPath: 'userId' });
+        }
     }
     
     // Submit score with token reward calculation

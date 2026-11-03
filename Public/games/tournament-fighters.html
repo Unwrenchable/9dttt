@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Add-on unlock guard (client-side UX gate only; see js/unlock-guard.js) -->
+    <script src="../js/catalog.js"></script>
+    <script src="../js/unlock-guard.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Tournament Fighters - 9DTTT Arcade</title>
@@ -24,6 +27,8 @@
         #hud {
             position: absolute;
             top: 0;
+            left: 0;
+            box-sizing: border-box;
             width: 100%;
             display: flex;
             justify-content: space-between;
@@ -140,7 +145,11 @@
             box-shadow: 0 0 60px rgba(124,58,237,0.5), inset 0 0 40px rgba(0,0,0,0.9);
             text-align: center;
             color: #fff;
-            min-width: 720px;
+            min-width: min(720px, 96vw);
+            max-width: 96vw;
+            max-height: 96vh;
+            overflow-y: auto;
+            box-sizing: border-box;
             /* scanlines */
             background-image: repeating-linear-gradient(
                 0deg,
@@ -151,6 +160,14 @@
             );
         }
         #menu.hidden { display: none; }
+        /* keep P1 health bar clear of the fixed Home nav (js/home-button.js) */
+        body.has-home-nav #hud { padding-left: calc(var(--home-nav-w, 60px) + 16px); }
+        @media (max-width: 760px), (max-height: 500px) {
+            #menu { padding: 14px 12px; }
+            .menu-title { font-size: 18px; }
+            /* roster portraits: responsive.css forces width:100% on all canvases */
+            .fighter-card canvas { width: 100% !important; max-width: 90px !important; height: auto !important; max-height: none !important; }
+        }
 
         .menu-title {
             font-size: 28px;
@@ -338,5 +355,6 @@
             }
         });
     </script>
+    <script src="../js/home-button.js"></script>
 </body>
 </html>

@@ -133,7 +133,7 @@
                 document.msFullscreenElement
             );
             const headerH = inFullscreen ? 0 : 56; // hide header reservation in fullscreen
-            const maxH = vh - controlsHeight - headerH;
+            const maxH = vh - controlsHeight - headerH - (inFullscreen ? 4 : 24); // margin + border
             const maxW = vw - (inFullscreen ? 0 : 12); // edge margin only outside fullscreen
 
             if (maxW <= 0 || maxH <= 0) return;
@@ -158,7 +158,7 @@
             this.canvas.style.width = Math.floor(displayW) + 'px';
             this.canvas.style.height = Math.floor(displayH) + 'px';
             this.canvas.style.display = 'block';
-            this.canvas.style.margin = '10px auto';
+            this.canvas.style.margin = inFullscreen ? '0 auto' : '10px auto';
             this.canvas.style.maxWidth = '100%';
             this.canvas.style.objectFit = 'contain';
             this.canvas.classList.add('mga-scaled');
@@ -225,93 +225,151 @@
 
             const style = document.createElement('style');
             style.textContent = `
+                /* Semi-transparent, outline-style controls: no panel behind them,
+                   and only the buttons themselves take pointer events, so the
+                   game stays visible and the canvas is never blocked. */
                 #mga-dpad-overlay {
+                    --mga-idle-opacity: 0.35;
+                    --mga-active-opacity: 0.7;
                     position: fixed;
-                    bottom: env(safe-area-inset-bottom, 10px);
+                    bottom: 0;
                     left: 0;
                     right: 0;
                     display: flex;
                     justify-content: space-between;
                     align-items: flex-end;
-                    padding: 0 16px 10px;
+                    padding: 0 calc(12px + env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) calc(12px + env(safe-area-inset-left, 0px));
+                    background: transparent;
                     z-index: 9999;
                     pointer-events: none;
                     user-select: none;
                     -webkit-user-select: none;
                 }
+                #mga-dpad-overlay.mga-opacity-low { --mga-idle-opacity: 0.2; --mga-active-opacity: 0.5; }
+                #mga-dpad-overlay.mga-opacity-high { --mga-idle-opacity: 0.6; --mga-active-opacity: 0.9; }
+                #mga-dpad, #mga-actions, .mga-dpad-row { pointer-events: none; background: transparent; }
                 #mga-dpad {
                     display: grid;
-                    grid-template-rows: 1fr 1fr 1fr;
+                    grid-template-rows: auto auto auto;
                     align-items: center;
                     justify-items: center;
-                    gap: 4px;
+                    gap: 2px;
+                }
+                .mga-dpad-row { display: flex; gap: 2px; align-items: center; }
+                .mga-dpad-center { width: 44px; height: 44px; }
+                .mga-dpad-btn, .mga-action-btn {
                     pointer-events: auto;
-                }
-                .mga-dpad-row {
-                    display: flex;
-                    gap: 4px;
-                    align-items: center;
-                }
-                .mga-dpad-center {
-                    width: 44px;
-                    height: 44px;
-                    background: rgba(255,255,255,0.05);
-                    border-radius: 8px;
-                }
-                .mga-dpad-btn {
-                    width: 54px;
-                    height: 54px;
-                    background: rgba(30,40,80,0.85);
-                    border: 2px solid rgba(102,126,234,0.6);
-                    border-radius: 12px;
+                    min-width: 48px;
+                    min-height: 48px;
+                    width: 50px;
+                    height: 50px;
+                    padding: 0;
+                    background: transparent;
+                    border: 2px solid rgba(255,255,255,0.85);
                     color: #fff;
-                    font-size: 20px;
+                    text-shadow: 0 0 3px #000, 0 0 2px #000;
+                    box-shadow: 0 0 0 1px rgba(0,0,0,0.35), inset 0 0 0 1px rgba(0,0,0,0.25);
+                    opacity: var(--mga-idle-opacity);
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     cursor: pointer;
                     -webkit-tap-highlight-color: transparent;
-                    backdrop-filter: blur(8px);
                     touch-action: none;
+                    transition: opacity 0.08s, transform 0.08s;
                 }
-                .mga-dpad-btn:active, .mga-dpad-btn.pressed {
-                    background: rgba(102,126,234,0.75);
+                .mga-dpad-btn { border-radius: 10px; font-size: 18px; }
+                .mga-action-btn { border-radius: 50%; font-size: 16px; font-weight: bold; }
+                .mga-dpad-btn:active, .mga-dpad-btn.pressed,
+                .mga-action-btn:active, .mga-action-btn.pressed {
+                    opacity: var(--mga-active-opacity);
+                    background: rgba(255,255,255,0.18);
                     transform: scale(0.93);
                 }
                 #mga-actions {
                     display: grid;
                     grid-template-columns: 1fr 1fr;
                     gap: 8px;
-                    pointer-events: auto;
                 }
-                .mga-action-btn {
-                    width: 58px;
-                    height: 58px;
-                    background: rgba(30,40,80,0.85);
-                    border: 2px solid rgba(102,126,234,0.6);
+                #mga-opacity-toggle {
+                    position: fixed;
+                    top: calc(6px + env(safe-area-inset-top, 0px));
+                    right: calc(54px + env(safe-area-inset-right, 0px));
+                    width: 44px; height: 44px;
+                    pointer-events: auto;
+                    background: transparent;
+                    border: 1px solid rgba(255,255,255,0.6);
                     border-radius: 50%;
                     color: #fff;
-                    font-size: 16px;
-                    font-weight: bold;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    cursor: pointer;
+                    font-size: 15px;
+                    opacity: 0.45;
+                    z-index: 10000;
                     -webkit-tap-highlight-color: transparent;
-                    backdrop-filter: blur(8px);
-                    touch-action: none;
                 }
-                .mga-action-btn:active, .mga-action-btn.pressed {
-                    background: rgba(102,126,234,0.75);
-                    transform: scale(0.93);
+                /* Keep the accessibility widget clear of the touch controls:
+                   move it to the top-right row, next to the opacity toggle. */
+                @media (max-width: 768px) {
+                    body.mga-dpad-active:not(.mga-controls-hidden) .accessibility-btn {
+                        top: calc(6px + env(safe-area-inset-top, 0px)) !important;
+                        bottom: auto !important;
+                        right: calc(102px + env(safe-area-inset-right, 0px)) !important;
+                        left: auto !important;
+                        width: 44px !important; height: 44px !important;
+                        font-size: 20px !important;
+                        z-index: 10000 !important;
+                    }
+                    body.mga-dpad-active:not(.mga-controls-hidden) .accessibility-panel {
+                        top: calc(56px + env(safe-area-inset-top, 0px)) !important;
+                        bottom: auto !important;
+                        right: calc(10px + env(safe-area-inset-right, 0px)) !important;
+                        max-height: calc(100vh - 66px) !important;
+                        overflow-y: auto !important;
+                        z-index: 10001 !important;
+                    }
                 }
+                body:not(.mga-dpad-active) #mga-opacity-toggle,
+                body.mga-controls-hidden #mga-opacity-toggle { display: none; }
+                @media (min-width: 769px) { #mga-opacity-toggle { display: none !important; } }
                 @media (min-width: 769px) {
                     #mga-dpad-overlay { display: none !important; }
                 }
+                /* Games hide the pad on menu / select screens via body.mga-controls-hidden */
+                body.mga-controls-hidden #mga-dpad-overlay { display: none !important; }
             `;
             document.head.appendChild(style);
             document.body.appendChild(overlay);
             document.body.classList.add('mga-dpad-active');
+
+            // Opacity setting (low / normal / high), remembered across games
+            const levels = ['normal', 'low', 'high'];
+            const applyLevel = (lvl) => {
+                overlay.classList.remove('mga-opacity-low', 'mga-opacity-high');
+                if (lvl !== 'normal') overlay.classList.add('mga-opacity-' + lvl);
+            };
+            let level = 'normal';
+            try { level = localStorage.getItem('9dttt.controlsOpacity') || 'normal'; } catch (e) {}
+            if (!levels.includes(level)) level = 'normal';
+            applyLevel(level);
+            const opBtn = document.createElement('button');
+            opBtn.id = 'mga-opacity-toggle';
+            opBtn.type = 'button';
+            opBtn.textContent = '\u25D0';
+            const label = () => 'Touch controls opacity: ' + level + ' (tap to change)';
+            opBtn.setAttribute('aria-label', label());
+            opBtn.title = label();
+            opBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                level = levels[(levels.indexOf(level) + 1) % levels.length];
+                applyLevel(level);
+                try { localStorage.setItem('9dttt.controlsOpacity', level); } catch (err) {}
+                opBtn.setAttribute('aria-label', label());
+                opBtn.title = label();
+            });
+            document.body.appendChild(opBtn);
+            // Only one set of touch controls: hide the legacy MobileControls if it was shown.
+            if (window.mobileControls && typeof window.mobileControls.hide === 'function') {
+                window.mobileControls.hide();
+            }
 
             // Wire up touch events → keyboard events (arrow functions preserve lexical this)
             overlay.querySelectorAll('[data-key]').forEach(btn => {

@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Add-on unlock guard (client-side UX gate only; see js/unlock-guard.js) -->
+    <script src="../js/catalog.js"></script>
+    <script src="../js/unlock-guard.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Contra Commando - 9DTTT Arcade</title>
@@ -14,7 +17,16 @@
             padding: 0;
             background: #000;
             font-family: 'Press Start 2P', cursive;
-            overflow: hidden;
+            overflow-x: hidden;
+            overflow-y: auto; /* was overflow:hidden; page taller than viewport hid the HUD/controls */
+        }
+
+        /* No horizontal overflow on phones: border/padding inside the width */
+        #gameContainer, #gameCanvas, #hud { box-sizing: border-box; max-width: 100%; }
+
+        @media (max-width: 480px) {
+            #hud { flex-wrap: wrap; gap: 8px; padding: 8px; }
+            .hud-item { font-size: 10px; }
         }
 
         #gameContainer {
@@ -191,5 +203,6 @@
             }
         });
     </script>
+    <script src="../js/home-button.js"></script>
 </body>
 </html>

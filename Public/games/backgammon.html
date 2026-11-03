@@ -1,30 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Add-on unlock guard (client-side UX gate only; see js/unlock-guard.js) -->
+    <script src="../js/catalog.js"></script>
+    <script src="../js/unlock-guard.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
     <!-- Primary Meta Tags -->
     <title>Backgammon Online - Free Multiplayer Strategy Game | 9DTTT</title>
     <meta name="title" content="Backgammon Online - Free Multiplayer Strategy Game | 9DTTT">
-    <meta name="description" content="Play Backgammon online free! Classic board game combining strategy and dice. Move your checkers around the board and bear them off to win. Real-time multiplayer.">
+    <meta name="description" content="Play Backgammon on 9DTTT! Classic board game combining strategy and dice. Move your checkers around the board and bear them off to win. Real-time multiplayer.">
     <meta name="keywords" content="backgammon, backgammon game, online backgammon, board game, dice game, multiplayer backgammon, free backgammon">
     <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://www.d9ttt.com/games/backgammon.html">
+    <link rel="canonical" href="https://9dttt.com/games/backgammon.html">
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://www.d9ttt.com/games/backgammon.html">
+    <meta property="og:url" content="https://9dttt.com/games/backgammon.html">
     <meta property="og:title" content="Backgammon Online - Free Multiplayer Strategy Game">
-    <meta property="og:description" content="Play Backgammon online free! Classic board game combining strategy and dice.">
-    <meta property="og:image" content="https://www.d9ttt.com/icon.jpg">
+    <meta property="og:description" content="Play Backgammon on 9DTTT! Classic board game combining strategy and dice.">
+    <meta property="og:image" content="https://9dttt.com/icon.jpg">
     
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://www.d9ttt.com/games/backgammon.html">
+    <meta property="twitter:url" content="https://9dttt.com/games/backgammon.html">
     <meta property="twitter:title" content="Backgammon Online - Free Multiplayer Strategy Game">
-    <meta property="twitter:description" content="Play Backgammon online free! Classic board game combining strategy and dice.">
-    <meta property="twitter:image" content="https://www.d9ttt.com/icon.jpg">
+    <meta property="twitter:description" content="Play Backgammon on 9DTTT! Classic board game combining strategy and dice.">
+    <meta property="twitter:image" content="https://9dttt.com/icon.jpg">
     
     <!-- Mobile App -->
     <meta name="mobile-web-app-capable" content="yes">
@@ -51,7 +54,7 @@
         "gamePlatform": "Web Browser",
         "numberOfPlayers": "2",
         "playMode": "MultiPlayer",
-        "url": "https://www.d9ttt.com/games/backgammon.html",
+        "url": "https://9dttt.com/games/backgammon.html",
         "genre": "Strategy Game",
         "offers": {
             "@type": "Offer",
@@ -1026,5 +1029,22 @@
         initBoardDelegation();
         initGame();
     </script>
+    <script>
+    // Fit the board to narrow screens instead of overflowing horizontally.
+    (function () {
+        function fitBoard() {
+            var board = document.querySelector('.board');
+            if (!board) return;
+            board.style.zoom = '';
+            var avail = document.documentElement.clientWidth - 16;
+            var natural = board.scrollWidth;
+            if (natural > avail && avail > 0) board.style.zoom = String(Math.max(0.4, avail / natural));
+        }
+        window.addEventListener('resize', fitBoard);
+        window.addEventListener('orientationchange', function () { setTimeout(fitBoard, 300); });
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fitBoard); else fitBoard();
+    })();
+    </script>
+    <script src="../js/home-button.js"></script>
 </body>
 </html>

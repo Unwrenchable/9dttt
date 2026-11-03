@@ -996,7 +996,18 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('new-game-btn').addEventListener('click', () => game.resetGame());
     const aiModeSelect = document.getElementById('ai-mode-select');
     if (aiModeSelect) {
-        aiModeSelect.addEventListener('change', () => game.setAIDifficulty(aiModeSelect.value || null));
+        // Default to vs AI (Medium); remember the player's last choice ('local' = 2 players).
+        const OPPONENT_KEY = '9dttt.uttt.opponent';
+        let saved = null;
+        try { saved = localStorage.getItem(OPPONENT_KEY); } catch (e) {}
+        const wanted = saved === null ? 'medium' : (saved === 'local' ? '' : saved);
+        const valid = [...aiModeSelect.options].some((o) => o.value === wanted);
+        aiModeSelect.value = valid ? wanted : 'medium';
+        game.setAIDifficulty(aiModeSelect.value || null);
+        aiModeSelect.addEventListener('change', () => {
+            try { localStorage.setItem(OPPONENT_KEY, aiModeSelect.value || 'local'); } catch (e) {}
+            game.setAIDifficulty(aiModeSelect.value || null);
+        });
     }
     document.getElementById('modal-new-game-btn').addEventListener('click', () => game.resetGame());
     

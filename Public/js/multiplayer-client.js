@@ -641,7 +641,7 @@ class MobileControls {
         `;
         
         controls.innerHTML = `
-            <div class="mobile-dpad" style="position: relative; width: 180px; height: 180px; pointer-events: auto;">
+            <div class="mobile-dpad" style="position: relative; width: 180px; height: 180px; pointer-events: none;">
                 <button data-dir="up" class="dpad-btn" style="position: absolute; top: 0; left: 50%; transform: translateX(-50%);">↑</button>
                 <button data-dir="left" class="dpad-btn" style="position: absolute; left: 0; top: 50%; transform: translateY(-50%);">←</button>
                 <button data-dir="down" class="dpad-btn" style="position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);">↓</button>
@@ -649,7 +649,7 @@ class MobileControls {
                 <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 50%;"></div>
             </div>
             
-            <div class="mobile-actions" style="display: flex; gap: 15px; align-items: flex-end; pointer-events: auto;">
+            <div class="mobile-actions" style="display: flex; gap: 15px; align-items: flex-end; pointer-events: none;">
                 <button data-action="attack" class="action-btn">🥊</button>
                 <button data-action="special" class="action-btn">⚡</button>
                 <button data-action="jump" class="action-btn">🦘</button>
@@ -659,18 +659,20 @@ class MobileControls {
                 .dpad-btn, .action-btn {
                     width: 60px;
                     height: 60px;
-                    background: rgba(102, 126, 234, 0.7);
-                    border: 2px solid #fff;
+                    pointer-events: auto;
+                    background: transparent;
+                    border: 2px solid rgba(255,255,255,0.85);
                     border-radius: 50%;
                     color: #fff;
                     font-size: 24px;
-                    backdrop-filter: blur(10px);
+                    opacity: 0.35;
                     -webkit-tap-highlight-color: transparent;
                     user-select: none;
                 }
                 
                 .dpad-btn:active, .action-btn:active {
-                    background: rgba(102, 126, 234, 0.9);
+                    opacity: 0.7;
+                    background: rgba(255, 255, 255, 0.18);
                     transform: scale(0.95);
                 }
             </style>

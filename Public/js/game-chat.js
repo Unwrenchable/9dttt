@@ -11,7 +11,11 @@ class GameChat {
         this.playerName = options.playerName || 'Player';
         this.isMultiplayer = options.isMultiplayer || false;
         this.messages = [];
-        this.isMinimized = false;
+        // Collapsed by default on phones / small screens so the panel doesn't cover the board.
+        // options.startMinimized overrides.
+        this.isMinimized = (options.startMinimized !== undefined)
+            ? !!options.startMinimized
+            : GameChat.isSmallScreen();
         
         // Quick chat messages
         this.quickMessages = [
@@ -43,7 +47,7 @@ class GameChat {
                 <div class="chat-header" id="chat-header">
                     <span class="chat-title">💬 Chat</span>
                     <button class="chat-toggle" id="chat-toggle" aria-label="Toggle chat">
-                        <span class="toggle-icon">−</span>
+                        <span class="toggle-icon">${this.isMinimized ? '+' : '−'}</span>
                     </button>
                 </div>
                 
@@ -91,6 +95,10 @@ class GameChat {
 
     attachEventListeners() {
         // Toggle chat
+        // Tapping the collapsed header (icon-only on phones) also opens the chat
+        document.getElementById('chat-header')?.addEventListener('click', (e) => {
+            if (this.isMinimized && !e.target.closest('#chat-toggle')) this.toggleMinimize();
+        });
         document.getElementById('chat-toggle')?.addEventListener('click', () => {
             this.toggleMinimize();
         });
@@ -137,6 +145,14 @@ class GameChat {
                 this.sendMessage(btn.dataset.message, 'quick');
             });
         });
+    }
+
+    static isSmallScreen() {
+        try {
+            return window.matchMedia('(max-width: 768px), (max-height: 500px), (pointer: coarse)').matches;
+        } catch (e) {
+            return window.innerWidth <= 768;
+        }
     }
 
     toggleMinimize() {

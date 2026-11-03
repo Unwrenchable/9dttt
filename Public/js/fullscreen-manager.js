@@ -175,6 +175,10 @@ class FullscreenManager {
     }
     
     restoreStyles() {
+        document.querySelectorAll('canvas[data-fs-prev-margin]').forEach(c => {
+            c.style.margin = c.dataset.fsPrevMargin;
+            delete c.dataset.fsPrevMargin;
+        });
         if (!this.container || !this.beforeFullscreenStyle) return;
         
         const style = this.container.style;
@@ -209,6 +213,10 @@ class FullscreenManager {
             
             canvas.style.maxWidth = '100vw';
             canvas.style.maxHeight = '100vh';
+            // Margins/borders would push a 100vh canvas past the viewport
+            if (canvas.dataset.fsPrevMargin === undefined) canvas.dataset.fsPrevMargin = canvas.style.margin || '';
+            canvas.style.margin = '0 auto';
+            canvas.style.boxSizing = 'border-box';
             canvas.style.objectFit = 'contain';
         });
     }
@@ -372,11 +380,27 @@ document.addEventListener('mousemove', () => {
         // Auto-detect from the *game* canvas only (aspect ratio > 1.15 = landscape game).
         // Decorative canvases (visual-effects overlay, 3D view) must not trigger the prompt,
         // otherwise DOM board games like 9D Tic-Tac-Toe get blocked in portrait.
+        // Hidden or zero-size canvases (e.g. a sub-game canvas behind a DOM menu) are ignored,
+        // so only a game canvas the player can actually see triggers the prompt.
         const canvases = document.querySelectorAll('#gameCanvas, #game-canvas, canvas[data-game-canvas]');
         for (const c of canvases) {
+            if (!isRenderedCanvas(c)) continue;
             if (c.width && c.height && (c.width / c.height) > 1.15) return true;
         }
         return false;
+    }
+
+    function isRenderedCanvas(c) {
+        if (!c.isConnected) return false;
+        const rect = c.getBoundingClientRect();
+        if (rect.width < 2 || rect.height < 2) return false;
+        // Walk up: display:none / visibility:hidden / opacity:0 / [hidden] anywhere hides it
+        for (let el = c; el && el !== document.documentElement; el = el.parentElement) {
+            if (el.hidden) return false;
+            const cs = getComputedStyle(el);
+            if (cs.display === 'none' || cs.visibility === 'hidden' || cs.opacity === '0') return false;
+        }
+        return true;
     }
 
     function isPortrait() {
@@ -419,6 +443,19 @@ document.addEventListener('mousemove', () => {
         setTimeout(checkOrientation, ORIENT_DELAY_MS);
         window.addEventListener('orientationchange', () => setTimeout(checkOrientation, ORIENT_DELAY_MS));
         window.addEventListener('resize', checkOrientation);
+        // A DOM menu can reveal a hidden game canvas later (e.g. Brain Academy sub-games):
+        // re-check shortly after taps/clicks and when the DOM changes, debounced.
+        let recheckTimer = null;
+        const scheduleRecheck = () => {
+            clearTimeout(recheckTimer);
+            recheckTimer = setTimeout(checkOrientation, ORIENT_DELAY_MS);
+        };
+        document.addEventListener('click', scheduleRecheck, true);
+        if (window.MutationObserver && document.body) {
+            new MutationObserver(scheduleRecheck).observe(document.body, {
+                attributes: true, attributeFilter: ['class', 'style', 'hidden'], subtree: true
+            });
+        }
         // Re-check when fullscreen changes (orientation may change with it)
         window.addEventListener('fullscreenEntered', checkOrientation);
         window.addEventListener('fullscreenExited', checkOrientation);

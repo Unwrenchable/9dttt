@@ -446,7 +446,10 @@ canvas.mga-scaled {
 
 :fullscreen body,
 :-webkit-full-screen body {
-    overflow: hidden;
+    /* was overflow:hidden: board games taller than a phone in landscape lost their
+       controls; allow vertical scroll, never horizontal */
+    overflow-x: hidden;
+    overflow-y: auto;
     margin: 0;
     padding: 0;
 }
@@ -483,6 +486,16 @@ canvas.mga-scaled {
     justify-content: center;
     padding: 0 !important;
     margin: 0 !important;
+    /* board games put board + side panels in this row: wrap instead of overflowing */
+    flex-wrap: wrap;
+    max-width: 100vw;
+    box-sizing: border-box;
+}
+
+:fullscreen main > *,
+:-webkit-full-screen main > * {
+    min-width: 0;
+    max-width: 100%;
 }
 
 :fullscreen canvas,
