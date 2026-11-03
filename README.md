@@ -232,6 +232,9 @@ cd 9dttt
 # Install dependencies
 npm install
 
+# Copy the env template and set JWT_SECRET (see .env.example; do not commit .env)
+cp .env.example .env
+
 # Start the server
 npm start
 
@@ -248,9 +251,11 @@ npm start
 |----------|-------------|----------|
 | `PORT` | Server port (default: 3000) | No |
 | `NODE_ENV` | Environment (development/production) | No |
-| `JWT_SECRET` | Secret for JWT tokens | Yes (production) |
+| `JWT_SECRET` | Signing secret for JWT tokens. Production (`NODE_ENV=production`) refuses to start if this is missing or blank. Development and test generate a random per-process secret when it is unset. | Yes (production) |
 | `REDIS_URL` | Redis connection URL for persistence | No |
 | `RENDER_EXTERNAL_URL` | Your Render app URL (for keep-alive) | No |
+
+`JWT_SECRET` has no committed default. Copy `.env.example` to `.env` (`.env` is gitignored) and set a unique value before a production deploy. If a production process previously started without `JWT_SECRET` set, rotate that secret after upgrading.
 
 ### Authentication Methods
 
